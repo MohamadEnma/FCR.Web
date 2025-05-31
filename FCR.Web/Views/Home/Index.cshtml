@@ -1,0 +1,286 @@
+﻿@model FCR.Dal.Models.HomeViewModel
+
+@{
+    ViewData["Title"] = "Home Page";
+}
+<div class="bg-dark text-white pt-5 pb-4 border-top border-secondary position-relative">
+    <!-- Background Image for HERO section -->
+    <div class="hero-background position-absolute top-0 start-0 w-100 h-100">
+        <div class="position-absolute top-0 start-0 w-100 h-100 bg-dark opacity-50"></div>
+        <img src="https://images.pexels.com/photos/919073/pexels-photo-919073.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1" alt="Luxury cars" class="w-100 h-100 object-fit-cover">
+    </div>
+
+    <!-- Hero section Content -->
+    <div class="container position-relative z-index-1">
+        <div class="row min-vh-75 align-items-center py-5 py-lg-10">
+            <div class="col-lg-7 text-center text-lg-start">
+                <h1 class="display-3 fw-bold text-white mb-4">Friberg Car Rental</h1>
+                <p class="lead text-white mb-5">Experience luxury and performance with our fleet of premium vehicles. Perfect for business trips, vacations, or special occasions.</p>
+
+                <div class="d-flex flex-column flex-sm-row gap-3 justify-content-center justify-content-lg-start">
+                    <a href="#booking" class="btn btn-primary btn-lg px-4 py-3 rounded-pill fw-bold">
+                        <i class="bi bi-calendar-check me-2"></i> Book Now
+                    </a>
+                    <a href="#fleet" class="btn btn-outline-light btn-lg px-4 py-3 rounded-pill fw-bold">
+                        <i class="bi bi-car-front me-2"></i> View Fleet
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+<!-- Our avaliable cars section -->
+
+<section class="py-5">
+    <div class="container">
+        <h3 class="text-center mb-5">Our Available Cars</h3>
+
+        @if (Model.AvailableCars.Any())
+        {
+            <div class="row g-4">
+                @foreach (var car in Model.AvailableCars)
+                {
+                    <div class="col-lg-4 col-md-6">
+                        <div class="card h-100 shadow-sm">
+                            <!-- Car Image -->
+                            <div class="card-img-top position-relative overflow-hidden" style="height: 200px;">
+                                @if (car.Images != null && car.Images.Any())
+                                {
+                                    <!-- Show first image -->
+                                    <img src="@car.Images.First().Url" class="w-100 h-100 object-fit-cover" alt="@car.Brand @car.Model">
+                                }
+                                else
+                                {
+                                    <!-- Fallback image -->
+                                    <div class="w-100 h-100 bg-light d-flex align-items-center justify-content-center">
+                                        <span class="text-muted">No Image Available</span>
+                                    </div>
+                                }
+                                <span class="position-absolute top-0 end-0 bg-success text-white px-2 py-1 small">Available</span>
+                            </div>
+
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <h5 class="card-title mb-0">@car.Brand @car.Model</h5>
+                                    <span class="badge bg-primary">@car.Year</span>
+                                </div>
+
+                                <ul class="list-unstyled small mb-3">
+                                    <li class="mb-1"><i class="bi bi-people text-muted me-2"></i> @car.Year </li>
+                                </ul>
+
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <h6 class="mb-0 text-primary fw-bold">$@car.DailyRate.ToString("N2")<small class="text-muted">/day</small></h6>
+                                    <a asp-controller="Bookings" asp-action="Create" asp-route-carId="@car.CarId"
+                                       class="btn btn-sm btn-outline-primary">Book Now</a>
+                                    <a asp-controller="Cars" asp-action="Details" asp-route-carId="@car.CarId"
+                                       class="btn btn-sm btn-outline-secondary">Details</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <div class="alert alert-info text-center">
+                <i class="bi bi-info-circle-fill me-2"></i> Currently no cars available. Please check back later.
+            </div>
+        }
+    </div>
+</section>
+
+<section class="py-5 bg-light">
+    <div class="container">
+        <h2 class="text-center mb-5">Why Choose Friberg Car Rental</h2>
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="text-center p-4">
+                    <div class="bg-primary bg-opacity-10 text-primary rounded-circle p-3 d-inline-block mb-3">
+                        <i class="bi bi-star-fill fs-2"></i>
+                    </div>
+                    <h4>Premium Fleet</h4>
+                    <p>Only the latest models from top brands, meticulously maintained for your safety and comfort.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="text-center p-4">
+                    <div class="bg-primary bg-opacity-10 text-primary rounded-circle p-3 d-inline-block mb-3">
+                        <i class="bi bi-currency-dollar fs-2"></i>
+                    </div>
+                    <h4>Competitive Pricing</h4>
+                    <p>Luxury doesn't have to break the bank. We offer the best value for premium vehicles.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="text-center p-4">
+                    <div class="bg-primary bg-opacity-10 text-primary rounded-circle p-3 d-inline-block mb-3">
+                        <i class="bi bi-headset fs-2"></i>
+                    </div>
+                    <h4>24/7 Support</h4>
+                    <p>Our dedicated team is always available to assist you with any questions or issues.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<!-- What Our Customers Say -->
+<section class="py-5">
+    <div class="container">
+        <h2 class="text-center mb-5">What Our Customers Say</h2>
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="card h-100 shadow-sm p-4">
+                    <div class="d-flex align-items-center mb-3">
+                        <i class="bi bi-star-fill text-warning me-1"></i>
+                        <i class="bi bi-star-fill text-warning me-1"></i>
+                        <i class="bi bi-star-fill text-warning me-1"></i>
+                        <i class="bi bi-star-fill text-warning me-1"></i>
+                        <i class="bi bi-star-fill text-warning"></i>
+                    </div>
+                    <p class="mb-4">"The BMW 5 Series was impeccable! Smooth ride and excellent service. Will definitely rent again."</p>
+                    <div class="d-flex align-items-center">
+                        <img src="https://randomuser.me/api/portraits/men/32.jpg" class="rounded-circle me-3" width="50" alt="Customer">
+                        <div>
+                            <h6 class="mb-0">Michael Johnson</h6>
+                            <small class="text-muted">Business Traveler</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="card h-100 shadow-sm p-4">
+                    <div class="d-flex align-items-center mb-3">
+                        <i class="bi bi-star-fill text-warning me-1"></i>
+                        <i class="bi bi-star-fill text-warning me-1"></i>
+                        <i class="bi bi-star-fill text-warning me-1"></i>
+                        <i class="bi bi-star-fill text-warning me-1"></i>
+                        <i class="bi bi-star-fill text-warning"></i>
+                    </div>
+                    <p class="mb-4">"The BMW 5 Series was impeccable! Smooth ride and excellent service. Will definitely rent again."</p>
+                    <div class="d-flex align-items-center">
+                        <img src="https://randomuser.me/api/portraits/men/32.jpg" class="rounded-circle me-3" width="50" alt="Customer">
+                        <div>
+                            <h6 class="mb-0">Michael Johnson</h6>
+                            <small class="text-muted">Business Traveler</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="card h-100 shadow-sm p-4">
+                    <div class="d-flex align-items-center mb-3">
+                        <i class="bi bi-star-fill text-warning me-1"></i>
+                        <i class="bi bi-star-fill text-warning me-1"></i>
+                        <i class="bi bi-star-fill text-warning me-1"></i>
+                        <i class="bi bi-star-fill text-warning me-1"></i>
+                        <i class="bi bi-star-fill text-warning"></i>
+                    </div>
+                    <p class="mb-4">"The BMW 5 Series was impeccable! Smooth ride and excellent service. Will definitely rent again."</p>
+                    <div class="d-flex align-items-center">
+                        <img src="https://randomuser.me/api/portraits/men/32.jpg" class="rounded-circle me-3" width="50" alt="Customer">
+                        <div>
+                            <h6 class="mb-0">Michael Johnson</h6>
+                            <small class="text-muted">Business Traveler</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+        </div>
+    </div>
+</section>
+
+
+<!-- How It Works Section  -->
+<section class="py-5 bg-dark text-white">
+    <div class="container">
+        <h2 class="text-center mb-5">How It Works</h2>
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="text-center">
+                    <div class="bg-primary text-white rounded-circle p-3 d-inline-flex align-items-center justify-content-center mb-3" style="width: 70px; height: 70px;">
+                        <span class="fs-3">1</span>
+                    </div>
+                    <h4>Choose Your Car</h4>
+                    <p>Select from our premium fleet of vehicles</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="text-center">
+                    <div class="bg-primary text-white rounded-circle p-3 d-inline-flex align-items-center justify-content-center mb-3" style="width: 70px; height: 70px;">
+                        <span class="fs-3">2</span>
+                    </div>
+                    <h4>Make Reservation</h4>
+                    <p>Book online in just a few clicks</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="text-center">
+                    <div class="bg-primary text-white rounded-circle p-3 d-inline-flex align-items-center justify-content-center mb-3" style="width: 70px; height: 70px;">
+                        <span class="fs-3">3</span>
+                    </div>
+                    <h4>Pick Up & Enjoy</h4>
+                    <p>Collect your car and hit the road</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+
+<!-- Frequently Asked Questions Section  -->
+<section class="py-5">
+    <div class="container">
+        <h2 class="text-center mb-5">Frequently Asked Questions</h2>
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="accordion" id="faqAccordion">
+                    <div class="accordion-item mb-3 border-0 shadow-sm">
+                        <h3 class="accordion-header" id="headingOne">
+                            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne">
+                                What documents do I need to rent a car?
+                            </button>
+                        </h3>
+                        <div id="collapseOne" class="accordion-collapse collapse show" aria-labelledby="headingOne">
+                            <div class="accordion-body">
+                                You'll need a valid driver's license, credit card in your name, and proof of insurance if you're not purchasing ours.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item mb-3 border-0 shadow-sm">
+                        <h3 class="accordion-header" id="headingOne">
+                            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne">
+                                What documents do I need to rent a car?
+                            </button>
+                        </h3>
+                        <div id="collapseOne" class="accordion-collapse collapse show" aria-labelledby="headingOne">
+                            <div class="accordion-body">
+                                You'll need a valid driver's license, credit card in your name, and proof of insurance if you're not purchasing ours.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<section class="py-5 bg-primary text-white">
+    <div class="container text-center">
+        <h2 class="mb-4">Ready for Your Next Adventure?</h2>
+        <p class="lead mb-5">Book your premium rental car today and experience the difference</p>
+        <a href="#booking" class="btn btn-light btn-lg px-5 py-3 rounded-pill fw-bold">
+            <i class="bi bi-calendar-check me-2"></i> Reserve Now
+        </a>
+    </div>
+</section>
+

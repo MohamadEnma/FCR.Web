@@ -1,0 +1,141 @@
+﻿@model FCR.Dal.Classes.Booking
+
+@{
+    ViewData["Title"] = $"Booking #{Model.BookingId} Details";
+}
+
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="display-6">
+            <i class="bi bi-journal-text me-2"></i>Booking Details #@Model.BookingId
+        </h1>
+        <div>
+            <a asp-action="MyBookings" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left me-1"></i>My Bookings
+            </a>
+        </div>
+    </div>
+
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">
+                <i class="bi bi-car-front me-2"></i>
+                @Model.Car.Brand @Model.Car.Model
+            </h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="mb-4">
+                        <h6 class="text-muted border-bottom pb-2">Rental Information</h6>
+                        <dl class="row">
+                            <dt class="col-sm-5">Booking Date:</dt>
+                            <dd class="col-sm-7">@Model.BookingDate.ToString("f")</dd>
+
+                            <dt class="col-sm-5">Pickup Date:</dt>
+                            <dd class="col-sm-7">@Model.PickupDate.ToString("f")</dd>
+
+                            <dt class="col-sm-5">Return Date:</dt>
+                            <dd class="col-sm-7">@Model.ReturnDate.ToString("f")</dd>
+
+                            <dt class="col-sm-5">Rental Duration:</dt>
+                            <dd class="col-sm-7">@((Model.ReturnDate - Model.PickupDate).Days) days</dd>
+
+                            <dt class="col-sm-5">Daily Rate:</dt>
+                            <dd class="col-sm-7">@Model.Car.DailyRate.ToString("C")</dd>
+                        </dl>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="mb-4">
+                        <h6 class="text-muted border-bottom pb-2">Payment & Status</h6>
+                        <dl class="row">
+                            <dt class="col-sm-5">Total Price:</dt>
+                            <dd class="col-sm-7 fw-bold">@Model.TotalPrice.ToString("C")</dd>
+
+                            <dt class="col-sm-5">Status:</dt>
+                            <dd class="col-sm-7">
+                                @if (Model.IsCancelled)
+                                {
+                                    <span class="badge bg-danger rounded-pill">
+                                        <i class="bi bi-x-circle me-1"></i>Cancelled
+                                    </span>
+                                }
+                                else if (Model.PickupDate > DateTime.Now)
+                                {
+                                    <span class="badge bg-success rounded-pill">
+                                        <i class="bi bi-check-circle me-1"></i>Confirmed
+                                    </span>
+                                }
+                                else if (Model.ReturnDate < DateTime.Now)
+                                {
+                                    <span class="badge bg-secondary rounded-pill">
+                                        <i class="bi bi-clock-history me-1"></i>Completed
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-primary rounded-pill">
+                                        <i class="bi bi-lightning-charge me-1"></i>Active
+                                    </span>
+                                }
+                            </dd>
+
+                            @if (Model.IsCancelled)
+                            {
+                                <dt class="col-sm-5">Cancellation Date:</dt>
+                                <dd class="col-sm-7">@Model.CancellationDate?.ToString("f")</dd>
+                            }
+                        </dl>
+                    </div>
+                </div>
+            </div>
+
+            @if (Model.Car.Images.Any())
+            {
+                <div class="mt-4">
+                    <h6 class="text-muted border-bottom pb-2">Vehicle Images</h6>
+                    <div class="row g-2">
+                        @foreach (var image in Model.Car.Images.Take(3))
+                        {
+                            <div class="col-md-4">
+                                <img src="@image.Url" class="img-fluid rounded"
+                                     style="height: 180px; width: 100%; object-fit: cover;"
+                                     alt="@Model.Car.Brand @Model.Car.Model">
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+
+    <div class="d-flex justify-content-between">
+        @if (!Model.IsCancelled && Model.PickupDate > DateTime.Now)
+        {
+            <form asp-action="Cancel" asp-route-id="@Model.BookingId" method="post">
+                <button type="submit" class="btn btn-danger"
+                        onclick="return confirm('Are you sure you want to cancel this booking?')">
+                    <i class="bi bi-x-circle me-1"></i>Cancel Booking
+                </button>
+            </form>
+        }
+        else
+        {
+            <div></div> <!-- Empty div for flex spacing -->
+        }
+
+        <div>
+            <a asp-action="MyBookings" class="btn btn-outline-secondary me-2">
+                <i class="bi bi-arrow-left me-1"></i>Back to List
+            </a>
+            @if (!Model.IsCancelled && Model.PickupDate > DateTime.Now.AddDays(1))
+            {
+                <a asp-action="Edit" asp-route-id="@Model.BookingId" class="btn btn-primary">
+                    <i class="bi bi-pencil me-1"></i>Modify Booking
+                </a>
+            }
+        </div>
+    </div>
+</div>
+

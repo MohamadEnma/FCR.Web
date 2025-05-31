@@ -1,0 +1,39 @@
+﻿@{
+    ViewData["Title"] = "Admin Dashboard";
+}
+
+<div class="container">
+    <h1>Admin Dashboard</h1>
+
+    <div class="row mt-4">
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Users</h5>
+                    <p class="card-text">Manage system users and permissions</p>
+                    <a asp-action="Users" class="btn btn-primary">Go to Users</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Bookings</h5>
+                    <p class="card-text">View and manage all bookings</p>
+                    <a asp-controller="Bookings" asp-action="index" class="btn btn-primary">Go to Bookings</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Cars</h5>
+                    <p class="card-text">Manage vehicle inventory</p>
+                    <a asp-controller="Cars" asp-action="Index" class="btn btn-primary">Go to Cars</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

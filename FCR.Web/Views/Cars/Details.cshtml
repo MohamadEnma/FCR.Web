@@ -1,0 +1,158 @@
+﻿@model FCR.Dal.Classes.Car
+@{
+    ViewData["Title"] = "Car Details";
+}
+
+<!-- 1. Top Section - Heading -->
+<div class="row mb-4">
+    <div class="col-12">
+        <h1 class="display-4">@Model.Brand @Model.Model</h1>
+        <hr class="border-primary" />
+    </div>
+</div>
+
+<!-- 2. Middle Section - Split View -->
+<div class="row mb-4">
+    <!-- Left Column - Car Details -->
+    <div class="col-md-4">
+        <div class="card shadow-sm h-100">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0"><i class="bi bi-car-front"></i> Vehicle Details</h5>
+            </div>
+            <div class="card-body">
+                <dl class="row">
+                    <dt class="col-sm-4">Category</dt>
+                    <dd class="col-sm-8">@Model.Category</dd>
+
+                    <dt class="col-sm-4">Year</dt>
+                    <dd class="col-sm-8">@Model.Year</dd>
+
+                    <dt class="col-sm-4">Daily Rate</dt>
+                    <dd class="col-sm-8">@Model.DailyRate.ToString("C")</dd>
+
+                    <dt class="col-sm-4">Transmission</dt>
+                    <dd class="col-sm-8">@Model.Transmission</dd>
+
+                    <dt class="col-sm-4">Fuel Type</dt>
+                    <dd class="col-sm-8">@Model.FuelType</dd>
+
+                    <dt class="col-sm-4">Seats</dt>
+                    <dd class="col-sm-8">@Model.Seats</dd>
+
+                    <dt class="col-sm-4">Availability</dt>
+                    <dd class="col-sm-8">
+                        @if (Model.IsAvailable)
+                        {
+                            <span class="badge bg-success">Available</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-danger">Unavailable</span>
+                        }
+                    </dd>
+                </dl>
+            </div>
+        </div>
+    </div>
+
+    <!-- Right Column - Image Gallery -->
+    <div class="col-md-8">
+        <div class="card shadow-sm h-100">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0"><i class="bi bi-images"></i> Gallery</h5>
+            </div>
+            <div class="card-body text-center">
+                @if (Model.Images != null && Model.Images.Any())
+                {
+                    <div id="imageGallery">
+                        @foreach (var image in Model.Images)
+                        {
+                            <div class="gallery-item" style="display: none;">
+                                <img src="@image.Url" class="img-fluid rounded"
+                                     style="max-height: 300px; width: auto;"
+                                     alt="@image.AltText">
+                                <p class="mt-2 text-muted small">@image.AltText</p>
+                            </div>
+                        }
+                    </div>
+
+                    <div class="mt-3">
+                        <button id="prevBtn" class="btn btn-outline-primary">
+                            <i class="bi bi-chevron-left"></i> Previous
+                        </button>
+                        <button id="nextBtn" class="btn btn-outline-primary">
+                            Next <i class="bi bi-chevron-right"></i>
+                        </button>
+                    </div>
+                    <div class="mt-2">
+                        <span id="imageCounter" class="badge bg-secondary"></span>
+                    </div>
+                }
+                else
+                {
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle"></i> No images available
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 3. Action Buttons Section -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="d-flex justify-content-between">
+            <a asp-controller="Home" asp-action="Index" asp-route-carId="@Model.CarId" class="btn btn-secondary">
+                <i class="bi bi-arrow-left-square-fill"></i> Back
+            </a>
+
+            <a asp-controller="Bookings" asp-action="Create" asp-route-carId="@Model.CarId" class="btn btn-primary">
+                <i class="bi bi-plus-lg"></i></i> Book Now
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- 4. Bottom Section - Back Button -->
+
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // Initialize image gallery
+            const items = $('.gallery-item');
+            let currentIndex = 0;
+
+            function showImage(index) {
+                items.hide();
+                items.eq(index).fadeIn();
+                $('#imageCounter').text(`${index + 1} of ${items.length}`);
+
+                // Disable buttons at boundaries
+                $('#prevBtn').toggleClass('disabled', index === 0);
+                $('#nextBtn').toggleClass('disabled', index === items.length - 1);
+            }
+
+            // Navigation buttons
+            $('#prevBtn').click(function() {
+                if (currentIndex > 0) {
+                    currentIndex--;
+                    showImage(currentIndex);
+                }
+            });
+
+            $('#nextBtn').click(function() {
+                if (currentIndex < items.length - 1) {
+                    currentIndex++;
+                    showImage(currentIndex);
+                }
+            });
+
+            // Initialize
+            if (items.length > 0) {
+                showImage(0);
+            }
+        });
+    </script>
+}

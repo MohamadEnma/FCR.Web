@@ -1,0 +1,94 @@
+﻿@model FCR.Dal.Models.ImagesViewModel
+
+@{
+    ViewData["Title"] = $"{Model.Brand} {Model.Model} Images";
+}
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>
+            <i class="bi bi-images"></i> @Model.Brand @Model.Model Images
+        </h2>
+        <div>
+            <a asp-action="Index" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left"></i> Back to List
+            </a>
+        </div>
+    </div>
+
+    <!-- URL Input Section -->
+    <div class="card mb-4">
+        <div class="card-header bg-light">
+            <h5 class="mb-0">Add Image URLs</h5>
+        </div>
+        <div class="card-body">
+            <form asp-action="Images" method="post">
+                <input type="hidden" asp-for="CarId" />
+                <input type="hidden" asp-for="Brand" />
+                <input type="hidden" asp-for="Model" />
+
+                <div class="form-group">
+                    <label class="form-label">Image URLs</label>
+                    <div id="imageUrlsContainer">
+                        @for (var i = 0; i < Model.ImageUpload.ImageUrls.Count; i++)
+                        {
+                            <div class="input-group mb-2">
+                                <input type="url" asp-for="ImageUpload.ImageUrls[i]" class="form-control" placeholder="https://example.com/image.jpg" required />                 
+                            </div>
+
+                        }
+                    </div>
+                    <button type="button" id="addImageUrlBtn" class="btn btn-sm btn-outline-primary mt-2">
+                        <i class="bi bi-plus"></i> Add Another URL
+                    </button>
+                </div>
+
+                <button type="submit" class="btn btn-success">
+                    <i class="bi bi-save"></i> Save Images
+                </button>
+            </form>
+        </div>
+
+                
+    </div>
+
+    <!-- Existing Images Gallery -->
+    @if (Model.Images.Any())
+    {
+        <div class="row">
+            @foreach (var image in Model.Images)
+            {
+                <div class="col-md-4 mb-4">
+                    <div class="card h-100 shadow-sm">
+                        <img src="@image.Url" class="card-img-top" alt="@Model.Brand @Model.Model" style="height: 200px; object-fit: cover;">
+                        <div class="card-body">
+                            <p class="card-text small text-muted">@image.AltText</p>
+                        </div>
+                        <div class="card-footer bg-white">
+                            <div class="d-flex justify-content-between">
+                                <a href="@image.Url" target="_blank" class="btn btn-sm btn-outline-primary">
+                                    <i class="bi bi-eye"></i> View
+                                </a>
+                                <form asp-action="DeleteImage" method="post">
+                                    <input type="hidden" name="imageId" value="@image.ImageId" />
+                                    <input type="hidden" name="carId" value="@Model.CarId" />
+                                    <button type="submit" class="btn btn-sm btn-outline-danger"
+                                            onclick="return confirm('Are you sure you want to delete this image?')">
+                                        <i class="bi bi-trash"></i> Delete
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-info">
+            <i class="bi bi-info-circle"></i> No images available for this car.
+        </div>
+    }
+</div>
+
