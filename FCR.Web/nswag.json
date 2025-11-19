@@ -1,0 +1,20 @@
+{
+  "runtime": "Net90",
+  "defaultVariables": null,
+  "documentGenerator": {
+    "fromDocument": {
+      "url": "https://localhost:7172/swagger/v1/swagger.json",
+      "output": null
+    }
+  },
+  "codeGenerators": {
+    "openApiToCSharpClient": {
+      "clientBaseClass": null,
+      "className": "ApiClient",
+      "namespace": "FCR.Web.Services",
+      "generateClientInterfaces": true,
+      "generateDtoTypes": true,
+      "output": "Services/ApiClient.cs"
+    }
+  }
+}

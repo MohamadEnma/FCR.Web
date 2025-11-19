@@ -1,0 +1,6 @@
+@FCR.Api_HostAddress = http://localhost:5215
+
+GET {{FCR.Api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

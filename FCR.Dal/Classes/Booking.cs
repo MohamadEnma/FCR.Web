@@ -1,54 +1,65 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
+using Microsoft.EntityFrameworkCore;
 
 namespace FCR.Dal.Classes
 {
+    [Index(nameof(UserId))]
+    [Index(nameof(CarId))]
+    [Index(nameof(Status))]
+    [Index(nameof(PickupDate))]
+    [Index(nameof(IsCancelled))]
+    [Index(nameof(IsDeleted))]
     public class Booking
     {
         [Key]
         public int BookingId { get; set; }
 
         [Required]
-        [ForeignKey(nameof(Car))]
         public int CarId { get; set; }
 
         [Required]
-        [ForeignKey(nameof(User))]
         public string UserId { get; set; } = string.Empty;
 
         [Required]
-        [DataType(DataType.Date)]
-        [Display(Name = "Pickup Date")]
         public DateTime PickupDate { get; set; }
 
         [Required]
-        [DataType(DataType.Date)]
-        [Display(Name = "Return Date")]
         public DateTime ReturnDate { get; set; }
 
-        [Column(TypeName = "decimal(10,2)")]
-        [Display(Name = "Total Price")]
-        public decimal TotalPrice { get; set; } = 0;
+        [Required]
+        [Column(TypeName = "decimal(18,2)")]
+        public decimal TotalPrice { get; set; }
 
-        [Display(Name = "Cancelled")]
-        public bool IsCancelled { get; set; } = false;
+        [Required]
+        [MaxLength(50)]
+        public string Status { get; set; } = "Pending"; // Pending, Confirmed, Completed, Cancelled
 
-        [Display(Name = "Deleted")]
-        public bool IsDeleted { get; set; } = false;
+        public bool IsCancelled { get; set; }
+        public bool IsDeleted { get; set; }
 
-        [Display(Name = "Booking Date")]
-        public DateTime BookingDate { get; set; } = DateTime.UtcNow;
-
-        [Display(Name = "Cancellation Date")]
         public DateTime? CancellationDate { get; set; }
 
-        [Display(Name = "Status")]
-        [StringLength(20)]
-        public string Status { get; set; } = "Confirmed"; // "Pending", "Confirmed", "Cancelled", "Completed"
+        [MaxLength(500)]
+        public string? CancellationReason { get; set; }
 
-        // Navigation Properties
-        public virtual Car Car { get; set; } = null!;
-        public virtual ApplicationUser User { get; set; } = null!;
+        [Required]
+        [MaxLength(50)]
+        public string BookingNumber { get; set; } = string.Empty;  // NEW
+
+        public DateTime? CompletedDate { get; set; }  // NEW
+
+        // Auto-generated timestamps
+        public DateTime CreatedAt { get; set; }
+        public DateTime UpdatedAt { get; set; }
+
+        // Navigation properties
+        [ForeignKey(nameof(CarId))]
+        public virtual Car? Car { get; set; }
+
+        [ForeignKey(nameof(UserId))]
+        public virtual ApplicationUser? User { get; set; }
     }
 }

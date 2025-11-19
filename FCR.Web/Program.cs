@@ -1,9 +1,9 @@
-using FCR.Dal.Classes;
-using FCR.Dal.Data;
-using FCR.Dal.Mapper;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.UI.Services;
-using Microsoft.EntityFrameworkCore;
+using FCR.Web.Services;
+using FCR.Web.Services.Base;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 namespace FCR.Web
 {
@@ -13,89 +13,74 @@ namespace FCR.Web
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            // Add services to the container.
-            var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
-            builder.Services.AddDbContext<ApplicationDbContext>(options =>
-                options.UseSqlServer(connectionString));
-            builder.Services.AddDatabaseDeveloperPageExceptionFilter();
-
-            //AutoMapper configuration
-            builder.Services.AddAutoMapper(typeof(UserProfile));
-
-            // Email sender configuration
-            builder.Services.AddTransient<IEmailSender, EmailSender>();
-
-            builder.Services.AddDefaultIdentity<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = false)
-                .AddRoles<IdentityRole>()
-                .AddEntityFrameworkStores<ApplicationDbContext>();
             builder.Services.AddControllersWithViews();
+            builder.Services.AddHttpClient<IClient, Client>(client =>
+            {
+                client.BaseAddress = new Uri("https://localhost:7172");
+            });
+
+            builder.Services.AddHttpContextAccessor();
+
+            builder.Services.AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            })
+ .AddJwtBearer(options =>
+ {
+     options.TokenValidationParameters = new TokenValidationParameters
+     {
+         ValidateIssuer = true,
+         ValidateAudience = true,
+         ValidateLifetime = true,
+         ValidateIssuerSigningKey = true,
+         ValidIssuer = builder.Configuration["JwtSettings:Issuer"],
+         ValidAudience = builder.Configuration["JwtSettings:Audience"],
+         IssuerSigningKey = new SymmetricSecurityKey(
+             Encoding.UTF8.GetBytes(builder.Configuration["JwtSettings:SecretKey"])),
+
+         // IMPORTANT: This maps the role claim correctly
+         RoleClaimType = "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
+     };
+
+     // Read token from cookie instead of Authorization header
+     options.Events = new JwtBearerEvents
+     {
+         OnMessageReceived = context =>
+         {
+             // Try to get token from cookie
+             if (context.Request.Cookies.ContainsKey("jwt"))
+             {
+                 context.Token = context.Request.Cookies["jwt"];
+             }
+             return Task.CompletedTask;
+         }
+     };
+ });
+
+            builder.Services.AddAuthorization();
 
             var app = builder.Build();
 
-            // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
             {
-                app.UseMigrationsEndPoint();
+                app.UseDeveloperExceptionPage();
             }
             else
             {
                 app.UseExceptionHandler("/Home/Error");
             }
+
             app.UseStaticFiles();
-
             app.UseRouting();
-
             app.UseAuthentication();
             app.UseAuthorization();
 
             app.MapControllerRoute(
                 name: "default",
                 pattern: "{controller=Home}/{action=Index}/{id?}");
-            app.MapRazorPages();
-            SeedAdminUser(app).GetAwaiter().GetResult();
+
             await app.RunAsync();
-        }
-        private static async Task SeedAdminUser(WebApplication app)
-        {
-            using var scope = app.Services.CreateScope();
-            var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
-            var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
-            var config = scope.ServiceProvider.GetRequiredService<IConfiguration>();
-
-            // Only run in Development OR if explicitly enabled in config
-            if (!app.Environment.IsDevelopment() &&
-                !config.GetValue<bool>("SeedAdmin:Enabled"))
-            {
-                return;
-            }
-
-            // Admin role creation
-            if (!await roleManager.RoleExistsAsync("Admin"))
-            {
-                await roleManager.CreateAsync(new IdentityRole("Admin"));
-            }
-
-            // Admin user creation
-            var adminEmail = config["SeedAdmin:Email"] ?? "admin@example.com";
-            var adminUser = await userManager.FindByEmailAsync(adminEmail);
-
-            if (adminUser == null) // Only create if doesn't exist
-            {
-                adminUser = new ApplicationUser
-                {
-                    UserName = adminEmail,
-                    Email = adminEmail,
-                    EmailConfirmed = true
-                };
-
-                var result = await userManager.CreateAsync(adminUser,
-                    config["SeedAdmin:Password"] ?? "Admin@123");
-
-                if (result.Succeeded)
-                {
-                    await userManager.AddToRoleAsync(adminUser, "Admin");
-                }
-            }
         }
     }
 }

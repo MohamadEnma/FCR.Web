@@ -1,35 +1,43 @@
-using System.Diagnostics;
-using FCR.Dal.Data;
-using FCR.Dal.Models;
-using FCR.Web.Models;
+using FCR.Web.Services.Base;
+using FCR.Web.ViewModels;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace FCR.Web.Controllers
 {
     public class HomeController : Controller
     {
+        private readonly IClient _apiClient;
         private readonly ILogger<HomeController> _logger;
-        private readonly ApplicationDbContext _context;
 
-        public HomeController(ILogger<HomeController> logger, ApplicationDbContext context)
+        public HomeController(IClient apiClient, ILogger<HomeController> logger)
         {
+            _apiClient = apiClient;
             _logger = logger;
-            _context = context;
         }
 
         public async Task<IActionResult> Index()
         {
-            var viewModel = new HomeViewModel
+            try
             {
-                UserId = User.Identity?.Name,
-                AllCars = await _context.Cars
-               .Include(c => c.Images)
-               .Where(c => !c.IsDeleted)
-               .ToListAsync()
-            };
-
-            return View(viewModel);
+                var cars = await _apiClient.CarsAllAsync();
+                var viewModel = new HomeViewModel
+                {
+                    AllCars = cars.ToList()
+                };
+                return View(viewModel);
+            }
+            catch (ApiException ex)
+            {
+                _logger.LogError(ex, "Error loading cars for home page");
+                ViewBag.ErrorMessage = "Unable to load cars. Please try again later.";
+                return View(new HomeViewModel { AllCars = new List<Car>() });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Unexpected error loading home page");
+                ViewBag.ErrorMessage = "An unexpected error occurred.";
+                return View(new HomeViewModel { AllCars = new List<Car>() });
+            }
         }
 
         public IActionResult Privacy()
@@ -37,20 +45,10 @@ namespace FCR.Web.Controllers
             return View();
         }
 
-        public IActionResult About()
-        {
-            return View();
-        }
-
-
-        public IActionResult Contact()
-        {
-            return View();
-        }
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()
         {
-            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+            return View();
         }
     }
 }

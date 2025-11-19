@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 using AutoMapper;
-using FCR.Dal.Models;
+using FCR.Web.ViewModels;
 
 namespace FCR.Dal.Mapper
 {

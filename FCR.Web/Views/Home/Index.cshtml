@@ -1,286 +1,389 @@
-﻿@model FCR.Dal.Models.HomeViewModel
+﻿@model FCR.Web.ViewModels.HomeViewModel
 
 @{
     ViewData["Title"] = "Home Page";
 }
-<div class="bg-dark text-white pt-5 pb-4 border-top border-secondary position-relative">
-    <!-- Background Image for HERO section -->
+
+@section Styles{
+    <style>
+        /* Custom Animations & Effects */
+        .hero-image {
+            animation: zoomIn 20s ease-in-out infinite alternate;
+        }
+
+        @@keyframes zoomIn {
+            0%
+
+        {
+            transform: scale(1);
+        }
+
+        100% {
+            transform: scale(1.1);
+        }
+
+        }
+
+        .hover-lift {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+            .hover-lift:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 10px 30px rgba(0,0,0,0.2) !important;
+            }
+
+        .shadow-hover {
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+        }
+
+            .shadow-hover:hover {
+                box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+                transform: translateY(-10px);
+            }
+
+        .car-image-hover {
+            transition: transform 0.5s ease;
+        }
+
+        .car-card:hover .car-image-hover {
+            transform: scale(1.1);
+        }
+
+        .car-card:hover .car-overlay {
+            opacity: 0.3 !important;
+        }
+
+        .feature-icon {
+            transition: transform 0.3s ease;
+        }
+
+        .feature-card:hover .feature-icon {
+            transform: scale(1.1) rotate(5deg);
+        }
+
+        .bg-gradient-light {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        }
+
+        .text-white-75 {
+            color: rgba(255,255,255,0.75);
+        }
+
+        /* Step line responsiveness */
+        @@media (max-width: 768px) {
+            .step-line
+
+        {
+            display: none !important;
+        }
+
+        }
+    </style>
+}
+
+
+<div class="hero-section position-relative overflow-hidden" style="height: 70vh;">
     <div class="hero-background position-absolute top-0 start-0 w-100 h-100">
-        <div class="position-absolute top-0 start-0 w-100 h-100 bg-dark opacity-50"></div>
-        <img src="https://images.pexels.com/photos/919073/pexels-photo-919073.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1" alt="Luxury cars" class="w-100 h-100 object-fit-cover">
+        <div class="position-absolute top-0 start-0 w-100 h-100 bg-dark opacity-60"></div>
+        <img src="https://images.pexels.com/photos/3802510/pexels-photo-3802510.jpeg?auto=compress&cs=tinysrgb&w=1920"
+             alt="Luxury cars" class="w-100 h-100 object-fit-cover hero-image">
     </div>
 
-    <!-- Hero section Content -->
-    <div class="container position-relative z-index-1">
-        <div class="row min-vh-75 align-items-center py-5 py-lg-10">
-            <div class="col-lg-7 text-center text-lg-start">
-                <h1 class="display-3 fw-bold text-white mb-4">Friberg Car Rental</h1>
-                <p class="lead text-white mb-5">Experience luxury and performance with our fleet of premium vehicles. Perfect for business trips, vacations, or special occasions.</p>
+   
+    <div class="particles position-absolute top-0 start-0 w-100 h-100 bg-dark" style="opacity:0.75;"></div>
 
-                <div class="d-flex flex-column flex-sm-row gap-3 justify-content-center justify-content-lg-start">
-                    <a href="#booking" class="btn btn-primary btn-lg px-4 py-3 rounded-pill fw-bold">
+    <!-- Hero Content -->
+    <div class="container position-relative" style="z-index: 10;">
+        <div class="row min-vh-100 align-items-center">
+            <div class="col-lg-7">
+                <!-- Animated Badge -->
+                <div class="badge bg-primary bg-gradient px-4 py-2 mb-4 animate__animated animate__fadeInDown">
+                    <i class="bi bi-star-fill me-2"></i>Premium Car Rental Service
+                </div>
+
+                <h1 class="display-1 fw-bold text-white mb-4 animate__animated animate__fadeInUp" style="text-shadow: 2px 4px 10px rgba(0,0,0,0.3);">
+                    Drive Your
+                    <span class="text-primary d-block">Dreams</span>
+                </h1>
+
+                <p class="lead text-white-75 mb-5 fs-4 animate__animated animate__fadeInUp animate__delay-1s" style="max-width: 600px;">
+                    Experience luxury and performance with our curated fleet of premium vehicles.
+                    Every journey becomes an unforgettable adventure.
+                </p>
+
+                <!-- CTA Buttons -->
+                <div class="d-flex flex-column flex-sm-row gap-3 animate__animated animate__fadeInUp animate__delay-2s">
+                    <a href="#fleet" class="btn btn-primary btn-lg px-5 py-3 rounded-pill fw-bold shadow-lg hover-lift">
+                        <i class="bi bi-car-front-fill me-2"></i> Explore Fleet
+                    </a>
+                    <a href="#booking" class="btn btn-outline-light btn-lg px-5 py-3 rounded-pill fw-bold hover-lift">
                         <i class="bi bi-calendar-check me-2"></i> Book Now
                     </a>
-                    <a href="#fleet" class="btn btn-outline-light btn-lg px-4 py-3 rounded-pill fw-bold">
-                        <i class="bi bi-car-front me-2"></i> View Fleet
-                    </a>
+                </div>
+
+                <!-- Stats Counter -->
+                <div class="row mt-5 pt-5 g-4 animate__animated animate__fadeInUp animate__delay-3s">
+                    <div class="col-4">
+                        <h3 class="text-white fw-bold mb-0 counter" data-target="5000">0</h3>
+                        <p class="text-white-50 small mb-0">Happy Clients</p>
+                    </div>
+                    <div class="col-4">
+                        <h3 class="text-white fw-bold mb-0 counter" data-target="50">0</h3>
+                        <p class="text-white-50 small mb-0">Premium Cars</p>
+                    </div>
+                    <div class="col-4">
+                        <h3 class="text-white fw-bold mb-0 counter" data-target="15">0</h3>
+                        <p class="text-white-50 small mb-0">Years Experience</p>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
+    <!-- Scroll Indicator -->
+    <div class="position-absolute bottom-0 start-50 translate-middle-x mb-5 animate__animated animate__bounce animate__infinite">
+        <a href="#features" class="text-white text-decoration-none">
+            <i class="bi bi-chevron-double-down fs-3"></i>
+        </a>
+    </div>
 </div>
-<!-- Our avaliable cars section -->
 
-<section class="py-5">
-    <div class="container">
-        <h3 class="text-center mb-5">Our Available Cars</h3>
+<!-- Features Section with Icons -->
+<section id="features" class="py-5 bg-gradient-light">
+    <div class="container py-5">
+        <div class="text-center mb-5">
+            <span class="badge bg-primary bg-gradient px-3 py-2 mb-3">Why Choose Us</span>
+            <h2 class="display-4 fw-bold mb-3">Your Journey, Our Priority</h2>
+            <p class="lead text-muted">Experience the difference with Friberg Car Rentals</p>
+        </div>
 
-        @if (Model.AvailableCars.Any())
+        <div class="row g-4">
+            <div class="col-lg-3 col-md-6">
+                <div class="feature-card text-center p-4 h-100 bg-white rounded-4 shadow-hover">
+                    <div class="feature-icon bg-primary bg-gradient text-white rounded-circle p-4 d-inline-flex align-items-center justify-content-center mb-4"
+                         style="width: 100px; height: 100px;">
+                        <i class="bi bi-shield-check fs-1"></i>
+                    </div>
+                    <h4 class="fw-bold mb-3">Fully Insured</h4>
+                    <p class="text-muted">Comprehensive coverage for complete peace of mind on every journey.</p>
+                </div>
+            </div>
+
+            <div class="col-lg-3 col-md-6">
+                <div class="feature-card text-center p-4 h-100 bg-white rounded-4 shadow-hover">
+                    <div class="feature-icon bg-success bg-gradient text-white rounded-circle p-4 d-inline-flex align-items-center justify-content-center mb-4"
+                         style="width: 100px; height: 100px;">
+                        <i class="bi bi-star-fill fs-1"></i>
+                    </div>
+                    <h4 class="fw-bold mb-3">Premium Quality</h4>
+                    <p class="text-muted">Latest models from top brands, meticulously maintained to perfection.</p>
+                </div>
+            </div>
+
+            <div class="col-lg-3 col-md-6">
+                <div class="feature-card text-center p-4 h-100 bg-white rounded-4 shadow-hover">
+                    <div class="feature-icon bg-warning bg-gradient text-white rounded-circle p-4 d-inline-flex align-items-center justify-content-center mb-4"
+                         style="width: 100px; height: 100px;">
+                        <i class="bi bi-currency-dollar fs-1"></i>
+                    </div>
+                    <h4 class="fw-bold mb-3">Best Prices</h4>
+                    <p class="text-muted">Competitive rates without compromising on luxury and quality.</p>
+                </div>
+            </div>
+
+            <div class="col-lg-3 col-md-6">
+                <div class="feature-card text-center p-4 h-100 bg-white rounded-4 shadow-hover">
+                    <div class="feature-icon bg-danger bg-gradient text-white rounded-circle p-4 d-inline-flex align-items-center justify-content-center mb-4"
+                         style="width: 100px; height: 100px;">
+                        <i class="bi bi-headset fs-1"></i>
+                    </div>
+                    <h4 class="fw-bold mb-3">24/7 Support</h4>
+                    <p class="text-muted">Always here for you, day or night, wherever your journey takes you.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Fleet Section with Modern Cards -->
+<section id="fleet" class="py-5">
+    <div class="container py-5">
+        <div class="text-center mb-5">
+            <span class="badge bg-primary bg-gradient px-3 py-2 mb-3">Our Collection</span>
+            <h2 class="display-4 fw-bold mb-3">Premium Fleet</h2>
+            <p class="lead text-muted">Handpicked luxury vehicles for every occasion</p>
+        </div>
+
+        @if (Model != null && Model.AllCars != null && Model.AllCars.Any())
         {
             <div class="row g-4">
-                @foreach (var car in Model.AvailableCars)
+                @foreach (var car in Model.AllCars.Take(6))
                 {
                     <div class="col-lg-4 col-md-6">
-                        <div class="card h-100 shadow-sm">
+                        <div class="car-card h-100 bg-white rounded-4 overflow-hidden shadow-hover position-relative">
+                            <!-- Badge -->
+                            <div class="position-absolute top-0 end-0 m-3" style="z-index: 10;">
+                                <span class="badge bg-success bg-gradient px-3 py-2">
+                                    <i class="bi bi-check-circle me-1"></i> Available
+                                </span>
+                            </div>
+
                             <!-- Car Image -->
-                            <div class="card-img-top position-relative overflow-hidden" style="height: 200px;">
+                            <div class="car-image-wrapper position-relative overflow-hidden" style="height: 280px;">
                                 @if (car.Images != null && car.Images.Any())
                                 {
-                                    <!-- Show first image -->
-                                    <img src="@car.Images.First().Url" class="w-100 h-100 object-fit-cover" alt="@car.Brand @car.Model">
+                                    <img src="@car.Images.First().Url"
+                                         class="w-100 h-100 object-fit-cover car-image-hover"
+                                         alt="@car.Brand @car.Model">
                                 }
                                 else
                                 {
-                                    <!-- Fallback image -->
-                                    <div class="w-100 h-100 bg-light d-flex align-items-center justify-content-center">
-                                        <span class="text-muted">No Image Available</span>
+                                    <div class="w-100 h-100 bg-gradient d-flex align-items-center justify-content-center">
+                                        <i class="bi bi-car-front text-white" style="font-size: 5rem; opacity: 0.3;"></i>
                                     </div>
                                 }
-                                <span class="position-absolute top-0 end-0 bg-success text-white px-2 py-1 small">Available</span>
+                                <div class="car-overlay position-absolute top-0 start-0 w-100 h-100 bg-dark opacity-0"></div>
                             </div>
 
-                            <div class="card-body">
-                                <div class="d-flex justify-content-between align-items-start mb-2">
-                                    <h5 class="card-title mb-0">@car.Brand @car.Model</h5>
-                                    <span class="badge bg-primary">@car.Year</span>
+                            <div class="p-4">
+                                <!-- Car Title & Year -->
+                                <div class="d-flex justify-content-between align-items-start mb-3">
+                                    <div>
+                                        <h5 class="fw-bold mb-1">@car.Brand @car.Model</h5>
+                                        <p class="text-muted small mb-0">@car.Year Model</p>
+                                    </div>
+                                    <span class="badge bg-primary-subtle text-primary px-3 py-2">@car.Year</span>
                                 </div>
 
-                                <ul class="list-unstyled small mb-3">
-                                    <li class="mb-1"><i class="bi bi-people text-muted me-2"></i> @car.Year </li>
-                                </ul>
+                                <!-- Car Features -->
+                                <div class="d-flex gap-3 mb-3 text-muted small">
+                                    <span><i class="bi bi-fuel-pump me-1"></i> Hybrid</span>
+                                    <span><i class="bi bi-speedometer me-1"></i> Auto</span>
+                                    <span><i class="bi bi-people me-1"></i> 5 Seats</span>
+                                </div>
 
+                                <hr class="my-3">
+
+                                <!-- Price & CTA -->
                                 <div class="d-flex justify-content-between align-items-center">
-                                    <h6 class="mb-0 text-primary fw-bold">$@car.DailyRate.ToString("N2")<small class="text-muted">/day</small></h6>
-                                    <a asp-controller="Bookings" asp-action="Create" asp-route-carId="@car.CarId"
-                                       class="btn btn-sm btn-outline-primary">Book Now</a>
-                                    <a asp-controller="Cars" asp-action="Details" asp-route-carId="@car.CarId"
-                                       class="btn btn-sm btn-outline-secondary">Details</a>
+                                    <div>
+                                        <h4 class="text-primary fw-bold mb-0">
+                                            $@car.DailyRate.ToString("N0")
+                                            <small class="text-muted fs-6">/day</small>
+                                        </h4>
+                                    </div>
+                                    <div class="d-flex gap-2">
+                                        <a asp-controller="Cars" asp-action="Details" asp-route-id="@car.CarId"
+                                           class="btn btn-outline-primary btn-sm rounded-pill px-3">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+                                        <a asp-controller="Bookings" asp-action="Create" asp-route-carId="@car.CarId"
+                                           class="btn btn-primary btn-sm rounded-pill px-4">
+                                            Book Now
+                                        </a>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 }
             </div>
+
+            <div class="text-center mt-5">
+                <a asp-controller="Cars" asp-action="Index" class="btn btn-outline-primary btn-lg px-5 py-3 rounded-pill">
+                    View All Cars <i class="bi bi-arrow-right ms-2"></i>
+                </a>
+            </div>
         }
         else
         {
-            <div class="alert alert-info text-center">
-                <i class="bi bi-info-circle-fill me-2"></i> Currently no cars available. Please check back later.
+            <div class="text-center py-5">
+                <div class="mb-4">
+                    <i class="bi bi-car-front text-muted" style="font-size: 5rem;"></i>
+                </div>
+                <h4 class="text-muted">No cars available at the moment</h4>
+                <p class="text-muted">Please check back soon for our premium fleet</p>
             </div>
         }
     </div>
 </section>
 
-<section class="py-5 bg-light">
-    <div class="container">
-        <h2 class="text-center mb-5">Why Choose Friberg Car Rental</h2>
-        <div class="row g-4">
-            <div class="col-md-4">
-                <div class="text-center p-4">
-                    <div class="bg-primary bg-opacity-10 text-primary rounded-circle p-3 d-inline-block mb-3">
-                        <i class="bi bi-star-fill fs-2"></i>
-                    </div>
-                    <h4>Premium Fleet</h4>
-                    <p>Only the latest models from top brands, meticulously maintained for your safety and comfort.</p>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="text-center p-4">
-                    <div class="bg-primary bg-opacity-10 text-primary rounded-circle p-3 d-inline-block mb-3">
-                        <i class="bi bi-currency-dollar fs-2"></i>
-                    </div>
-                    <h4>Competitive Pricing</h4>
-                    <p>Luxury doesn't have to break the bank. We offer the best value for premium vehicles.</p>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="text-center p-4">
-                    <div class="bg-primary bg-opacity-10 text-primary rounded-circle p-3 d-inline-block mb-3">
-                        <i class="bi bi-headset fs-2"></i>
-                    </div>
-                    <h4>24/7 Support</h4>
-                    <p>Our dedicated team is always available to assist you with any questions or issues.</p>
-                </div>
-            </div>
-        </div>
-    </div>
-</section>
 
-
-<!-- What Our Customers Say -->
+<!-- How It Works Section -->
 <section class="py-5">
-    <div class="container">
-        <h2 class="text-center mb-5">What Our Customers Say</h2>
-        <div class="row g-4">
-            <div class="col-md-4">
-                <div class="card h-100 shadow-sm p-4">
-                    <div class="d-flex align-items-center mb-3">
-                        <i class="bi bi-star-fill text-warning me-1"></i>
-                        <i class="bi bi-star-fill text-warning me-1"></i>
-                        <i class="bi bi-star-fill text-warning me-1"></i>
-                        <i class="bi bi-star-fill text-warning me-1"></i>
-                        <i class="bi bi-star-fill text-warning"></i>
-                    </div>
-                    <p class="mb-4">"The BMW 5 Series was impeccable! Smooth ride and excellent service. Will definitely rent again."</p>
-                    <div class="d-flex align-items-center">
-                        <img src="https://randomuser.me/api/portraits/men/32.jpg" class="rounded-circle me-3" width="50" alt="Customer">
-                        <div>
-                            <h6 class="mb-0">Michael Johnson</h6>
-                            <small class="text-muted">Business Traveler</small>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-md-4">
-                <div class="card h-100 shadow-sm p-4">
-                    <div class="d-flex align-items-center mb-3">
-                        <i class="bi bi-star-fill text-warning me-1"></i>
-                        <i class="bi bi-star-fill text-warning me-1"></i>
-                        <i class="bi bi-star-fill text-warning me-1"></i>
-                        <i class="bi bi-star-fill text-warning me-1"></i>
-                        <i class="bi bi-star-fill text-warning"></i>
-                    </div>
-                    <p class="mb-4">"The BMW 5 Series was impeccable! Smooth ride and excellent service. Will definitely rent again."</p>
-                    <div class="d-flex align-items-center">
-                        <img src="https://randomuser.me/api/portraits/men/32.jpg" class="rounded-circle me-3" width="50" alt="Customer">
-                        <div>
-                            <h6 class="mb-0">Michael Johnson</h6>
-                            <small class="text-muted">Business Traveler</small>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-md-4">
-                <div class="card h-100 shadow-sm p-4">
-                    <div class="d-flex align-items-center mb-3">
-                        <i class="bi bi-star-fill text-warning me-1"></i>
-                        <i class="bi bi-star-fill text-warning me-1"></i>
-                        <i class="bi bi-star-fill text-warning me-1"></i>
-                        <i class="bi bi-star-fill text-warning me-1"></i>
-                        <i class="bi bi-star-fill text-warning"></i>
-                    </div>
-                    <p class="mb-4">"The BMW 5 Series was impeccable! Smooth ride and excellent service. Will definitely rent again."</p>
-                    <div class="d-flex align-items-center">
-                        <img src="https://randomuser.me/api/portraits/men/32.jpg" class="rounded-circle me-3" width="50" alt="Customer">
-                        <div>
-                            <h6 class="mb-0">Michael Johnson</h6>
-                            <small class="text-muted">Business Traveler</small>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
+    <div class="container py-5">
+        <div class="text-center mb-5">
+            <span class="badge bg-primary bg-gradient px-3 py-2 mb-3">Simple Process</span>
+            <h2 class="display-4 fw-bold mb-3">How It Works</h2>
+            <p class="lead text-muted">Book your dream car in three easy steps</p>
         </div>
-    </div>
-</section>
 
-
-<!-- How It Works Section  -->
-<section class="py-5 bg-dark text-white">
-    <div class="container">
-        <h2 class="text-center mb-5">How It Works</h2>
-        <div class="row g-4">
+        <div class="row g-5">
             <div class="col-md-4">
-                <div class="text-center">
-                    <div class="bg-primary text-white rounded-circle p-3 d-inline-flex align-items-center justify-content-center mb-3" style="width: 70px; height: 70px;">
-                        <span class="fs-3">1</span>
+                <div class="text-center position-relative">
+                    <div class="step-number bg-primary bg-gradient text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-4 shadow-lg"
+                         style="width: 100px; height: 100px; font-size: 2.5rem; font-weight: 700;">
+                        1
                     </div>
-                    <h4>Choose Your Car</h4>
-                    <p>Select from our premium fleet of vehicles</p>
+                    <div class="step-line position-absolute top-50 start-100 translate-middle-y d-none d-md-block"
+                         style="width: 100%; height: 2px; background: linear-gradient(to right, var(--bs-primary), transparent);"></div>
+                    <h4 class="fw-bold mb-3">Choose Your Vehicle</h4>
+                    <p class="text-muted">Browse our premium fleet and select the perfect car for your journey</p>
                 </div>
             </div>
+
             <div class="col-md-4">
-                <div class="text-center">
-                    <div class="bg-primary text-white rounded-circle p-3 d-inline-flex align-items-center justify-content-center mb-3" style="width: 70px; height: 70px;">
-                        <span class="fs-3">2</span>
+                <div class="text-center position-relative">
+                    <div class="step-number bg-primary bg-gradient text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-4 shadow-lg"
+                         style="width: 100px; height: 100px; font-size: 2.5rem; font-weight: 700;">
+                        2
                     </div>
-                    <h4>Make Reservation</h4>
-                    <p>Book online in just a few clicks</p>
+                    <div class="step-line position-absolute top-50 start-100 translate-middle-y d-none d-md-block"
+                         style="width: 100%; height: 2px; background: linear-gradient(to right, var(--bs-primary), transparent);"></div>
+                    <h4 class="fw-bold mb-3">Make Reservation</h4>
+                    <p class="text-muted">Complete your booking online with our secure and easy process</p>
                 </div>
             </div>
+
             <div class="col-md-4">
-                <div class="text-center">
-                    <div class="bg-primary text-white rounded-circle p-3 d-inline-flex align-items-center justify-content-center mb-3" style="width: 70px; height: 70px;">
-                        <span class="fs-3">3</span>
+                <div class="text-center position-relative">
+                    <div class="step-number bg-primary bg-gradient text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-4 shadow-lg"
+                         style="width: 100px; height: 100px; font-size: 2.5rem; font-weight: 700;">
+                        3
                     </div>
-                    <h4>Pick Up & Enjoy</h4>
-                    <p>Collect your car and hit the road</p>
+                    <h4 class="fw-bold mb-3">Pick Up & Drive</h4>
+                    <p class="text-muted">Collect your car and start your unforgettable adventure</p>
                 </div>
             </div>
         </div>
     </div>
 </section>
 
+<!-- CTA Section -->
+<section id="booking" class="py-5 bg-primary bg-gradient text-white position-relative overflow-hidden">
+    <div class="position-absolute top-0 start-0 w-100 h-100" style="background: url('data:image/svg+xml,<svg xmlns=\" http: //www.w3.org/2000/svg\" viewBox=\"0 0 1200 120\"><path fill=\"rgba(255,255,255,0.05)\" d=\"M0,0V46.29c47.79,22.2,103.59,32.17,158,28,70.36-5.37,136.33-33.31,206.
+              @section Scripts {
+        <script>
+            // Counter Animation
+            document.addEventListener('DOMContentLoaded', function() {
+                const counters = document.querySelectorAll('.counter');
+                counters.forEach(counter => {
+                    const target = +counter.getAttribute('data-target');
+                    const increment = target / 200;
 
-
-<!-- Frequently Asked Questions Section  -->
-<section class="py-5">
-    <div class="container">
-        <h2 class="text-center mb-5">Frequently Asked Questions</h2>
-        <div class="row justify-content-center">
-            <div class="col-lg-8">
-                <div class="accordion" id="faqAccordion">
-                    <div class="accordion-item mb-3 border-0 shadow-sm">
-                        <h3 class="accordion-header" id="headingOne">
-                            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne">
-                                What documents do I need to rent a car?
-                            </button>
-                        </h3>
-                        <div id="collapseOne" class="accordion-collapse collapse show" aria-labelledby="headingOne">
-                            <div class="accordion-body">
-                                You'll need a valid driver's license, credit card in your name, and proof of insurance if you're not purchasing ours.
-                            </div>
-                        </div>
-                    </div>
-                    <div class="accordion-item mb-3 border-0 shadow-sm">
-                        <h3 class="accordion-header" id="headingOne">
-                            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne">
-                                What documents do I need to rent a car?
-                            </button>
-                        </h3>
-                        <div id="collapseOne" class="accordion-collapse collapse show" aria-labelledby="headingOne">
-                            <div class="accordion-body">
-                                You'll need a valid driver's license, credit card in your name, and proof of insurance if you're not purchasing ours.
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</section>
-
-
-<section class="py-5 bg-primary text-white">
-    <div class="container text-center">
-        <h2 class="mb-4">Ready for Your Next Adventure?</h2>
-        <p class="lead mb-5">Book your premium rental car today and experience the difference</p>
-        <a href="#booking" class="btn btn-light btn-lg px-5 py-3 rounded-pill fw-bold">
-            <i class="bi bi-calendar-check me-2"></i> Reserve Now
-        </a>
-    </div>
-</section>
-
+                    const updateCounter = () => {
+                        const current = +counter.innerText;
+                        if (current < target) {
+                            counter.innerText = Math.ceil(current + increment);
+                            setTimeout(updateCounter, 10);
+                        } else {
+                            counter.innerText = target;
+                        }
+                    };
+                    updateCounter();
+                });
+            });
+        </script>
+}

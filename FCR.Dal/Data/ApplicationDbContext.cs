@@ -1,15 +1,19 @@
 ﻿using FCR.Dal.Classes;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using System;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace FCR.Dal.Data
 {
     public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     {
-        public DbSet<FCR.Dal.Classes.Car> Cars { get; set; } = null!;
-        public DbSet<FCR.Dal.Classes.Image> Images { get; set; } = null!;
-        public DbSet<FCR.Dal.Classes.Booking> Bookings { get; set; } = null!;
-        
+        public DbSet<Car> Cars { get; set; } = null!;
+        public DbSet<Image> Images { get; set; } = null!;
+        public DbSet<Booking> Bookings { get; set; } = null!;
+
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
             : base(options)
         {
@@ -18,27 +22,24 @@ namespace FCR.Dal.Data
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
+            modelBuilder.ApplyConfigurationsFromAssembly(typeof(ApplicationDbContext).Assembly);
+        }
 
-            modelBuilder.Entity<Image>()
-                .HasOne(i => i.Car)
-                .WithMany(c => c.Images)
-                .HasForeignKey(i => i.CarId);
+        // NEW: Auto-update timestamps
+        public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+        {
+            var entries = ChangeTracker.Entries()
+                .Where(e => e.State == EntityState.Modified);
 
-            modelBuilder.Entity<Car>()
-                .Property(c => c.DailyRate)
-                .HasPrecision(10, 2);
+            foreach (var entry in entries)
+            {
+                if (entry.Entity is Car car)
+                {
+                    car.UpdatedAt = DateTime.UtcNow;
+                }
+            }
 
-            modelBuilder.Entity<Booking>()
-                .HasOne(b => b.User)
-                .WithMany(u => u.Bookings)
-                .HasForeignKey(b => b.UserId);
-
-            modelBuilder.Entity<Booking>()
-                .HasOne(b => b.Car)
-                .WithMany()
-                .HasForeignKey(b => b.CarId);
-
-        } 
+            return base.SaveChangesAsync(cancellationToken);
+        }
     }
 }
-

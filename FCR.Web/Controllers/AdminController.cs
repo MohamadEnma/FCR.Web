@@ -1,235 +1,86 @@
-﻿using FCR.Dal.Classes;
-using FCR.Dal.Data;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using AutoMapper;
-using FCR.Dal.Models;
-using System.Security.Claims;
+﻿using FCR.Web.Services.Base;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 
 namespace FCR.Web.Controllers
 {
     [Authorize(Roles = "Admin")]
     public class AdminController : Controller
     {
-        private readonly UserManager<ApplicationUser> _userManager;
-        private readonly RoleManager<IdentityRole> _roleManager;
-        private readonly ApplicationDbContext _context;
+        private readonly IClient _apiClient;
         private readonly ILogger<AdminController> _logger;
-        private readonly IMapper _mapper;
 
-        public AdminController(
-           UserManager<ApplicationUser> userManager,
-           RoleManager<IdentityRole> roleManager,
-        ApplicationDbContext context,
-        ILogger<AdminController> logger, IMapper mapper
-           )
+        public AdminController(IClient apiClient, ILogger<AdminController> logger)
         {
-            _userManager = userManager;
-            _roleManager = roleManager;
-            _context = context;
+            _apiClient = apiClient;
             _logger = logger;
-            _mapper = mapper;
-
         }
 
         // GET: Admin/Dashboard
-        public IActionResult Dashboard()
+        public async Task<IActionResult> Dashboard()
         {
-            return View();
+            try
+            {
+                var activeBookings = await _apiClient.ActiveAsync();
+                return View(activeBookings);
+            }
+            catch (ApiException ex)
+            {
+                _logger.LogError(ex, "Error loading admin dashboard");
+                ViewBag.ErrorMessage = "Unable to load dashboard data.";
+                return View(new List<Booking>());
+            }
         }
 
-        //GET: User/Users 
-        [HttpGet]
+        // GET: Admin/Users
         public async Task<IActionResult> Users()
         {
-            var users = await _userManager.Users.ToListAsync();
-            var userViewModels = _mapper.Map<List<UserViewModel>>(users);
-
-            // Populate roles separately
-            foreach (var userViewModel in userViewModels)
+            try
             {
-                var user = users.First(u => u.Id == userViewModel.Id);
-                userViewModel.Roles = await _userManager.GetRolesAsync(user);
+                var users = await _apiClient.UsersAllAsync();
+                return View(users);
             }
-
-            return View(userViewModels);
+            catch (ApiException ex)
+            {
+                _logger.LogError(ex, "Error loading users");
+                ViewBag.ErrorMessage = "Unable to load users.";
+                return View(new List<UserDto>());
+            }
         }
 
-
-        // GET: User/Create
-        [HttpGet]
-        public IActionResult Create()
+        // GET: Admin/ManageCars
+        public async Task<IActionResult> ManageCars()
         {
-            return View(new UserViewModel());
+            try
+            {
+                var cars = await _apiClient.CarsAllAsync();
+                return View(cars);
+            }
+            catch (ApiException ex)
+            {
+                _logger.LogError(ex, "Error loading cars for management");
+                ViewBag.ErrorMessage = "Unable to load cars.";
+                return View(new List<Car>());
+            }
         }
 
-
+        // POST: Admin/DeleteCar/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(UserViewModel model)
+        public async Task<IActionResult> DeleteCar(int id)
         {
-            if (ModelState.IsValid)
+            try
             {
-                // Check if email already exists
-                var existingUser = await _userManager.FindByEmailAsync(model.Email);
-                if (existingUser != null)
-                {
-                    ModelState.AddModelError(nameof(model.Email), "A user with this email already exists.");
-                    return View(model);
-                }
-
-                var user = _mapper.Map<ApplicationUser>(model);
-                var result = await _userManager.CreateAsync(user, model.Password);
-
-                if (result.Succeeded)
-                {
-                    _logger.LogInformation("Created new user with ID {UserId}", user.Id);
-
-                    // Handle role assignment
-                    if (model.IsAdmin)
-                    {
-                        // Ensure Admin role exists
-                        if (!await _roleManager.RoleExistsAsync("Admin"))
-                        {
-                            await _roleManager.CreateAsync(new IdentityRole("Admin"));
-                        }
-
-                        await _userManager.AddToRoleAsync(user, "Admin");
-                        _logger.LogInformation("Assigned Admin role to user {UserId}", user.Id);
-                    }
-
-                    TempData["SuccessMessage"] = "User created successfully!";
-                    return RedirectToAction(nameof(Users));
-                }
-
-                // Handle password requirements explicitly
-                foreach (var error in result.Errors)
-                {
-                    if (error.Code.Contains("Password"))
-                    {
-                        ModelState.AddModelError(nameof(model.Password), error.Description);
-                    }
-                    else
-                    {
-                        ModelState.AddModelError(string.Empty, error.Description);
-                    }
-                    _logger.LogWarning("User creation failed: {Error}", error.Description);
-                }
+                await _apiClient.CarsDELETEAsync(id);
+                TempData["SuccessMessage"] = "Car deleted successfully.";
+                return RedirectToAction(nameof(ManageCars));
             }
-
-            return View(model);
-        }
-
-
-        // GET: User/Edit/5
-        [HttpGet]
-        public async Task<IActionResult> Edit(string id)
-        {
-            if (string.IsNullOrEmpty(id))
+            catch (ApiException ex)
             {
-                return NotFound();
+                _logger.LogError(ex, "Error deleting car");
+                TempData["ErrorMessage"] = "Unable to delete car.";
+                return RedirectToAction(nameof(ManageCars));
             }
-            var user = await _userManager.FindByIdAsync(id);
-            if (user == null)
-            {
-                _logger.LogWarning("User with ID {UserId} not found", id);
-                return NotFound();
-            }
-            var model = _mapper.Map<UserViewModel>(user);
-            model.IsAdmin = await _userManager.IsInRoleAsync(user, "Admin");
-            return View(model);
-
-        }
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(UserViewModel model)
-        {
-            if (!ModelState.IsValid)
-            {
-                return View(model);
-            }
-
-            var user = await _userManager.FindByIdAsync(model.Id);
-            if (user == null)
-            {
-                return NotFound();
-            }
-
-            // Update basic info
-            user.Email = model.Email;
-            user.UserName = model.Email;
-            user.FirstName = model.FirstName;
-            user.LastName = model.LastName;
-
-            // Update password only if provided
-            if (!string.IsNullOrEmpty(model.Password))
-            {
-                var passwordHasher = new PasswordHasher<ApplicationUser>();
-                user.PasswordHash = passwordHasher.HashPassword(user, model.Password);
-            }
-
-            var result = await _userManager.UpdateAsync(user);
-            if (!result.Succeeded)
-            {
-                foreach (var error in result.Errors)
-                {
-                    ModelState.AddModelError(string.Empty, error.Description);
-                }
-                return View(model);
-            }
-
-            // Handle role changes
-            var isAdmin = await _userManager.IsInRoleAsync(user, "Admin");
-            if (model.IsAdmin && !isAdmin)
-            {
-                await _userManager.AddToRoleAsync(user, "Admin");
-            }
-            else if (!model.IsAdmin && isAdmin)
-            {
-                await _userManager.RemoveFromRoleAsync(user, "Admin");
-            }
-
-            return RedirectToAction(nameof(Users));
-        }
-
-
-        // GET: User/Delete/5
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Delete(string id)
-        {
-            if (string.IsNullOrEmpty(id))
-            {
-                return NotFound();
-            }
-
-            if (id == User.FindFirstValue(ClaimTypes.NameIdentifier))
-            {
-                _logger.LogWarning("Attempt to delete self with ID {UserId}", id);
-                ModelState.AddModelError(string.Empty, "You cannot delete your own account.");
-                return RedirectToAction(nameof(Users));
-            }
-            var user = await _userManager.FindByIdAsync(id);
-            if (user == null)
-            {
-                _logger.LogWarning("User with ID {UserId} not found", id);
-                return NotFound();
-            }
-            var result = await _userManager.DeleteAsync(user);
-            if (result.Succeeded)
-            {
-                _logger.LogInformation("Deleted user with ID {UserId}", id);
-                return RedirectToAction(nameof(Users));
-            }
-            foreach (var error in result.Errors)
-            {
-                ModelState.AddModelError(string.Empty, error.Description);
-                _logger.LogWarning("User deletion failed: {Error}", error.Description);
-            }
-            return RedirectToAction(nameof(Users));
         }
     }
 }

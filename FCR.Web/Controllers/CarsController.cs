@@ -1,258 +1,90 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using FCR.Web.Services.Base;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.EntityFrameworkCore;
-using FCR.Dal.Classes;
-using FCR.Dal.Data;
-using FCR.Dal.Models;
-using Microsoft.CodeAnalysis.CSharp;
 
 namespace FCR.Web.Controllers
 {
     public class CarsController : Controller
     {
-        private readonly ApplicationDbContext _context;
+        private readonly IClient _apiClient;
+        private readonly ILogger<CarsController> _logger;
 
-        public CarsController(ApplicationDbContext context)
+        public CarsController(IClient apiClient, ILogger<CarsController> logger)
         {
-            _context = context;
+            _apiClient = apiClient;
+            _logger = logger;
         }
 
         // GET: Cars
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string category, string transmission, string fuelType, int? minSeats, double? maxDailyRate)
         {
-            return View(await _context.Cars.ToListAsync());
+            try
+            {
+                IEnumerable<Car> cars;
+
+                if (string.IsNullOrEmpty(category) && string.IsNullOrEmpty(transmission) &&
+                    string.IsNullOrEmpty(fuelType) && !minSeats.HasValue && !maxDailyRate.HasValue)
+                {
+                    cars = await _apiClient.CarsAllAsync();
+                }
+                else
+                {
+                    cars = await _apiClient.FilterAsync(category, transmission, fuelType, minSeats, maxDailyRate);
+                }
+
+                ViewBag.Category = category;
+                ViewBag.Transmission = transmission;
+                ViewBag.FuelType = fuelType;
+                ViewBag.MinSeats = minSeats;
+                ViewBag.MaxDailyRate = maxDailyRate;
+
+                return View(cars.ToList());
+            }
+            catch (ApiException ex)
+            {
+                _logger.LogError(ex, "Error loading cars");
+                ViewBag.ErrorMessage = "Unable to load cars. Please try again later.";
+                return View(new List<Car>());
+            }
         }
 
         // GET: Cars/Details/5
-        public async Task<IActionResult> Details( int CarId)
+        public async Task<IActionResult> Details(int id)
         {
-            if (CarId == null)
+            try
             {
-                return NotFound();
-            }
-
-            var car = await _context.Cars
-                .Include(c => c.Images)
-                .FirstOrDefaultAsync(m => m.CarId == CarId);
-            if (car == null)
-            {
-                return NotFound();
-            }
-
-            return View(car);
-        }
-
-        // GET: Cars/Create
-        public IActionResult Create()
-        {
-            var viewModel = new CarViewModel
-            {
-                ImageUrls = new List<string> { "" }
-            };
-            return View(viewModel);
-
-        }
-
-        // POST: Cars/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(CarViewModel viewModel)
-        {
-            if (ModelState.IsValid)
-            {
-                var car = new Car
+                var car = await _apiClient.CarsGETAsync(id);
+                if (car == null)
                 {
-                    Brand = viewModel.Brand,
-                    Model = viewModel.Model,
-                    Category = viewModel.Category,
-                    Year = viewModel.Year,
-                    DailyRate = viewModel.DailyRate,
-                    IsAvailable = viewModel.IsAvailable,
-                    Transmission = viewModel.Transmission,
-                    FuelType = viewModel.FuelType,
-                    Seats = viewModel.Seats,
-                    Images = viewModel.ImageUrls
-                            .Where(url => !string.IsNullOrWhiteSpace(url))
-                            .Select(url => new Image
-                            {
-                                Url = url,
-                                AltText = $"{viewModel.Brand} {viewModel.Model} Image"
-                            })
-                            .ToList()
-                };
-                _context.Add(car);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
-            }
-            return View(viewModel);
-        }
-
-        // GET: Cars/Edit/5
-        public async Task<IActionResult> Edit(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var car = await _context.Cars.FindAsync(id);
-            if (car == null)
-            {
-                return NotFound();
-            }
-            return View(car);
-        }
-
-        // POST: Cars/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("CarId,Brand,Model,Category,Year,DailyRate,IsAvailable,Transmission,FuelType,Seats,IsDeleted")] Car car)
-        {
-            if (id != car.CarId)
-            {
-                return NotFound();
-            }
-
-            if (ModelState.IsValid)
-            {
-                try
-                {
-                    _context.Update(car);
-                    await _context.SaveChangesAsync();
+                    return NotFound();
                 }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!CarExists(car.CarId))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-                return RedirectToAction(nameof(Index));
+                return View(car);
             }
-            return View(car);
-        }
-
-        // GET: Cars/Delete/5
-        public async Task<IActionResult> Delete(int? id)
-        {
-            if (id == null)
+            catch (ApiException ex) when (ex.StatusCode == 404)
             {
                 return NotFound();
             }
-
-            var car = await _context.Cars
-                .FirstOrDefaultAsync(m => m.CarId == id);
-            if (car == null)
+            catch (ApiException ex)
             {
-                return NotFound();
+                _logger.LogError(ex, "Error loading car details for ID {CarId}", id);
+                ViewBag.ErrorMessage = "Unable to load car details.";
+                return View("Error");
             }
-
-            return View(car);
         }
 
-        // POST: Cars/Delete/5
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
+        // GET: Cars/Available
+        public async Task<IActionResult> Available()
         {
-            var car = await _context.Cars.FindAsync(id);
-            if (car != null)
+            try
             {
-                _context.Cars.Remove(car);
+                var cars = await _apiClient.AvailableAsync();
+                return View("Index", cars.ToList());
             }
-
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
-        }
-
-        private bool CarExists(int id)
-        {
-            return _context.Cars.Any(e => e.CarId == id);
-        }
-
-        [HttpGet("Images/{carId}")]
-        public async Task<IActionResult> Images(int carId)
-        {
-            var car = await _context.Cars
-                .Include(c => c.Images)
-                .FirstOrDefaultAsync(c => c.CarId == carId);
-
-            if (car == null) return NotFound();
-
-            var viewModel = new ImagesViewModel
+            catch (ApiException ex)
             {
-                CarId = car.CarId,
-                Brand = car.Brand,
-                Model = car.Model,
-                Images = car.Images.ToList(),
-                ImageUpload = new AddImagesDto { CarId = car.CarId }
-            };
-
-            return View(viewModel);
-        }
-
-        [HttpPost("Images/{carId}")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Images(int carId, AddImagesDto dto)
-        {
-            var car = await _context.Cars
-                .Include(c => c.Images)
-                .FirstOrDefaultAsync(c => c.CarId == carId);
-
-            if (car == null) return NotFound();
-
-            if (ModelState.IsValid)
-            {
-                foreach (var url in dto.ImageUrls.Where(url => !string.IsNullOrWhiteSpace(url)))
-                {
-                    car.Images.Add(new Image
-                    {
-                        Url = url,
-                        AltText = $"{car.Brand} {car.Model}",
-                        CarId = carId
-                    });
-                }
-
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Images), new { carId });
+                _logger.LogError(ex, "Error loading available cars");
+                ViewBag.ErrorMessage = "Unable to load available cars.";
+                return View("Index", new List<Car>());
             }
-
-            // If validation fails, rebuild the ViewModel
-            var viewModel = new ImagesViewModel
-            {
-                CarId = car.CarId,
-                Brand = car.Brand,
-                Model = car.Model,
-                Images = car.Images.ToList(),
-                ImageUpload = dto
-            };
-
-            return View(viewModel);
-        }
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteImage(int imageId, int carId)
-        {
-            var image = await _context.Images.FindAsync(imageId);
-            if (image != null)
-            {
-                _context.Images.Remove(image);
-                await _context.SaveChangesAsync();
-            }
-            return RedirectToAction(nameof(Images), new { carId = carId });
         }
     }
 }
