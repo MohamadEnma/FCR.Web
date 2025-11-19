@@ -84,6 +84,11 @@ namespace FCR.Web
             app.UseAuthorization();
 
             app.MapControllerRoute(
+                name: "adminCars",
+                pattern: "Admin/Cars/{action=Index}/{id?}",
+                defaults: new { controller = "AdminCars" });
+
+            app.MapControllerRoute(
                 name: "default",
                 pattern: "{controller=Home}/{action=Index}/{id?}");
 
