@@ -12,16 +12,17 @@ namespace FCR.Bll.Mappings
     {
         public static void Configure()
         {
-            // Most mappings work automatically with Mapster!
-            // Only configure custom mappings here
-
-            // Car to CarResponseDto
+            // Car to CarResponseDto - NULL-SAFE without ?. operator
             TypeAdapterConfig<Car, CarResponseDto>
                 .NewConfig()
-                .Map(dest => dest.PrimaryImageUrl, src => src.Images.FirstOrDefault(i => i.IsPrimary).Url)
-                .Map(dest => dest.TotalBookings, src => src.Bookings != null ? src.Bookings.Count : 0);
+                .Map(dest => dest.PrimaryImageUrl,
+                     src => src.Images != null && src.Images.Any()
+                            ? src.Images.Where(i => i.IsPrimary).Select(i => i.Url).FirstOrDefault()
+                            : null)
+                .Map(dest => dest.TotalBookings,
+                     src => src.Bookings != null ? src.Bookings.Count : 0);
 
-            // Booking to BookingResponseDto
+            // Booking to BookingResponseDto - NULL-SAFE without ?. operator
             TypeAdapterConfig<Booking, BookingResponseDto>
                 .NewConfig()
                 .Map(dest => dest.BookingId, src => src.BookingId)
@@ -29,25 +30,32 @@ namespace FCR.Bll.Mappings
                 .Map(dest => dest.CarBrand, src => src.Car != null ? src.Car.Brand : string.Empty)
                 .Map(dest => dest.CarModel, src => src.Car != null ? src.Car.Model : string.Empty)
                 .Map(dest => dest.CarYear, src => src.Car != null ? src.Car.Year : 0)
-                .Map(dest => dest.CarImageUrl, src => src.Car != null && src.Car.Images != null
-                    ? src.Car.Images.FirstOrDefault(i => i.IsPrimary).Url
-                    : null)
-                .Map(dest => dest.UserFullName, src => src.User != null
-                    ? $"{src.User.FirstName} {src.User.LastName}"
-                    : string.Empty)
-                .Map(dest => dest.UserEmail, src => src.User != null ? src.User.Email : string.Empty)
-                .Map(dest => dest.TotalDays, src => (src.ReturnDate - src.PickupDate).Days)
-                .Map(dest => dest.DailyRate, src => src.Car != null ? src.Car.DailyRate : 0);
+                .Map(dest => dest.CarImageUrl,
+                     src => src.Car != null && src.Car.Images != null && src.Car.Images.Any()
+                            ? src.Car.Images.Where(i => i.IsPrimary).Select(i => i.Url).FirstOrDefault()
+                            : null)
+                .Map(dest => dest.UserFullName,
+                     src => src.User != null
+                            ? string.Concat(src.User.FirstName, " ", src.User.LastName)
+                            : string.Empty)
+                .Map(dest => dest.UserEmail,
+                     src => src.User != null ? src.User.Email : string.Empty)
+                .Map(dest => dest.TotalDays,
+                     src => (src.ReturnDate - src.PickupDate).Days)
+                .Map(dest => dest.DailyRate,
+                     src => src.Car != null ? src.Car.DailyRate : 0);
 
             // ApplicationUser to UserDto
             TypeAdapterConfig<ApplicationUser, UserDto>
                 .NewConfig()
-                .Map(dest => dest.DisplayName, src => $"{src.FirstName} {src.LastName}");
+                .Map(dest => dest.DisplayName,
+                     src => string.Concat(src.FirstName, " ", src.LastName));
 
             // ApplicationUser to UserProfileDto
             TypeAdapterConfig<ApplicationUser, UserProfileDto>
                 .NewConfig()
-                .Map(dest => dest.DisplayName, src => $"{src.FirstName} {src.LastName}")
+                .Map(dest => dest.DisplayName,
+                     src => string.Concat(src.FirstName, " ", src.LastName))
                 .Ignore(dest => dest.TotalBookings)
                 .Ignore(dest => dest.ActiveBookings)
                 .Ignore(dest => dest.CompletedBookings)

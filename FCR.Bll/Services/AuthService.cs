@@ -177,7 +177,7 @@ namespace FCR.Bll.Services
                 var token = GenerateJwtToken(user, roles.ToList());
                 var refreshToken = GenerateRefreshToken();
                 user.RefreshToken = refreshToken;
-                user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(7); // 7 days validity
+                user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(1); // 1 days validity
                 await _userManager.UpdateAsync(user);
 
                 var response = new LoginResponseDto
@@ -187,7 +187,8 @@ namespace FCR.Bll.Services
                     Email = user.Email!,
                     FirstName = user.FirstName,
                     LastName = user.LastName,
-                    Roles = roles.ToList()
+                    Roles = roles.ToList(),
+                    TokenExpiration = DateTime.UtcNow.AddHours(24)
                 };
 
                 return ServiceResponse<LoginResponseDto>.SuccessResponse(
@@ -387,7 +388,7 @@ namespace FCR.Bll.Services
             }
 
             var key = new SymmetricSecurityKey(
-                Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]!));
+                Encoding.UTF8.GetBytes(_configuration["Jwt:SecretKey"]!));
 
             var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 

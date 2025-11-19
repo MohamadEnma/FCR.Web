@@ -1,81 +1,286 @@
-﻿@model FCR.Dal.Classes.Car
+﻿@model FCR.Web.Services.Base.CarResponseDto
 
 @{
-    ViewData["Title"] = "Delete";
+    ViewData["Title"] = "Delete Car";
 }
 
-<h1>Delete</h1>
+<!-- Delete Car Section -->
+<section class="min-h-screen bg-gradient-to-br from-red-50 via-orange-50 to-yellow-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div class="absolute inset-0 overflow-hidden">
+        <div class="absolute top-20 left-20 w-72 h-72 bg-red-200/30 rounded-full blur-3xl animate-float"></div>
+        <div class="absolute bottom-20 right-20 w-96 h-96 bg-orange-200/30 rounded-full blur-3xl animate-float" style="animation-delay: 1s;"></div>
+    </div>
 
-<h3>Are you sure you want to delete this?</h3>
-<div>
-    <h4>Car</h4>
-    <hr />
-    <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Brand)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Brand)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Model)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Model)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Category)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Category)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Year)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Year)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.DailyRate)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.DailyRate)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.IsAvailable)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.IsAvailable)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Transmission)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Transmission)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.FuelType)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.FuelType)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Seats)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Seats)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.IsDeleted)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.IsDeleted)
-        </dd>
-    </dl>
-    
-    <form asp-action="Delete">
-        <input type="hidden" asp-for="CarId" />
-        <input type="submit" value="Delete" class="btn btn-danger" /> |
-        <a asp-action="Index">Back to List</a>
-    </form>
-</div>
+    <div class="relative max-w-4xl mx-auto">
+
+        <!-- Warning Icon -->
+        <div class="text-center mb-8 animate-slide-up">
+            <div class="inline-flex items-center justify-center w-24 h-24 bg-gradient-to-br from-red-400 to-red-600 rounded-full mb-6 animate-pulse">
+                <i class="fas fa-exclamation-triangle text-white text-5xl"></i>
+            </div>
+            <h1 class="text-5xl md:text-6xl font-black text-gray-900 mb-4">
+                Delete Car?
+            </h1>
+            <p class="text-xl text-gray-600">
+                Are you sure you want to permanently delete this vehicle?
+            </p>
+        </div>
+
+        <!-- Warning Alert -->
+        <div class="bg-gradient-to-r from-red-500 to-orange-600 rounded-3xl shadow-2xl p-8 text-white mb-8 animate-fade-in">
+            <div class="flex items-start space-x-4">
+                <div class="flex-shrink-0">
+                    <div class="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center">
+                        <i class="fas fa-exclamation-circle text-3xl"></i>
+                    </div>
+                </div>
+                <div class="flex-1">
+                    <h2 class="text-2xl font-bold mb-2">⚠️ Critical Warning</h2>
+                    <ul class="space-y-1 text-red-100">
+                        <li><i class="fas fa-chevron-right mr-2"></i>This action cannot be undone</li>
+                        <li><i class="fas fa-chevron-right mr-2"></i>All car data will be permanently deleted</li>
+                        <li><i class="fas fa-chevron-right mr-2"></i>Associated images and bookings may be affected</li>
+                        <li><i class="fas fa-chevron-right mr-2"></i>This car will no longer be available for rent</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Car Details Card -->
+        <div class="bg-white rounded-3xl shadow-2xl overflow-hidden mb-8">
+
+            <!-- Header -->
+            <div class="bg-gradient-to-r from-gray-800 to-gray-900 p-8 text-white">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-300 mb-2">Car ID</p>
+                        <h3 class="text-3xl font-bold">#@Model.CarId</h3>
+                    </div>
+                    <div class="text-right">
+                        @if (Model.IsAvailable)
+                        {
+                            <span class="inline-block px-6 py-2 bg-green-500 rounded-full font-bold">
+                                <i class="fas fa-check-circle mr-2"></i>Available
+                            </span>
+                        }
+                        else
+                        {
+                            <span class="inline-block px-6 py-2 bg-gray-500 rounded-full font-bold">
+                                <i class="fas fa-times-circle mr-2"></i>Unavailable
+                            </span>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <!-- Car Images -->
+            @if (Model.Images != null && Model.Images.Any())
+            {
+                <div class="grid grid-cols-3 gap-2 p-4 bg-gray-50">
+                    @foreach (var image in Model.Images.Take(3))
+                    {
+                        <div class="relative rounded-xl overflow-hidden shadow-lg">
+                            <img src="@image.Url"
+                                 alt="@Model.Brand @Model.Model"
+                                 class="w-full h-48 object-cover">
+                        </div>
+                    }
+                </div>
+            }
+
+            <!-- Details -->
+            <div class="p-8">
+
+                <!-- Car Title -->
+                <div class="mb-8 text-center">
+                    <h2 class="text-4xl font-black text-gray-900 mb-2">
+                        @Model.Brand @Model.Model
+                    </h2>
+                    <p class="text-xl text-gray-600">@Model.Category • @Model.Year</p>
+                </div>
+
+                <!-- Specifications Grid -->
+                <div class="grid grid-cols-2 md:grid-cols-3 gap-6 mb-8">
+
+                    <div class="bg-blue-50 rounded-2xl p-6 text-center">
+                        <i class="fas fa-gas-pump text-blue-600 text-3xl mb-3"></i>
+                        <p class="text-sm text-gray-600 mb-1">Fuel Type</p>
+                        <p class="text-lg font-bold text-gray-900">@Model.FuelType</p>
+                    </div>
+
+                    <div class="bg-green-50 rounded-2xl p-6 text-center">
+                        <i class="fas fa-cog text-green-600 text-3xl mb-3"></i>
+                        <p class="text-sm text-gray-600 mb-1">Transmission</p>
+                        <p class="text-lg font-bold text-gray-900">@Model.Transmission</p>
+                    </div>
+
+                    <div class="bg-purple-50 rounded-2xl p-6 text-center">
+                        <i class="fas fa-users text-purple-600 text-3xl mb-3"></i>
+                        <p class="text-sm text-gray-600 mb-1">Seats</p>
+                        <p class="text-lg font-bold text-gray-900">@Model.Seats</p>
+                    </div>
+
+                    <div class="bg-orange-50 rounded-2xl p-6 text-center">
+                        <i class="fas fa-calendar text-orange-600 text-3xl mb-3"></i>
+                        <p class="text-sm text-gray-600 mb-1">Year</p>
+                        <p class="text-lg font-bold text-gray-900">@Model.Year</p>
+                    </div>
+
+                    <div class="bg-pink-50 rounded-2xl p-6 text-center">
+                        <i class="fas fa-layer-group text-pink-600 text-3xl mb-3"></i>
+                        <p class="text-sm text-gray-600 mb-1">Category</p>
+                        <p class="text-lg font-bold text-gray-900">@Model.Category</p>
+                    </div>
+
+                    <div class="bg-indigo-50 rounded-2xl p-6 text-center">
+                        <i class="fas fa-dollar-sign text-indigo-600 text-3xl mb-3"></i>
+                        <p class="text-sm text-gray-600 mb-1">Daily Rate</p>
+                        <p class="text-lg font-bold text-gray-900">$@Model.DailyRate</p>
+                    </div>
+
+                </div>
+
+                <!-- Additional Info -->
+                <div class="bg-gray-50 rounded-2xl p-6">
+                    <h3 class="text-xl font-bold text-gray-900 mb-4 flex items-center">
+                        <i class="fas fa-info-circle text-primary-500 mr-3"></i>
+                        Additional Information
+                    </h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="flex items-center justify-between py-3 border-b border-gray-200">
+                            <span class="text-gray-600 font-medium">Car ID</span>
+                            <span class="font-bold text-gray-900">#@Model.CarId</span>
+                        </div>
+                        <div class="flex items-center justify-between py-3 border-b border-gray-200">
+                            <span class="text-gray-600 font-medium">Availability</span>
+                            @if (Model.IsAvailable)
+                            {
+                                <span class="px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm font-bold">
+                                    <i class="fas fa-check-circle mr-1"></i>Available
+                                </span>
+                            }
+                            else
+                            {
+                                <span class="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm font-bold">
+                                    <i class="fas fa-times-circle mr-1"></i>Unavailable
+                                </span>
+                            }
+                        </div>
+                        <div class="flex items-center justify-between py-3 border-b border-gray-200">
+                            <span class="text-gray-600 font-medium">Total Images</span>
+                            <span class="font-bold text-gray-900">@(Model.Images?.Count ?? 0)</span>
+                        </div>
+                        <div class="flex items-center justify-between py-3 border-b border-gray-200">
+                            <span class="text-gray-600 font-medium">Status</span>
+                            @if (Model.IsDeleted)
+                            {
+                                <span class="px-3 py-1 bg-red-100 text-red-700 rounded-full text-sm font-bold">
+                                    <i class="fas fa-trash mr-1"></i>Deleted
+                                </span>
+                            }
+                            else
+                            {
+                                <span class="px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm font-bold">
+                                    <i class="fas fa-check mr-1"></i>Active
+                                </span>
+                            }
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <form asp-action="Delete" method="post">
+            <input type="hidden" asp-for="CarId" />
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+                <button type="submit"
+                        onclick="return confirm('⚠️ FINAL WARNING: Are you absolutely sure you want to permanently delete @Model.Brand @Model.Model? This action CANNOT be undone!');"
+                        class="flex items-center justify-center px-8 py-4 bg-gradient-to-r from-red-500 to-red-700 hover:from-red-600 hover:to-red-800 text-white rounded-2xl font-bold text-lg transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-2xl">
+                    <i class="fas fa-trash-alt mr-3"></i>
+                    Yes, Delete Permanently
+                </button>
+                <a asp-action="Index"
+                   class="flex items-center justify-center px-8 py-4 bg-white hover:bg-gray-50 text-gray-700 border-2 border-gray-200 rounded-2xl font-bold text-lg transform hover:scale-105 transition-all duration-300">
+                    <i class="fas fa-arrow-left mr-3"></i>
+                    No, Keep This Car
+                </a>
+            </div>
+        </form>
+
+        <!-- Impact Warning -->
+        <div class="bg-white rounded-2xl shadow-lg p-8">
+            <h4 class="text-xl font-bold text-gray-900 mb-4 flex items-center">
+                <i class="fas fa-exclamation-triangle text-yellow-500 mr-3"></i>
+                What Will Be Deleted?
+            </h4>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="flex items-start space-x-3">
+                    <i class="fas fa-times-circle text-red-500 text-xl mt-1"></i>
+                    <div>
+                        <p class="font-bold text-gray-900">Vehicle Information</p>
+                        <p class="text-gray-600 text-sm">All specifications, brand, model, and pricing data</p>
+                    </div>
+                </div>
+                <div class="flex items-start space-x-3">
+                    <i class="fas fa-times-circle text-red-500 text-xl mt-1"></i>
+                    <div>
+                        <p class="font-bold text-gray-900">Images</p>
+                        <p class="text-gray-600 text-sm">All uploaded images and media files</p>
+                    </div>
+                </div>
+                <div class="flex items-start space-x-3">
+                    <i class="fas fa-times-circle text-red-500 text-xl mt-1"></i>
+                    <div>
+                        <p class="font-bold text-gray-900">Availability Status</p>
+                        <p class="text-gray-600 text-sm">Car will be removed from rental listings</p>
+                    </div>
+                </div>
+                <div class="flex items-start space-x-3">
+                    <i class="fas fa-times-circle text-red-500 text-xl mt-1"></i>
+                    <div>
+                        <p class="font-bold text-gray-900">Booking History</p>
+                        <p class="text-gray-600 text-sm">Historical booking references may be affected</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Alternative Actions -->
+        <div class="mt-8 text-center">
+            <p class="text-gray-600 mb-4">
+                Consider these alternatives instead of deleting:
+            </p>
+            <div class="flex flex-col sm:flex-row gap-3 justify-center">
+                <a asp-action="Edit" asp-route-id="@Model.CarId"
+                   class="inline-flex items-center px-6 py-3 bg-blue-500 hover:bg-blue-600 text-white rounded-xl font-bold transition-all">
+                    <i class="fas fa-edit mr-2"></i>
+                    Edit Car Details
+                </a>
+                <button onclick="alert('Feature coming soon: Mark as unavailable')"
+                        class="inline-flex items-center px-6 py-3 bg-gray-500 hover:bg-gray-600 text-white rounded-xl font-bold transition-all">
+                    <i class="fas fa-eye-slash mr-2"></i>
+                    Mark as Unavailable
+                </button>
+            </div>
+        </div>
+
+    </div>
+</section>
+
+@section Scripts {
+    <script>
+        // Additional confirmation on form submit
+        document.querySelector('form').addEventListener('submit', function(e) {
+            const carName = '@Model.Brand @Model.Model';
+            const userConfirmed = confirm(`🚨 LAST CHANCE!\n\nYou are about to permanently delete:\n${carName}\n\nType "DELETE" to confirm (case-sensitive):`);
+
+            if (!userConfirmed) {
+                e.preventDefault();
+                return false;
+            }
+        });
+    </script>
+}

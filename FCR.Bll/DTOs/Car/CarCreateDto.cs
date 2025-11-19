@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
@@ -17,7 +18,7 @@ namespace FCR.Bll.DTOs
 
         [Required(ErrorMessage = "Category is required")]
         [MaxLength(30)]
-        public string Category { get; set; } = string.Empty;  // SUV, Sedan, Electric, etc.
+        public string Category { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "Year is required")]
         [Range(2000, 2030, ErrorMessage = "Year must be between 2000 and 2030")]
@@ -40,11 +41,11 @@ namespace FCR.Bll.DTOs
         // Specifications
         [Required(ErrorMessage = "Transmission type is required")]
         [MaxLength(20)]
-        public string Transmission { get; set; } = string.Empty;  // Automatic, Manual
+        public string Transmission { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "Fuel type is required")]
         [MaxLength(20)]
-        public string FuelType { get; set; } = string.Empty;  // Petrol, Diesel, Electric, Hybrid
+        public string FuelType { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "Number of seats is required")]
         [Range(2, 9, ErrorMessage = "Seats must be between 2 and 9")]
@@ -63,8 +64,8 @@ namespace FCR.Bll.DTOs
         [MaxLength(1000)]
         public string? Description { get; set; }
 
-        // Images
-        public List<string>? ImageUrls { get; set; }  
-
+        // ✅ Images - Support BOTH URLs and File Uploads
+        public List<string>? ImageUrls { get; set; }  // Direct URLs
+        public List<IFormFile>? ImageFiles { get; set; }  // File uploads
     }
 }

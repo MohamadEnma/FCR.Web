@@ -1,4 +1,5 @@
 ﻿using FCR.Bll.DTOs.Image;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -40,6 +41,7 @@ namespace FCR.Bll.DTOs
         // Images
         public List<ImageResponseDto> Images { get; set; } = new List<ImageResponseDto>();
         public string? PrimaryImageUrl { get; set; }
+        public List<IFormFile>? ImageFiles { get; set; }
 
         // Metadata
         public bool IsDeleted { get; set; }

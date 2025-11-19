@@ -19,10 +19,10 @@ namespace FCR.Web.Controllers
         {
             try
             {
-                var cars = await _apiClient.CarsAllAsync();
+                var response = await _apiClient.CarsGETAsync();
                 var viewModel = new HomeViewModel
                 {
-                    AllCars = cars.ToList()
+                    AllCars = response?.Data?.ToList() ?? new List<CarResponseDto>()
                 };
                 return View(viewModel);
             }
@@ -30,14 +30,24 @@ namespace FCR.Web.Controllers
             {
                 _logger.LogError(ex, "Error loading cars for home page");
                 ViewBag.ErrorMessage = "Unable to load cars. Please try again later.";
-                return View(new HomeViewModel { AllCars = new List<Car>() });
+                return View(new HomeViewModel { AllCars = new List<CarResponseDto>() });
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Unexpected error loading home page");
                 ViewBag.ErrorMessage = "An unexpected error occurred.";
-                return View(new HomeViewModel { AllCars = new List<Car>() });
+                return View(new HomeViewModel { AllCars = new List<CarResponseDto>() });
             }
+        }
+
+        public IActionResult About()
+        {
+            return View();
+        }
+
+        public IActionResult Contact()
+        {
+            return View();
         }
 
         public IActionResult Privacy()

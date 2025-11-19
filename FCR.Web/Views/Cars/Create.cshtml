@@ -1,100 +1,282 @@
-﻿@model FCR.Web.ViewModels.CarViewModel
+﻿@model FCR.Web.Services.Base.CarCreateDto
 
 @{
-    ViewData["Title"] = "Create";
+    ViewData["Title"] = "Add New Car";
 }
 
-<h1>Create</h1>
+<!-- Create Car Section -->
+<section class="py-12 bg-gradient-to-br from-gray-50 to-gray-100 min-h-screen">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
 
-<h4>Car</h4>
-<hr />
-<div class="row">
-    <div  class="col-md-4">
-        <form asp-action="Create">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <div class="form-group">
-                <label asp-for="Brand" class="control-label"></label>
-                <input asp-for="Brand" class="form-control" />
-                <span asp-validation-for="Brand" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Model" class="control-label"></label>
-                <input asp-for="Model" class="form-control" />
-                <span asp-validation-for="Model" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Category" class="control-label"></label>
-                <input asp-for="Category" class="form-control" />
-                <span asp-validation-for="Category" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Year" class="control-label"></label>
-                <input asp-for="Year" class="form-control" />
-                <span asp-validation-for="Year" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="DailyRate" class="control-label"></label>
-                <input asp-for="DailyRate" class="form-control" />
-                <span asp-validation-for="DailyRate" class="text-danger"></span>
-            </div>
-            <div class="form-group form-check">
-                <label class="form-check-label">
-                    <input class="form-check-input" asp-for="IsAvailable" /> @Html.DisplayNameFor(model => model.IsAvailable)
-                </label>
-            </div>
-            <div class="form-group">
-                <label asp-for="Transmission" class="control-label"></label>
-                <input asp-for="Transmission" class="form-control" />
-                <span asp-validation-for="Transmission" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="FuelType" class="control-label"></label>
-                <input asp-for="FuelType" class="form-control" />
-                <span asp-validation-for="FuelType" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Seats" class="control-label"></label>
-                <input asp-for="Seats" class="form-control" />
-                <span asp-validation-for="Seats" class="text-danger"></span>
-            </div>
-            <div class="form-group form-check">
-                <label class="form-check-label">
-                    <input class="form-check-input" asp-for="IsDeleted" /> @Html.DisplayNameFor(model => model.IsDeleted)
-                </label>
-            </div>
+        <!-- Header -->
+        <div class="mb-8">
+            <a asp-action="Index" class="inline-flex items-center text-primary-600 hover:text-primary-800 font-medium mb-4">
+                <i class="fas fa-arrow-left mr-2"></i>
+                Back to Cars
+            </a>
+            <h1 class="text-4xl font-black text-gray-900">
+                <i class="fas fa-plus-circle text-primary-500 mr-3"></i>
+                Add New Car
+            </h1>
+            <p class="text-gray-600 mt-2">Add a new vehicle to your fleet</p>
+        </div>
 
-
-            
-            <!-- Image URLs section -->
-            <div class="col-md-6">
-                <div class="form-group">
-                    <label class="control-label">Image URLs</label>
-                    <div id="imageUrlsContainer">
-                        @for (int i = 0; i < Model.ImageUrls.Count; i++)
-                        {
-                            <div class="input-group mb-2">
-                                <input asp-for="ImageUrls[i]" class="form-control" placeholder="https://example.com/image.jpg" />
-                                <button type="button" class="btn btn-outline-danger remove-image-btn">Remove</button>
-                            </div>
-                        }
-                    </div>
-                    <button type="button" id="addImageUrlBtn" class="btn btn-sm btn-outline-primary mt-2">
-                        <i class="bi bi-plus"></i> Add Another Image
-                    </button>
+        <!-- Success/Error Messages -->
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="mb-6 bg-green-50 border-l-4 border-green-500 rounded-lg p-4">
+                <div class="flex items-center">
+                    <i class="fas fa-check-circle text-green-500 mr-3 text-xl"></i>
+                    <p class="text-green-700 font-medium">@TempData["SuccessMessage"]</p>
                 </div>
             </div>
+        }
 
-
-            <div class="form-group">
-                <input type="submit" value="Create" class="btn btn-primary" />
-            <a asp-action="Index" class="btn btn-secondary">Back to List</a>
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <div class="mb-6 bg-red-50 border-l-4 border-red-500 rounded-lg p-4">
+                <div class="flex items-center">
+                    <i class="fas fa-exclamation-circle text-red-500 mr-3 text-xl"></i>
+                    <p class="text-red-700 font-medium">@TempData["ErrorMessage"]</p>
+                </div>
             </div>
-        </form>
+        }
+
+        <div asp-validation-summary="ModelOnly" class="mb-6 bg-red-50 border-l-4 border-red-500 rounded-lg p-4 hidden"></div>
+
+        <!-- Form Card -->
+        <div class="bg-white rounded-3xl shadow-xl p-8">
+            <form asp-action="Create" method="post" id="carForm">
+
+                <!-- Basic Information Section -->
+                <div class="mb-8">
+                    <h2 class="text-2xl font-bold text-gray-900 mb-6 flex items-center">
+                        <i class="fas fa-info-circle text-primary-500 mr-3"></i>
+                        Basic Information
+                    </h2>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+                        <!-- Brand -->
+                        <div>
+                            <label asp-for="Brand" class="block text-sm font-bold text-gray-700 mb-2">
+                                <i class="fas fa-tag text-primary-500 mr-2"></i>Brand
+                            </label>
+                            <input asp-for="Brand"
+                                   type="text"
+                                   placeholder="e.g., Toyota, BMW, Mercedes"
+                                   class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-primary-500 focus:ring-2 focus:ring-primary-200 transition-all duration-300 outline-none">
+                            <span asp-validation-for="Brand" class="text-red-500 text-sm mt-1"></span>
+                        </div>
+
+                        <!-- Model -->
+                        <div>
+                            <label asp-for="Model" class="block text-sm font-bold text-gray-700 mb-2">
+                                <i class="fas fa-car text-primary-500 mr-2"></i>Model
+                            </label>
+                            <input asp-for="Model"
+                                   type="text"
+                                   placeholder="e.g., Camry, X5, S-Class"
+                                   class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-primary-500 focus:ring-2 focus:ring-primary-200 transition-all duration-300 outline-none">
+                            <span asp-validation-for="Model" class="text-red-500 text-sm mt-1"></span>
+                        </div>
+
+                        <!-- Category -->
+                        <div>
+                            <label asp-for="Category" class="block text-sm font-bold text-gray-700 mb-2">
+                                <i class="fas fa-layer-group text-primary-500 mr-2"></i>Category
+                            </label>
+                            <select asp-for="Category"
+                                    class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-primary-500 focus:ring-2 focus:ring-primary-200 transition-all duration-300 outline-none">
+                                <option value="">Select Category</option>
+                                <option value="Sedan">Sedan</option>
+                                <option value="SUV">SUV</option>
+                                <option value="Sports">Sports</option>
+                                <option value="Luxury">Luxury</option>
+                                <option value="Compact">Compact</option>
+                                <option value="Van">Van</option>
+                                <option value="Truck">Truck</option>
+                            </select>
+                            <span asp-validation-for="Category" class="text-red-500 text-sm mt-1"></span>
+                        </div>
+
+                        <!-- Year -->
+                        <div>
+                            <label asp-for="Year" class="block text-sm font-bold text-gray-700 mb-2">
+                                <i class="fas fa-calendar text-primary-500 mr-2"></i>Year
+                            </label>
+                            <input asp-for="Year"
+                                   type="number"
+                                   min="2000"
+                                   max="2100"
+                                   placeholder="2024"
+                                   class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-primary-500 focus:ring-2 focus:ring-primary-200 transition-all duration-300 outline-none">
+                            <span asp-validation-for="Year" class="text-red-500 text-sm mt-1"></span>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- Specifications Section -->
+                <div class="mb-8 pb-8 border-t border-gray-200 pt-8">
+                    <h2 class="text-2xl font-bold text-gray-900 mb-6 flex items-center">
+                        <i class="fas fa-cogs text-primary-500 mr-3"></i>
+                        Specifications
+                    </h2>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+
+                        <!-- Transmission -->
+                        <div>
+                            <label asp-for="Transmission" class="block text-sm font-bold text-gray-700 mb-2">
+                                <i class="fas fa-cog text-primary-500 mr-2"></i>Transmission
+                            </label>
+                            <select asp-for="Transmission"
+                                    class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-primary-500 focus:ring-2 focus:ring-primary-200 transition-all duration-300 outline-none">
+                                <option value="Automatic">Automatic</option>
+                                <option value="Manual">Manual</option>
+                                <option value="CVT">CVT</option>
+                                <option value="Semi-Automatic">Semi-Automatic</option>
+                            </select>
+                            <span asp-validation-for="Transmission" class="text-red-500 text-sm mt-1"></span>
+                        </div>
+
+                        <!-- Fuel Type -->
+                        <div>
+                            <label asp-for="FuelType" class="block text-sm font-bold text-gray-700 mb-2">
+                                <i class="fas fa-gas-pump text-primary-500 mr-2"></i>Fuel Type
+                            </label>
+                            <select asp-for="FuelType"
+                                    class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-primary-500 focus:ring-2 focus:ring-primary-200 transition-all duration-300 outline-none">
+                                <option value="Petrol">Petrol</option>
+                                <option value="Diesel">Diesel</option>
+                                <option value="Electric">Electric</option>
+                                <option value="Hybrid">Hybrid</option>
+                                <option value="Plug-in Hybrid">Plug-in Hybrid</option>
+                            </select>
+                            <span asp-validation-for="FuelType" class="text-red-500 text-sm mt-1"></span>
+                        </div>
+
+                        <!-- Seats -->
+                        <div>
+                            <label asp-for="Seats" class="block text-sm font-bold text-gray-700 mb-2">
+                                <i class="fas fa-users text-primary-500 mr-2"></i>Seats
+                            </label>
+                            <input asp-for="Seats"
+                                   type="number"
+                                   min="1"
+                                   max="20"
+                                   placeholder="5"
+                                   class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-primary-500 focus:ring-2 focus:ring-primary-200 transition-all duration-300 outline-none">
+                            <span asp-validation-for="Seats" class="text-red-500 text-sm mt-1"></span>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- Pricing Section -->
+                <div class="mb-8 pb-8 border-t border-gray-200 pt-8">
+                    <h2 class="text-2xl font-bold text-gray-900 mb-6 flex items-center">
+                        <i class="fas fa-dollar-sign text-primary-500 mr-3"></i>
+                        Pricing & Availability
+                    </h2>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+
+                        <!-- Daily Rate -->
+                        <div>
+                            <label asp-for="DailyRate" class="block text-sm font-bold text-gray-700 mb-2">
+                                <i class="fas fa-tag text-primary-500 mr-2"></i>Daily Rate ($)
+                            </label>
+                            <input asp-for="DailyRate"
+                                   type="number"
+                                   step="0.01"
+                                   min="0.01"
+                                   placeholder="99.99"
+                                   class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-primary-500 focus:ring-2 focus:ring-primary-200 transition-all duration-300 outline-none">
+                            <span asp-validation-for="DailyRate" class="text-red-500 text-sm mt-1"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Images Section -->
+                <div class="mb-8 pb-8 border-t border-gray-200 pt-8">
+                    <h2 class="text-2xl font-bold text-gray-900 mb-6 flex items-center">
+                        <i class="fas fa-images text-primary-500 mr-3"></i>
+                        Car Images
+                    </h2>
+
+                    <div class="bg-blue-50 border-l-4 border-blue-500 rounded-r-lg p-4 mb-6">
+                        <p class="text-blue-700 text-sm">
+                            <i class="fas fa-info-circle mr-2"></i>
+                            Note: Images will be uploaded after the car is created. You'll be redirected to the image upload page.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="flex gap-4 pt-6 border-t border-gray-200">
+                    <button type="submit"
+                            class="flex-1 px-8 py-4 bg-gradient-to-r from-primary-500 to-primary-700 hover:from-primary-600 hover:to-primary-800 text-white rounded-xl font-bold text-lg transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl">
+                        <i class="fas fa-plus-circle mr-2"></i>
+                        Create Car
+                    </button>
+                    <a asp-action="Index"
+                       class="flex-1 px-8 py-4 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-xl font-bold text-lg text-center transform hover:scale-105 transition-all duration-300">
+                        <i class="fas fa-times mr-2"></i>
+                        Cancel
+                    </a>
+                </div>
+
+            </form>
+        </div>
+
+        <!-- Help Section -->
+        <div class="mt-8 bg-gradient-to-br from-primary-50 to-blue-50 rounded-2xl p-6 border-2 border-primary-200">
+            <h3 class="text-lg font-bold text-gray-900 mb-3 flex items-center">
+                <i class="fas fa-lightbulb text-primary-600 mr-2"></i>
+                Tips for Adding Cars
+            </h3>
+            <ul class="space-y-2 text-gray-700">
+                <li class="flex items-start">
+                    <i class="fas fa-check text-primary-600 mr-2 mt-1"></i>
+                    Provide accurate and detailed information
+                </li>
+                <li class="flex items-start">
+                    <i class="fas fa-check text-primary-600 mr-2 mt-1"></i>
+                    Set competitive daily rates based on market research
+                </li>
+                <li class="flex items-start">
+                    <i class="fas fa-check text-primary-600 mr-2 mt-1"></i>
+                    High-quality images increase booking rates (add after creation)
+                </li>
+                <li class="flex items-start">
+                    <i class="fas fa-check text-primary-600 mr-2 mt-1"></i>
+                    Keep availability status updated
+                </li>
+            </ul>
+        </div>
+
     </div>
-</div>
-
-
+</section>
 
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        // Form validation feedback
+        document.getElementById('carForm').addEventListener('submit', function(e) {
+            const submitBtn = this.querySelector('button[type="submit"]');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Creating...';
+        });
+
+        // Show validation errors with animation
+        document.addEventListener('DOMContentLoaded', function() {
+            const validationSummary = document.querySelector('[asp-validation-summary]');
+            if (validationSummary && validationSummary.querySelector('li')) {
+                validationSummary.classList.remove('hidden');
+            }
+        });
+    </script>
 }

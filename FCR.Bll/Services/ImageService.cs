@@ -51,12 +51,10 @@ namespace FCR.Bll.Services
                         "Car not found",
                         "Invalid car ID");
                 }
-
-                // Save file (you'll need to implement actual file storage)
+                
                 var fileName = $"{Guid.NewGuid()}{Path.GetExtension(imageFile.FileName)}";
                 var imageUrl = await SaveImageFileAsync(imageFile, fileName, cancellationToken);
 
-                // If this is primary, unset other primary images
                 if (isPrimary)
                 {
                     await _unitOfWork.Images.SetPrimaryImageAsync(0, carId, cancellationToken);

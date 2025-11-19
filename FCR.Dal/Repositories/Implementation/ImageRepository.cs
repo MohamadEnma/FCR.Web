@@ -54,5 +54,10 @@ namespace FCR.Dal.Repositories.Implementation
 
             _db.Images.RemoveRange(images);
         }
+
+        public async Task AddRangeAsync(IEnumerable<Image> images, CancellationToken cancellationToken = default)
+        {
+            await _db.Images.AddRangeAsync(images, cancellationToken);
+        }
     }
 }

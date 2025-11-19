@@ -15,5 +15,6 @@ namespace FCR.Dal.Repositories.Interfaces
         Task<IEnumerable<Car>> GetCarsByBrandAsync(string brand, CancellationToken cancellationToken = default);
         Task<IEnumerable<Car>> GetCarsByCategoryAsync(string category, CancellationToken cancellationToken = default);
         Task<IEnumerable<Car>> SearchCarsAsync(string keyword, CancellationToken cancellationToken = default);
+       
     }
 }

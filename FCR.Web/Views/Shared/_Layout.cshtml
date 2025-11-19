@@ -1,231 +1,242 @@
 ﻿<!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="scroll-smooth">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - Friberg Car Rentals</title>
-    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/FCR.Web.styles.css" asp-append-version="true" />
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Custom Tailwind Config -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            200: '#bae6fd',
+                            300: '#7dd3fc',
+                            400: '#38bdf8',
+                            500: '#0ea5e9',
+                            600: '#0284c7',
+                            700: '#0369a1',
+                            800: '#075985',
+                            900: '#0c4a6e',
+                        }
+                    },
+                    animation: {
+                        'fade-in': 'fadeIn 1s ease-in-out',
+                        'slide-up': 'slideUp 0.5s ease-out',
+                        'float': 'float 3s ease-in-out infinite',
+                    },
+                    keyframes: {
+                        fadeIn: {
+                            '0%': { opacity: '0' },
+                            '100%': { opacity: '1' },
+                        },
+                        slideUp: {
+                            '0%': { transform: 'translateY(20px)', opacity: '0' },
+                            '100%': { transform: 'translateY(0)', opacity: '1' },
+                        },
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0px)' },
+                            '50%': { transform: 'translateY(-20px)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Poppins', sans-serif;
+        }
+    </style>
+
     @await RenderSectionAsync("Styles", required: false)
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
 </head>
-<body class="d-flex flex-column min-vh-100">
-    <header class="border-bottom shadow-sm bg-white sticky-top">
-        <div class="container-fluid px-0">
-            <!-- Top Bar -->
-            <div class="top-bar px-3 py-2 bg-light">
-                <div class="d-flex flex-wrap justify-content-between align-items-center">
-                    <!-- Logo and Brand -->
-                    <div class="d-flex align-items-center">
-                        <a asp-controller="Home" asp-action="Index" class="d-flex align-items-center text-decoration-none me-3">
-                            <img src="~/logo.png" alt="Friberg Car Rentals Logo" class="img-fluid" style="max-height: 40px;">
-                        </a>
-                        <a asp-controller="Home" asp-action="Index" class="text-decoration-none d-none d-md-block">
-                            <span class="fs-4 fw-bold text-primary">Friberg Car Rentals</span>
-                        </a>
+<body class="bg-gray-50 text-gray-900">
+    <!-- Navigation -->
+    <nav class="fixed w-full z-50 top-0 bg-white/95 backdrop-blur-sm shadow-lg transition-all duration-300">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-20">
+                <!-- Logo -->
+                <a asp-controller="Home" asp-action="Index" class="flex items-center space-x-3 group">
+                    <div class="w-12 h-12 bg-gradient-to-br from-primary-500 to-primary-700 rounded-xl flex items-center justify-center transform group-hover:rotate-12 transition-transform duration-300">
+                        <img src="/logo.png"
+                        width="60"
+                        height="60"
+                        />
                     </div>
+                    <span class="text-2xl font-bold bg-gradient-to-r from-primary-600 to-primary-800 bg-clip-text text-transparent">
+                        Friberg Rentals
+                    </span>
+                </a>
 
-                    <!-- Login/Register or User Actions -->
-                    <div class="d-flex align-items-center">
-                        @if (User.Identity != null && User.Identity.IsAuthenticated)
+                <!-- Desktop Navigation -->
+                <div class="hidden md:flex items-center space-x-8">
+                    <a asp-controller="Home" asp-action="Index" class="text-gray-700 hover:text-primary-600 font-medium transition-colors">Home</a>
+                    <a asp-controller="Cars" asp-action="Index" class="text-gray-700 hover:text-primary-600 font-medium transition-colors">Fleet</a>
+                    <a asp-controller="Home" asp-action="About" class="text-gray-700 hover:text-primary-600 font-medium transition-colors">About</a>
+                    <a asp-controller="Home" asp-action="Contact" class="text-gray-700 hover:text-primary-600 font-medium transition-colors">Contact</a>
+
+                    @if (User.Identity?.IsAuthenticated == true)
+                    {
+                        <a asp-controller="Bookings" asp-action="MyBookings" class="text-gray-700 hover:text-primary-600 font-medium transition-colors">My Bookings</a>
+
+                        @if (User.IsInRole("Admin"))
                         {
-                            <a asp-controller="Home" asp-action="Index" class="btn btn-outline-primary rounded-pill me-2">
-                                <i class="bi bi-lightning-charge-fill me-1"></i> Quick Book
-                            </a>
-                            <a asp-controller="Bookings" asp-action="MyBookings" class="btn btn-outline-primary rounded-pill">
-                                <i class="bi bi-calendar-check me-1"></i> My Bookings
-                            </a>
+                            <a asp-controller="Admin" asp-action="Dashboard" class="text-gray-700 hover:text-primary-600 font-medium transition-colors">Admin</a>
                         }
-                        else
-                        {
-                            <a asp-controller="Account" asp-action="Login" class="btn btn-primary rounded-pill me-2">
-                                <i class="bi bi-box-arrow-in-right me-1"></i> Login
-                            </a>
-                            <a asp-controller="Account" asp-action="Register" class="btn btn-outline-primary rounded-pill">
-                                <i class="bi bi-person-plus me-1"></i> Register
-                            </a>
-                        }
-                    </div>
+
+                        <form asp-controller="Auth" asp-action="Logout" method="post" class="inline">
+                            <button type="submit" class="px-6 py-2.5 bg-red-500 text-white rounded-full font-semibold hover:bg-red-600 transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl">
+                                Logout
+                            </button>
+                        </form>
+                    }
+                    else
+                    {
+                        <a asp-controller="Auth" asp-action="Login" class="px-6 py-2.5 bg-primary-500 text-white rounded-full font-semibold hover:bg-primary-600 transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl">
+                            Login
+                        </a>
+                    }
                 </div>
+
+                <!-- Mobile menu button -->
+                <button id="mobile-menu-btn" class="md:hidden text-gray-700 hover:text-primary-600">
+                    <i class="fas fa-bars text-2xl"></i>
+                </button>
             </div>
-
-            <!-- Main Navigation -->
-            <nav class="navbar navbar-expand-lg navbar-light bg-white">
-                <div class="container-fluid px-3">
-                    <!-- Mobile Brand -->
-                    <a class="navbar-brand d-lg-none text-primary fw-bold" asp-controller="Home" asp-action="Index">
-                        Friberg
-                    </a>
-
-                    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar"
-                            aria-controls="mainNavbar" aria-expanded="false" aria-label="Toggle navigation">
-                        <span class="navbar-toggler-icon"></span>
-                    </button>
-
-                    <div class="collapse navbar-collapse" id="mainNavbar">
-                        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                            <li class="nav-item">
-                                <a class="nav-link px-3 py-2 text-dark fw-medium" asp-controller="Home" asp-action="Index">
-                                    <i class="bi bi-house-door me-1"></i> Home
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link px-3 py-2 text-dark fw-medium" asp-controller="Home" asp-action="Index">
-                                    <i class="bi bi-car-front me-1"></i> Our Fleet
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link px-3 py-2 text-dark fw-medium" asp-controller="Home" asp-action="About">
-                                    <i class="bi bi-info-circle me-1"></i> About Us
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link px-3 py-2 text-dark fw-medium" asp-controller="Home" asp-action="Contact">
-                                    <i class="bi bi-telephone me-1"></i> Contact
-                                </a>
-                            </li>
-                            @if (User.IsInRole("Admin"))
-                            {
-                                <li class="nav-item dropdown">
-                                    <a class="nav-link dropdown-toggle px-3 py-2 text-dark fw-medium" href="#" role="button" data-bs-toggle="dropdown">
-                                        <i class="bi bi-speedometer2 me-1"></i> Admin
-                                    </a>
-                                    <ul class="dropdown-menu">
-                                        <li><a class="dropdown-item" asp-controller="Admin" asp-action="Dashboard"><i class="bi bi-speedometer2 me-2"></i>Dashboard</a></li>
-                                        <li><a class="dropdown-item" asp-controller="Admin" asp-action="Users"><i class="bi bi-people me-2"></i>User Management</a></li>
-                                        <li><hr class="dropdown-divider"></li>
-                                        <li><a class="dropdown-item" asp-controller="Cars" asp-action="Index"><i class="bi bi-car-front me-2"></i>Car Inventory</a></li>
-                                        <li><a class="dropdown-item" asp-controller="Bookings" asp-action="Index"><i class="bi bi-calendar-check me-2"></i>All Bookings</a></li>
-                                    </ul>
-                                </li>
-                            }
-                        </ul>
-
-                        @if (User.Identity != null && User.Identity.IsAuthenticated)
-                        {
-                            <div class="d-flex align-items-center">
-                                <div class="dropdown">
-                                    <a href="#" class="d-flex align-items-center text-decoration-none dropdown-toggle" id="userDropdown" data-bs-toggle="dropdown">
-                                        <img src="~/UserIcon.png" alt="User" width="32" height="32" class="rounded-circle me-2">
-                                        <span class="d-none d-lg-inline">@User.Identity?.Name</span>
-                                    </a>
-                                    <ul class="dropdown-menu dropdown-menu-end">
-                                        <li><a class="dropdown-item" href="#"><i class="bi bi-person me-2"></i>Profile</a></li>
-                                        <li><hr class="dropdown-divider"></li>
-                                        <li>
-                                            <form method="post" asp-controller="Account" asp-action="Logout">
-                                                <button type="submit" class="dropdown-item"><i class="bi bi-box-arrow-right me-2"></i>Logout</button>
-                                            </form>
-                                        </li>
-                                    </ul>
-                                </div>
-                            </div>
-                        }
-                    </div>
-                </div>
-            </nav>
         </div>
-    </header>
 
-    <div class="container flex-grow-1">
-        <main role="main" class="pb-3 pt-4">
-            @RenderBody()
-        </main>
-    </div>
+        <!-- Mobile Navigation -->
+        <div id="mobile-menu" class="hidden md:hidden bg-white border-t">
+            <div class="px-4 py-4 space-y-3">
+                <a asp-controller="Home" asp-action="Index" class="block text-gray-700 hover:text-primary-600 font-medium py-2">Home</a>
+                <a asp-controller="Cars" asp-action="Index" class="block text-gray-700 hover:text-primary-600 font-medium py-2">Fleet</a>
+                <a asp-controller="Home" asp-action="About" class="block text-gray-700 hover:text-primary-600 font-medium py-2">About</a>
+                <a asp-controller="Home" asp-action="Contact" class="block text-gray-700 hover:text-primary-600 font-medium py-2">Contact</a>
 
+                @if (User.Identity?.IsAuthenticated == true)
+                {
+                    <a asp-controller="Bookings" asp-action="MyBookings" class="block text-gray-700 hover:text-primary-600 font-medium py-2">My Bookings</a>
+                    <form asp-controller="Auth" asp-action="Logout" method="post">
+                        <button type="submit" class="w-full text-left text-red-600 font-medium py-2">Logout</button>
+                    </form>
+                }
+                else
+                {
+                    <a asp-controller="Auth" asp-action="Login" class="block text-primary-600 font-medium py-2">Login</a>
+                }
+            </div>
+        </div>
+    </nav>
 
-    <footer class="bg-light text-white pt-5 pb-4 border-top border-secondary">
-        <div class="container">
-            <div class="row g-4">
+    <!-- Main Content -->
+    <main>
+        @RenderBody()
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-gray-300 pt-16 pb-8">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
                 <!-- Company Info -->
-                <div class="col-lg-4 col-md-6 mb-4">
-                    <div class="d-flex align-items-center mb-3">
-                        <img src="~/logo.png" alt="Friberg Car Rentals" class="img-fluid me-2" style="max-height: 100px;">
-                        <h3 class="h5 mb-0 text-primary fw-bold">Friberg Car Rentals</h3>
+                <div class="col-span-1 md:col-span-2">
+                    <div class="flex items-center space-x-3 mb-4">
+                        <div class="w-12 h-12 bg-gradient-to-br from-primary-500 to-primary-700 rounded-xl flex items-center justify-center">
+                            <i class="fas fa-car text-white text-xl"></i>
+                        </div>
+                        <span class="text-2xl font-bold text-white">Friberg Rentals</span>
                     </div>
-                    <p class="small text-muted">Premium car rental services with unmatched quality and customer satisfaction since 2010.</p>
-                    <div class="social-icons mt-3">
-                        <a href="#" class="text-dark me-2"><i class="bi bi-facebook fs-5"></i></a>
-                        <a href="#" class="text-dark me-2"><i class="bi bi-twitter-x fs-5"></i></a>
-                        <a href="#" class="text-dark me-2"><i class="bi bi-instagram fs-5"></i></a>
-                        <a href="#" class="text-dark me-2"><i class="bi bi-linkedin fs-5"></i></a>
+                    <p class="text-gray-400 mb-4">Premium car rental service offering the finest vehicles for your journey. Experience luxury, comfort, and performance.</p>
+                    <div class="flex space-x-4">
+                        <a href="#" class="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-primary-600 transition-colors">
+                            <i class="fab fa-facebook-f"></i>
+                        </a>
+                        <a href="#" class="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-primary-600 transition-colors">
+                            <i class="fab fa-twitter"></i>
+                        </a>
+                        <a href="#" class="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-primary-600 transition-colors">
+                            <i class="fab fa-instagram"></i>
+                        </a>
+                        <a href="#" class="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-primary-600 transition-colors">
+                            <i class="fab fa-linkedin-in"></i>
+                        </a>
                     </div>
                 </div>
 
                 <!-- Quick Links -->
-                <div class="col-lg-2 col-md-6 mb-4">
-                    <h5 class="text-uppercase text-primary mb-3 fw-bold">Quick Links</h5>
-                    <ul class="list-unstyled">
-                        <li class="mb-2"><a href="#" class="text-dark text-decoration-none small">Home</a></li>
-                        <li class="mb-2"><a href="#" class="text-dark text-decoration-none small">Our Fleet</a></li>
-                        <li class="mb-2"><a href="#" class="text-dark text-decoration-none small">Pricing</a></li>
-                        <li class="mb-2"><a href="#" class="text-dark text-decoration-none small">Locations</a></li>
-                        <li class="mb-2"><a asp-area="" asp-controller="Home" asp-action="Privacy" class="text-dark text-decoration-none small">Privacy Policy</a></li>
+                <div>
+                    <h3 class="text-white font-bold text-lg mb-4">Quick Links</h3>
+                    <ul class="space-y-2">
+                        <li><a asp-controller="Home" asp-action="About" class="hover:text-primary-400 transition-colors">About Us</a></li>
+                        <li><a asp-controller="Cars" asp-action="Index" class="hover:text-primary-400 transition-colors">Our Fleet</a></li>
+                        <li><a asp-controller="Home" asp-action="Contact" class="hover:text-primary-400 transition-colors">Contact</a></li>
+                        <li><a asp-controller="Home" asp-action="Privacy" class="hover:text-primary-400 transition-colors">Privacy Policy</a></li>
                     </ul>
                 </div>
 
                 <!-- Contact Info -->
-                <div class="col-lg-3 col-md-6 mb-4">
-                    <h5 class="text-uppercase text-primary mb-3 fw-bold">Contact Us</h5>
-                    <ul class="list-unstyled text-muted small">
-                        <li class="mb-2"><i class="bi bi-geo-alt-fill text-primary me-2"></i> 123 Rental Street, Auto City</li>
-                        <li class="mb-2"><i class="bi bi-telephone-fill text-primary me-2"></i> +1 (555) 123-4567</li>
-                        <li class="mb-2"><i class="bi bi-envelope-fill text-primary me-2"></i> info@fribergrentals.com</li>
-                        <li class="mb-2"><i class="bi bi-clock-fill text-primary me-2"></i> Mon-Sun: 24/7 Service</li>
+                <div>
+                    <h3 class="text-white font-bold text-lg mb-4">Contact Us</h3>
+                    <ul class="space-y-3">
+                        <li class="flex items-start space-x-3">
+                            <i class="fas fa-map-marker-alt text-primary-500 mt-1"></i>
+                            <span>123 Luxury Drive, Premium City, PC 12345</span>
+                        </li>
+                        <li class="flex items-center space-x-3">
+                            <i class="fas fa-phone text-primary-500"></i>
+                            <span>+1 (555) 123-4567</span>
+                        </li>
+                        <li class="flex items-center space-x-3">
+                            <i class="fas fa-envelope text-primary-500"></i>
+                            <span>info@fribergrentals.com</span>
+                        </li>
                     </ul>
                 </div>
-
-                <!-- Newsletter -->
-                <div class="col-lg-3 col-md-6 mb-4">
-                    <h5 class="text-uppercase text-primary mb-3 fw-bold">Newsletter</h5>
-                    <p class="small text-muted">Subscribe for special offers and updates</p>
-                    <form class="mb-3">
-                        <div class="input-group">
-                            <input type="email" class="form-control form-control-sm" placeholder="Your email">
-                            <button class="btn btn-primary btn-sm" type="submit">
-                                <i class="bi bi-send-fill"></i>
-                            </button>
-                        </div>
-                    </form>
-                    <div class="payment-methods mt-3">
-                        <img src="~/visa.svg" alt="Visa" class="me-1" style="width:60px;">
-                        <img src="~/mastercard.svg" alt="Mastercard" class="me-1" style="width:50px;" />
-                        <img src="~/paypal.svg" alt="PayPal" class="me-1" style="width:100px;">
-                    </div>
-                </div>
             </div>
 
-            <hr class="my-4 border-secondary">
-        </div>
-
-    </footer>
-
-    <!-- Footer Section -->
-    <footer class="py-4 bg-dark text-white-50">
-        <div class="container">
-            <div class="row align-items-center">
-                <!-- Copyright -->
-                <div class="col-md-6 text-center text-md-start">
-                    <small>&copy; @DateTime.Now.Year Friberg Car Rental. All rights reserved.</small>
-                </div>
-
-                <!-- Privacy Policy Links -->
-                <div class="col-md-6 text-center text-md-end">
-                    <small>
-                        <a href="/Privacy" class="text-white-50 text-decoration-none me-3">Privacy Policy</a>
-                        <a href="/Terms" class="text-white-50 text-decoration-none me-3">Terms of Service</a>
-                        <a href="/Contact" class="text-white-50 text-decoration-none">Contact Us</a>
-                    </small>
-                </div>
+            <div class="border-t border-gray-800 pt-8 text-center">
+                <p>&copy; @DateTime.Now.Year Friberg Car Rentals. All rights reserved.</p>
             </div>
         </div>
     </footer>
 
-    <script src="~/lib/jquery/dist/jquery.min.js"></script>
-    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="~/js/site.js" asp-append-version="true"></script>
+    <script>
+        // Mobile menu toggle
+        document.getElementById('mobile-menu-btn').addEventListener('click', function() {
+            document.getElementById('mobile-menu').classList.toggle('hidden');
+        });
+
+        // Navbar scroll effect
+        window.addEventListener('scroll', function() {
+            const nav = document.querySelector('nav');
+            if (window.scrollY > 50) {
+                nav.classList.add('shadow-2xl');
+            } else {
+                nav.classList.remove('shadow-2xl');
+            }
+        });
+    </script>
+
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

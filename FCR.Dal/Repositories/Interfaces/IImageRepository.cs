@@ -11,5 +11,7 @@ namespace FCR.Dal.Repositories.Interfaces
         Task<Image?> GetPrimaryImageAsync(int carId, CancellationToken cancellationToken = default);
         Task<bool> SetPrimaryImageAsync(int imageId, int carId, CancellationToken cancellationToken = default);
         Task DeleteImagesByCarIdAsync(int carId, CancellationToken cancellationToken = default);
+        Task AddRangeAsync(IEnumerable<Image> images, CancellationToken cancellationToken = default);
+        
     }
 }

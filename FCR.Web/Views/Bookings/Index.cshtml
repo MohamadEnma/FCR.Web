@@ -1,68 +1,248 @@
-﻿@model IEnumerable<FCR.Dal.Classes.Booking>
+﻿@model IEnumerable<FCR.Web.Services.Base.BookingResponseDto>
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "All Bookings";
+    var now = DateTime.UtcNow;
 }
 
-<h1>Index</h1>
+<!-- Admin Bookings Section -->
+<section class="py-12 bg-gradient-to-br from-gray-50 to-gray-100 min-h-screen">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.PickupDate)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.ReturnDate)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.TotalPrice)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.IsCancelled)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.IsDeleted)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Car)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.User)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.PickupDate)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.ReturnDate)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.TotalPrice)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.IsCancelled)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.IsDeleted)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Car.Brand)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.User.Id)
-            </td>
-            <td>
-                
-                <a asp-action="Details" asp-route-id="@item.BookingId">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.BookingId">Delete</a>
-            </td>
-        </tr>
-}
-    </tbody>
-</table>
+        <!-- Header -->
+        <div class="mb-8">
+            <a asp-controller="Admin" asp-action="Dashboard" class="inline-flex items-center text-primary-600 hover:text-primary-800 font-medium mb-4">
+                <i class="fas fa-arrow-left mr-2"></i>
+                Back to Dashboard
+            </a>
+            <h1 class="text-4xl md:text-5xl font-black text-gray-900 mb-2">
+                <i class="fas fa-list-alt text-primary-500 mr-3"></i>
+                All Bookings
+            </h1>
+            <p class="text-gray-600 text-lg">Manage all customer reservations</p>
+        </div>
+
+        <!-- Success/Error Messages -->
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="mb-6 bg-green-50 border-l-4 border-green-500 rounded-lg p-4 animate-slide-up">
+                <div class="flex items-center">
+                    <i class="fas fa-check-circle text-green-500 mr-3 text-xl"></i>
+                    <p class="text-green-700 font-medium">@TempData["SuccessMessage"]</p>
+                </div>
+            </div>
+        }
+
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <div class="mb-6 bg-red-50 border-l-4 border-red-500 rounded-lg p-4 animate-slide-up">
+                <div class="flex items-center">
+                    <i class="fas fa-exclamation-circle text-red-500 mr-3 text-xl"></i>
+                    <p class="text-red-700 font-medium">@TempData["ErrorMessage"]</p>
+                </div>
+            </div>
+        }
+
+        @if (Model != null && Model.Any())
+        {
+            <!-- Stats Cards -->
+            var totalBookings = Model.Count();
+            var activeBookings = Model.Count(b => !b.IsCancelled && b.PickupDate <= now && b.ReturnDate >= now);
+            var upcomingBookings = Model.Count(b => !b.IsCancelled && b.PickupDate > now);
+            var cancelledBookings = Model.Count(b => b.IsCancelled);
+            var totalRevenue = Model.Where(b => !b.IsCancelled).Sum(b => b.TotalPrice);
+
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+                <div class="bg-white rounded-2xl shadow-lg p-6 border-l-4 border-blue-500">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-gray-600 text-sm font-medium mb-1">Total Bookings</p>
+                            <p class="text-3xl font-black text-gray-900">@totalBookings</p>
+                        </div>
+                        <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
+                            <i class="fas fa-list text-blue-600 text-xl"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-2xl shadow-lg p-6 border-l-4 border-green-500">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-gray-600 text-sm font-medium mb-1">Active</p>
+                            <p class="text-3xl font-black text-gray-900">@activeBookings</p>
+                        </div>
+                        <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
+                            <i class="fas fa-car text-green-600 text-xl"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-2xl shadow-lg p-6 border-l-4 border-purple-500">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-gray-600 text-sm font-medium mb-1">Upcoming</p>
+                            <p class="text-3xl font-black text-gray-900">@upcomingBookings</p>
+                        </div>
+                        <div class="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center">
+                            <i class="fas fa-calendar-alt text-purple-600 text-xl"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-2xl shadow-lg p-6 border-l-4 border-orange-500">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-gray-600 text-sm font-medium mb-1">Total Revenue</p>
+                            <p class="text-3xl font-black text-gray-900">$@totalRevenue.ToString("N0")</p>
+                        </div>
+                        <div class="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center">
+                            <i class="fas fa-dollar-sign text-orange-600 text-xl"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bookings Table -->
+            <div class="bg-white rounded-3xl shadow-xl overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead class="bg-gradient-to-r from-primary-500 to-primary-700 text-white">
+                            <tr>
+                                <th class="px-6 py-4 text-left font-bold">
+                                    <i class="fas fa-hashtag mr-2"></i>ID
+                                </th>
+                                <th class="px-6 py-4 text-left font-bold">
+                                    <i class="fas fa-user mr-2"></i>Customer
+                                </th>
+                                <th class="px-6 py-4 text-left font-bold">
+                                    <i class="fas fa-car mr-2"></i>Car
+                                </th>
+                                <th class="px-6 py-4 text-left font-bold">
+                                    <i class="fas fa-calendar-plus mr-2"></i>Pickup
+                                </th>
+                                <th class="px-6 py-4 text-left font-bold">
+                                    <i class="fas fa-calendar-minus mr-2"></i>Return
+                                </th>
+                                <th class="px-6 py-4 text-right font-bold">
+                                    <i class="fas fa-dollar-sign mr-2"></i>Total
+                                </th>
+                                <th class="px-6 py-4 text-center font-bold">
+                                    <i class="fas fa-info-circle mr-2"></i>Status
+                                </th>
+                                <th class="px-6 py-4 text-center font-bold">
+                                    <i class="fas fa-cog mr-2"></i>Actions
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-200">
+                            @foreach (var booking in Model.OrderByDescending(b => b.BookingDate))
+                            {
+                                var isActive = !booking.IsCancelled && booking.PickupDate <= now && booking.ReturnDate >= now;
+                                var isUpcoming = !booking.IsCancelled && booking.PickupDate > now;
+                                var isCompleted = !booking.IsCancelled && booking.ReturnDate < now;
+                                var isCancelled = booking.IsCancelled;
+
+                                <tr class="hover:bg-gray-50 transition-colors">
+                                    <!-- Booking ID -->
+                                    <td class="px-6 py-4 font-mono text-sm">#@booking.BookingId</td>
+
+                                    <!-- Customer Info -->
+                                    <td class="px-6 py-4">
+                                        <div class="flex items-center">
+                                            @{
+                                                var userFullName = booking.UserFullName ?? "Unknown User";
+                                                var nameParts = userFullName.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+                                                var firstInitial = nameParts.Length > 0 ? nameParts[0].Substring(0, 1).ToUpper() : "?";
+                                                var lastInitial = nameParts.Length > 1 ? nameParts[nameParts.Length - 1].Substring(0, 1).ToUpper() : "";
+                                            }
+                                            <div class="w-8 h-8 bg-gradient-to-br from-primary-400 to-primary-600 rounded-full flex items-center justify-center text-white text-xs font-bold mr-2">
+                                                @firstInitial@lastInitial
+                                            </div>
+                                            <div>
+                                                <p class="font-semibold text-gray-900">@userFullName</p>
+                                                <p class="text-xs text-gray-500">@(booking.UserEmail ?? "")</p>
+                                            </div>
+                                        </div>
+                                    </td>
+
+                                    <!-- Car Info -->
+                                    <td class="px-6 py-4">
+                                        <p class="font-bold text-gray-900">@booking.CarBrand @booking.CarModel</p>    
+                                    </td>
+
+                                    <!-- Pickup Date -->
+                                    <td class="px-6 py-4 text-sm">@booking.PickupDate.ToString("MMM dd, yyyy")</td>
+
+                                    <!-- Return Date -->
+                                    <td class="px-6 py-4 text-sm">@booking.ReturnDate.ToString("MMM dd, yyyy")</td>
+
+                                    <!-- Total Price -->
+                                    <td class="px-6 py-4 text-right font-bold text-primary-600">$@booking.TotalPrice.ToString("N2")</td>
+
+                                    <!-- Status Badge -->
+                                    <td class="px-6 py-4 text-center">
+                                        @if (isCancelled)
+                                        {
+                                            <span class="px-3 py-1 bg-red-100 text-red-700 rounded-full text-xs font-bold">
+                                                <i class="fas fa-times-circle mr-1"></i>Cancelled
+                                            </span>
+                                        }
+                                        else if (isActive)
+                                        {
+                                            <span class="px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs font-bold">
+                                                <i class="fas fa-car mr-1"></i>Active
+                                            </span>
+                                        }
+                                        else if (isUpcoming)
+                                        {
+                                            <span class="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-bold">
+                                                <i class="fas fa-calendar-check mr-1"></i>Upcoming
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-xs font-bold">
+                                                <i class="fas fa-check-circle mr-1"></i>Completed
+                                            </span>
+                                        }
+                                    </td>
+
+                                    <!-- Actions -->
+                                    <td class="px-6 py-4 text-center">
+                                        <div class="flex gap-2 justify-center">
+                                            <a asp-action="Details" asp-route-id="@booking.BookingId"
+                                               class="px-3 py-1 bg-blue-500 hover:bg-blue-600 text-white rounded-lg text-sm font-semibold transition-all"
+                                               title="View Details">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            @if (!isCancelled)
+                                            {
+                                                <a asp-action="Delete" asp-route-id="@booking.BookingId"
+                                                   class="px-3 py-1 bg-red-500 hover:bg-red-600 text-white rounded-lg text-sm font-semibold transition-all"
+                                                   title="Cancel Booking">
+                                                    <i class="fas fa-times"></i>
+                                                </a>
+                                            }
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        }
+        else
+        {
+            <!-- Empty State -->
+            <div class="bg-white rounded-3xl shadow-lg p-12 text-center">
+                <div class="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <i class="fas fa-calendar-times text-gray-400 text-4xl"></i>
+                </div>
+                <h3 class="text-3xl font-bold text-gray-900 mb-3">No Bookings Yet</h3>
+                <p class="text-gray-600 text-lg mb-8">There are no bookings in the system.</p>
+            </div>
+        }
+
+    </div>
+</section>

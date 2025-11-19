@@ -1,6 +1,330 @@
 ﻿@{
     ViewData["Title"] = "Privacy Policy";
 }
-<h1>@ViewData["Title"]</h1>
 
-<p>Use this page to detail your site's privacy policy.</p>
+<!-- Privacy Policy Hero -->
+<section class="relative pt-32 pb-20 bg-gradient-to-br from-primary-50 to-blue-50">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <div class="inline-flex items-center px-6 py-2 bg-primary-100 text-primary-700 rounded-full font-bold text-sm mb-6 uppercase tracking-wide">
+            <i class="fas fa-shield-alt mr-2"></i>
+            Legal
+        </div>
+        <h1 class="text-5xl md:text-6xl font-black text-gray-900 mb-6">
+            Privacy Policy
+        </h1>
+        <p class="text-xl text-gray-600">
+            Last updated: <span class="font-semibold">@DateTime.UtcNow.ToString("MMMM dd, yyyy")</span>
+        </p>
+    </div>
+</section>
+
+<!-- Privacy Content -->
+<section class="py-16 bg-white">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+
+        <!-- Introduction -->
+        <div class="prose prose-lg max-w-none mb-12">
+            <div class="bg-blue-50 border-l-4 border-primary-500 p-6 rounded-r-lg mb-8">
+                <p class="text-gray-700 mb-0">
+                    <i class="fas fa-info-circle text-primary-500 mr-2"></i>
+                    At <strong>Friberg Car Rentals</strong>, we are committed to protecting your privacy and ensuring the security of your personal information.
+                    This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our services.
+                </p>
+            </div>
+        </div>
+
+        <!-- Table of Contents -->
+        <div class="bg-gray-50 rounded-2xl p-8 mb-12">
+            <h2 class="text-2xl font-bold text-gray-900 mb-4 flex items-center">
+                <i class="fas fa-list text-primary-500 mr-3"></i>
+                Table of Contents
+            </h2>
+            <ul class="space-y-2">
+                <li><a href="#section1" class="text-primary-600 hover:text-primary-800 font-medium">1. Information We Collect</a></li>
+                <li><a href="#section2" class="text-primary-600 hover:text-primary-800 font-medium">2. How We Use Your Information</a></li>
+                <li><a href="#section3" class="text-primary-600 hover:text-primary-800 font-medium">3. Information Sharing and Disclosure</a></li>
+                <li><a href="#section4" class="text-primary-600 hover:text-primary-800 font-medium">4. Data Security</a></li>
+                <li><a href="#section5" class="text-primary-600 hover:text-primary-800 font-medium">5. Your Rights</a></li>
+                <li><a href="#section6" class="text-primary-600 hover:text-primary-800 font-medium">6. Cookies and Tracking</a></li>
+                <li><a href="#section7" class="text-primary-600 hover:text-primary-800 font-medium">7. Third-Party Services</a></li>
+                <li><a href="#section8" class="text-primary-600 hover:text-primary-800 font-medium">8. Changes to This Policy</a></li>
+                <li><a href="#section9" class="text-primary-600 hover:text-primary-800 font-medium">9. Contact Us</a></li>
+            </ul>
+        </div>
+
+        <!-- Section 1 -->
+        <div id="section1" class="mb-12 scroll-mt-24">
+            <div class="flex items-center mb-4">
+                <div class="w-12 h-12 bg-primary-100 rounded-xl flex items-center justify-center mr-4">
+                    <i class="fas fa-database text-primary-600 text-xl"></i>
+                </div>
+                <h2 class="text-3xl font-bold text-gray-900">1. Information We Collect</h2>
+            </div>
+            <div class="pl-16 space-y-4 text-gray-700">
+                <h3 class="text-xl font-bold text-gray-900 mt-6">Personal Information</h3>
+                <p>When you register or book a rental, we collect:</p>
+                <ul class="list-disc pl-6 space-y-2">
+                    <li>Full name and contact information (email, phone number, address)</li>
+                    <li>Date of birth and driver's license details</li>
+                    <li>Payment information (credit/debit card details)</li>
+                    <li>Booking history and preferences</li>
+                </ul>
+
+                <h3 class="text-xl font-bold text-gray-900 mt-6">Automatically Collected Information</h3>
+                <p>We automatically collect certain information when you visit our website:</p>
+                <ul class="list-disc pl-6 space-y-2">
+                    <li>IP address and browser type</li>
+                    <li>Device information and operating system</li>
+                    <li>Pages visited and time spent on our site</li>
+                    <li>Referral source and exit pages</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Section 2 -->
+        <div id="section2" class="mb-12 scroll-mt-24">
+            <div class="flex items-center mb-4">
+                <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center mr-4">
+                    <i class="fas fa-tasks text-green-600 text-xl"></i>
+                </div>
+                <h2 class="text-3xl font-bold text-gray-900">2. How We Use Your Information</h2>
+            </div>
+            <div class="pl-16 space-y-4 text-gray-700">
+                <p>We use the collected information for:</p>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                    <div class="bg-green-50 rounded-xl p-4">
+                        <i class="fas fa-check-circle text-green-600 mr-2"></i>
+                        Processing and managing your bookings
+                    </div>
+                    <div class="bg-green-50 rounded-xl p-4">
+                        <i class="fas fa-check-circle text-green-600 mr-2"></i>
+                        Providing customer support
+                    </div>
+                    <div class="bg-green-50 rounded-xl p-4">
+                        <i class="fas fa-check-circle text-green-600 mr-2"></i>
+                        Sending booking confirmations and updates
+                    </div>
+                    <div class="bg-green-50 rounded-xl p-4">
+                        <i class="fas fa-check-circle text-green-600 mr-2"></i>
+                        Improving our services and website
+                    </div>
+                    <div class="bg-green-50 rounded-xl p-4">
+                        <i class="fas fa-check-circle text-green-600 mr-2"></i>
+                        Preventing fraud and ensuring security
+                    </div>
+                    <div class="bg-green-50 rounded-xl p-4">
+                        <i class="fas fa-check-circle text-green-600 mr-2"></i>
+                        Complying with legal obligations
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 3 -->
+        <div id="section3" class="mb-12 scroll-mt-24">
+            <div class="flex items-center mb-4">
+                <div class="w-12 h-12 bg-yellow-100 rounded-xl flex items-center justify-center mr-4">
+                    <i class="fas fa-share-alt text-yellow-600 text-xl"></i>
+                </div>
+                <h2 class="text-3xl font-bold text-gray-900">3. Information Sharing and Disclosure</h2>
+            </div>
+            <div class="pl-16 space-y-4 text-gray-700">
+                <p>We do not sell your personal information. We may share your information with:</p>
+                <ul class="list-disc pl-6 space-y-2">
+                    <li><strong>Service Providers:</strong> Third-party companies that help us operate our business (payment processors, email services)</li>
+                    <li><strong>Legal Requirements:</strong> When required by law or to protect our rights</li>
+                    <li><strong>Business Transfers:</strong> In case of merger, acquisition, or sale of assets</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Section 4 -->
+        <div id="section4" class="mb-12 scroll-mt-24">
+            <div class="flex items-center mb-4">
+                <div class="w-12 h-12 bg-red-100 rounded-xl flex items-center justify-center mr-4">
+                    <i class="fas fa-lock text-red-600 text-xl"></i>
+                </div>
+                <h2 class="text-3xl font-bold text-gray-900">4. Data Security</h2>
+            </div>
+            <div class="pl-16 space-y-4 text-gray-700">
+                <div class="bg-red-50 border-l-4 border-red-500 p-6 rounded-r-lg">
+                    <p class="mb-0">
+                        We implement industry-standard security measures to protect your personal information, including:
+                    </p>
+                </div>
+                <ul class="list-disc pl-6 space-y-2 mt-4">
+                    <li>SSL encryption for data transmission</li>
+                    <li>Secure servers and databases</li>
+                    <li>Regular security audits and updates</li>
+                    <li>Access controls and authentication</li>
+                    <li>Employee training on data protection</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Section 5 -->
+        <div id="section5" class="mb-12 scroll-mt-24">
+            <div class="flex items-center mb-4">
+                <div class="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center mr-4">
+                    <i class="fas fa-user-shield text-purple-600 text-xl"></i>
+                </div>
+                <h2 class="text-3xl font-bold text-gray-900">5. Your Rights</h2>
+            </div>
+            <div class="pl-16 space-y-4 text-gray-700">
+                <p>You have the right to:</p>
+                <div class="space-y-3">
+                    <div class="flex items-start">
+                        <i class="fas fa-chevron-right text-purple-600 mt-1 mr-3"></i>
+                        <div>
+                            <strong>Access:</strong> Request a copy of your personal information
+                        </div>
+                    </div>
+                    <div class="flex items-start">
+                        <i class="fas fa-chevron-right text-purple-600 mt-1 mr-3"></i>
+                        <div>
+                            <strong>Correction:</strong> Update or correct inaccurate information
+                        </div>
+                    </div>
+                    <div class="flex items-start">
+                        <i class="fas fa-chevron-right text-purple-600 mt-1 mr-3"></i>
+                        <div>
+                            <strong>Deletion:</strong> Request deletion of your personal data
+                        </div>
+                    </div>
+                    <div class="flex items-start">
+                        <i class="fas fa-chevron-right text-purple-600 mt-1 mr-3"></i>
+                        <div>
+                            <strong>Opt-out:</strong> Unsubscribe from marketing communications
+                        </div>
+                    </div>
+                    <div class="flex items-start">
+                        <i class="fas fa-chevron-right text-purple-600 mt-1 mr-3"></i>
+                        <div>
+                            <strong>Portability:</strong> Receive your data in a portable format
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 6 -->
+        <div id="section6" class="mb-12 scroll-mt-24">
+            <div class="flex items-center mb-4">
+                <div class="w-12 h-12 bg-indigo-100 rounded-xl flex items-center justify-center mr-4">
+                    <i class="fas fa-cookie-bite text-indigo-600 text-xl"></i>
+                </div>
+                <h2 class="text-3xl font-bold text-gray-900">6. Cookies and Tracking</h2>
+            </div>
+            <div class="pl-16 space-y-4 text-gray-700">
+                <p>We use cookies and similar technologies to:</p>
+                <ul class="list-disc pl-6 space-y-2">
+                    <li>Remember your preferences and settings</li>
+                    <li>Understand how you use our website</li>
+                    <li>Improve your user experience</li>
+                    <li>Analyze website traffic and performance</li>
+                </ul>
+                <p class="mt-4">You can control cookies through your browser settings.</p>
+            </div>
+        </div>
+
+        <!-- Section 7 -->
+        <div id="section7" class="mb-12 scroll-mt-24">
+            <div class="flex items-center mb-4">
+                <div class="w-12 h-12 bg-pink-100 rounded-xl flex items-center justify-center mr-4">
+                    <i class="fas fa-link text-pink-600 text-xl"></i>
+                </div>
+                <h2 class="text-3xl font-bold text-gray-900">7. Third-Party Services</h2>
+            </div>
+            <div class="pl-16 space-y-4 text-gray-700">
+                <p>Our website may contain links to third-party websites. We are not responsible for the privacy practices of these external sites. We encourage you to review their privacy policies.</p>
+            </div>
+        </div>
+
+        <!-- Section 8 -->
+        <div id="section8" class="mb-12 scroll-mt-24">
+            <div class="flex items-center mb-4">
+                <div class="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center mr-4">
+                    <i class="fas fa-sync-alt text-orange-600 text-xl"></i>
+                </div>
+                <h2 class="text-3xl font-bold text-gray-900">8. Changes to This Policy</h2>
+            </div>
+            <div class="pl-16 space-y-4 text-gray-700">
+                <p>We may update this Privacy Policy from time to time. We will notify you of any significant changes by:</p>
+                <ul class="list-disc pl-6 space-y-2">
+                    <li>Posting the updated policy on our website</li>
+                    <li>Sending an email notification to registered users</li>
+                    <li>Displaying a notice on our homepage</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Section 9 - Contact -->
+        <div id="section9" class="mb-12 scroll-mt-24">
+            <div class="flex items-center mb-4">
+                <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mr-4">
+                    <i class="fas fa-envelope text-blue-600 text-xl"></i>
+                </div>
+                <h2 class="text-3xl font-bold text-gray-900">9. Contact Us</h2>
+            </div>
+            <div class="pl-16">
+                <div class="bg-gradient-to-br from-primary-50 to-blue-50 rounded-2xl p-8">
+                    <p class="text-gray-700 mb-6">If you have any questions or concerns about this Privacy Policy or our data practices, please contact us:</p>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="flex items-start space-x-4">
+                            <div class="w-10 h-10 bg-primary-500 rounded-lg flex items-center justify-center flex-shrink-0">
+                                <i class="fas fa-envelope text-white"></i>
+                            </div>
+                            <div>
+                                <p class="font-semibold text-gray-900">Email</p>
+                                <a href="mailto:privacy@fribergrentals.com" class="text-primary-600 hover:text-primary-800">privacy@fribergrentals.com</a>
+                            </div>
+                        </div>
+                        <div class="flex items-start space-x-4">
+                            <div class="w-10 h-10 bg-primary-500 rounded-lg flex items-center justify-center flex-shrink-0">
+                                <i class="fas fa-phone text-white"></i>
+                            </div>
+                            <div>
+                                <p class="font-semibold text-gray-900">Phone</p>
+                                <a href="tel:+15551234567" class="text-primary-600 hover:text-primary-800">+1 (555) 123-4567</a>
+                            </div>
+                        </div>
+                        <div class="flex items-start space-x-4 md:col-span-2">
+                            <div class="w-10 h-10 bg-primary-500 rounded-lg flex items-center justify-center flex-shrink-0">
+                                <i class="fas fa-map-marker-alt text-white"></i>
+                            </div>
+                            <div>
+                                <p class="font-semibold text-gray-900">Address</p>
+                                <p class="text-gray-700">123 Luxury Drive, Premium City, PC 12345, United States</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Consent Statement -->
+        <div class="bg-gradient-to-r from-primary-500 to-primary-700 rounded-2xl p-8 text-white text-center">
+            <i class="fas fa-check-circle text-4xl mb-4"></i>
+            <h3 class="text-2xl font-bold mb-4">Your Consent</h3>
+            <p class="text-white/90">
+                By using our website and services, you consent to our Privacy Policy and agree to its terms.
+            </p>
+        </div>
+
+    </div>
+</section>
+
+@section Scripts {
+    <script>
+        // Smooth scroll for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            });
+        });
+    </script>
+}

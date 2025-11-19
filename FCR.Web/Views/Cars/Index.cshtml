@@ -1,95 +1,346 @@
-﻿@model IEnumerable<FCR.Dal.Classes.Car>
+﻿@model IEnumerable<FCR.Web.Services.Base.CarResponseDto>
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Our Fleet";
+    var isAdmin = User.IsInRole("Admin");
 }
 
-<h1>Index</h1>
+<!-- Fleet Section -->
+<section class="py-12 bg-gradient-to-br from-gray-50 to-gray-100 min-h-screen">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
-<p>
-    <a asp-action="Create" class="btn btn-primary">Create New</a>
-</p>
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.Brand)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Model)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Category)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Year)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.DailyRate)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.IsAvailable)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Transmission)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.FuelType)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Seats)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.IsDeleted)
-            </th>
-            <th>Actions</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var item in Model)
+        <!-- Header -->
+        <div class="mb-8 flex flex-col md:flex-row md:items-center md:justify-between">
+            <div>
+                <h1 class="text-4xl md:text-5xl font-black text-gray-900 mb-2">
+                    <i class="fas fa-car text-primary-500 mr-3"></i>
+                    @(isAdmin ? "Manage Fleet" : "Our Fleet")
+                </h1>
+                <p class="text-gray-600 text-lg">
+                    @if (isAdmin)
+                    {
+                        <text>Manage your entire vehicle collection</text>
+                    }
+                    else
+                    {
+                        <text>Browse our premium collection of vehicles</text>
+                    }
+                </p>
+            </div>
+            @if (isAdmin)
+            {
+                <a asp-action="Create"
+                   class="mt-4 md:mt-0 inline-flex items-center px-6 py-3 bg-gradient-to-r from-green-500 to-green-700 hover:from-green-600 hover:to-green-800 text-white rounded-xl font-bold transform hover:scale-105 transition-all duration-300 shadow-lg">
+                    <i class="fas fa-plus-circle mr-2"></i>
+                    Add New Car
+                </a>
+            }
+        </div>
+
+        <!-- Success/Error Messages -->
+        @if (TempData["SuccessMessage"] != null)
         {
-            <tr>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Brand)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Model)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Category)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Year)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.DailyRate)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.IsAvailable)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Transmission)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.FuelType)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Seats)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.IsDeleted)
-                </td>
-                <td>
-                    <div class="btn-group" role="group">
-                        <a asp-action="Edit" asp-route-id="@item.CarId" class="btn m-1 btn-sm btn-outline-primary">Edit</a>
-                        <a asp-action="Details" asp-route-id="@item.CarId" class="btn m-1 btn-sm btn-outline-info">Details</a>
-                        <a asp-action="Delete" asp-route-id="@item.CarId" class="btn m-1 btn-sm btn-outline-danger">Delete</a>
-                        <a asp-controller="Cars" asp-action="Images" asp-route-carId="@item.CarId" class="btn m-1 btn-sm btn-outline-secondary">
-                            <i class="bi bi-images"></i> Images
-                        </a>
-                    </div>
-                </td>
-            </tr>
+            <div class="mb-6 bg-green-50 border-l-4 border-green-500 rounded-lg p-4 animate-slide-up">
+                <div class="flex items-center">
+                    <i class="fas fa-check-circle text-green-500 mr-3 text-xl"></i>
+                    <p class="text-green-700 font-medium">@TempData["SuccessMessage"]</p>
+                </div>
+            </div>
         }
-    </tbody>
-</table>
+
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <div class="mb-6 bg-red-50 border-l-4 border-red-500 rounded-lg p-4 animate-slide-up">
+                <div class="flex items-center">
+                    <i class="fas fa-exclamation-circle text-red-500 mr-3 text-xl"></i>
+                    <p class="text-red-700 font-medium">@TempData["ErrorMessage"]</p>
+                </div>
+            </div>
+        }
+
+        @if (Model != null && Model.Any())
+        {
+            <!-- Stats Cards -->
+            var totalCars = Model.Count();
+            var availableCars = Model.Count(c => c.IsAvailable);
+            var unavailableCars = totalCars - availableCars;
+            var avgDailyRate = Model.Average(c => c.DailyRate);
+
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+                <div class="bg-white rounded-2xl shadow-lg p-6 border-l-4 border-blue-500 transform hover:scale-105 transition-all duration-300">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-gray-600 text-sm font-medium mb-1">Total Cars</p>
+                            <p class="text-3xl font-black text-gray-900">@totalCars</p>
+                        </div>
+                        <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
+                            <i class="fas fa-car text-blue-600 text-xl"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-2xl shadow-lg p-6 border-l-4 border-green-500 transform hover:scale-105 transition-all duration-300">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-gray-600 text-sm font-medium mb-1">Available</p>
+                            <p class="text-3xl font-black text-gray-900">@availableCars</p>
+                        </div>
+                        <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
+                            <i class="fas fa-check-circle text-green-600 text-xl"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-2xl shadow-lg p-6 border-l-4 border-red-500 transform hover:scale-105 transition-all duration-300">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-gray-600 text-sm font-medium mb-1">Unavailable</p>
+                            <p class="text-3xl font-black text-gray-900">@unavailableCars</p>
+                        </div>
+                        <div class="w-12 h-12 bg-red-100 rounded-xl flex items-center justify-center">
+                            <i class="fas fa-times-circle text-red-600 text-xl"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-2xl shadow-lg p-6 border-l-4 border-orange-500 transform hover:scale-105 transition-all duration-300">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-gray-600 text-sm font-medium mb-1">Avg. Rate</p>
+                            <p class="text-3xl font-black text-gray-900">$@avgDailyRate.ToString("N0")</p>
+                        </div>
+                        <div class="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center">
+                            <i class="fas fa-dollar-sign text-orange-600 text-xl"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Filters & Search -->
+            <div class="bg-white rounded-2xl shadow-lg p-6 mb-8">
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <div class="relative">
+                        <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                        <input type="text"
+                               id="searchInput"
+                               placeholder="Search by brand or model..."
+                               class="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-primary-500 focus:ring-2 focus:ring-primary-200 transition-all duration-300 outline-none">
+                    </div>
+                    <select id="categoryFilter"
+                            class="px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-primary-500 focus:ring-2 focus:ring-primary-200 transition-all duration-300 outline-none">
+                        <option value="">All Categories</option>
+                        <option value="Sedan">Sedan</option>
+                        <option value="SUV">SUV</option>
+                        <option value="Sports">Sports</option>
+                        <option value="Luxury">Luxury</option>
+                        <option value="Compact">Compact</option>
+                        <option value="Van">Van</option>
+                        <option value="Truck">Truck</option>
+                    </select>
+                    <select id="availabilityFilter"
+                            class="px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-primary-500 focus:ring-2 focus:ring-primary-200 transition-all duration-300 outline-none">
+                        <option value="">All Status</option>
+                        <option value="available">Available Only</option>
+                        <option value="unavailable">Unavailable Only</option>
+                    </select>
+                    <button onclick="resetFilters()"
+                            class="px-4 py-3 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-xl font-semibold transition-all">
+                        <i class="fas fa-redo mr-2"></i>Reset
+                    </button>
+                </div>
+            </div>
+
+            <!-- Cars Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" id="carsGrid">
+                @foreach (var car in Model)
+                {
+                    <div class="car-card bg-white rounded-3xl shadow-xl overflow-hidden transform hover:-translate-y-2 transition-all duration-300"
+                         data-brand="@car.Brand.ToLower()"
+                         data-model="@car.Model.ToLower()"
+                         data-category="@car.Category"
+                         data-available="@car.IsAvailable.ToString().ToLower()">
+
+                        <!-- Car Image -->
+                        <div class="relative h-56 overflow-hidden bg-gradient-to-br from-gray-100 to-gray-200">
+                            @if (car.Images != null && car.Images.Any())
+                            {
+                                <img src="@car.Images.First().Url"
+                                     alt="@car.Brand @car.Model"
+                                     class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
+                            }
+                            else
+                            {
+                                <div class="w-full h-full flex items-center justify-center">
+                                    <i class="fas fa-car text-gray-400 text-5xl"></i>
+                                </div>
+                            }
+
+                            <!-- Status Badge -->
+                            <div class="absolute top-4 right-4">
+                                @if (car.IsAvailable)
+                                {
+                                    <span class="px-4 py-2 bg-green-500 text-white rounded-full font-bold text-sm shadow-lg">
+                                        <i class="fas fa-check-circle mr-1"></i>Available
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="px-4 py-2 bg-red-500 text-white rounded-full font-bold text-sm shadow-lg">
+                                        <i class="fas fa-times-circle mr-1"></i>Unavailable
+                                    </span>
+                                }
+                            </div>
+
+                            <!-- Category Badge -->
+                            <div class="absolute top-4 left-4">
+                                <span class="px-3 py-1 bg-black/70 text-white rounded-full font-semibold text-xs">
+                                    @car.Category
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- Car Details -->
+                        <div class="p-6">
+                            <div class="mb-4">
+                                <h3 class="text-2xl font-black text-gray-900 mb-1">
+                                    @car.Brand @car.Model
+                                </h3>
+                                <p class="text-gray-600">@car.Year</p>
+                            </div>
+
+                            <!-- Specs -->
+                            <div class="grid grid-cols-3 gap-3 mb-4">
+                                <div class="text-center p-2 bg-gray-50 rounded-lg">
+                                    <i class="fas fa-cog text-primary-500 mb-1"></i>
+                                    <p class="text-xs text-gray-600">@car.Transmission</p>
+                                </div>
+                                <div class="text-center p-2 bg-gray-50 rounded-lg">
+                                    <i class="fas fa-gas-pump text-primary-500 mb-1"></i>
+                                    <p class="text-xs text-gray-600">@car.FuelType</p>
+                                </div>
+                                <div class="text-center p-2 bg-gray-50 rounded-lg">
+                                    <i class="fas fa-users text-primary-500 mb-1"></i>
+                                    <p class="text-xs text-gray-600">@car.Seats Seats</p>
+                                </div>
+                            </div>
+
+                            <!-- Price -->
+                            <div class="bg-gradient-to-r from-primary-50 to-blue-50 rounded-xl p-4 mb-4">
+                                <p class="text-gray-600 text-sm mb-1">Daily Rate</p>
+                                <p class="text-3xl font-black text-primary-600">$@car.DailyRate</p>
+                            </div>
+
+                            <!-- Actions -->
+                            @if (isAdmin)
+                            {
+                                <div class="grid grid-cols-2 gap-2">
+                                    <a asp-action="Details" asp-route-id="@car.CarId"
+                                       class="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-semibold text-center transition-all text-sm">
+                                        <i class="fas fa-eye mr-1"></i>View
+                                    </a>
+                                    <a asp-action="Edit" asp-route-id="@car.CarId"
+                                       class="px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg font-semibold text-center transition-all text-sm">
+                                        <i class="fas fa-edit mr-1"></i>Edit
+                                    </a>
+                                    <a asp-action="UploadImages" asp-route-id="@car.CarId"
+                                       class="px-4 py-2 bg-purple-500 hover:bg-purple-600 text-white rounded-lg font-semibold text-center transition-all text-sm">
+                                        <i class="fas fa-images mr-1"></i>Images
+                                    </a>
+                                    <a asp-action="Delete" asp-route-id="@car.CarId"
+                                       class="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg font-semibold text-center transition-all text-sm">
+                                        <i class="fas fa-trash mr-1"></i>Delete
+                                    </a>
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="flex gap-2">
+                                    <a asp-action="Details" asp-route-id="@car.CarId"
+                                       class="flex-1 px-4 py-3 bg-primary-500 hover:bg-primary-600 text-white rounded-xl font-bold text-center transition-all">
+                                        <i class="fas fa-eye mr-2"></i>View Details
+                                    </a>
+                                    @if (car.IsAvailable)
+                                    {
+                                        <a asp-controller="Bookings" asp-action="Create" asp-route-carId="@car.CarId"
+                                           class="flex-1 px-4 py-3 bg-green-500 hover:bg-green-600 text-white rounded-xl font-bold text-center transition-all">
+                                            <i class="fas fa-calendar-check mr-2"></i>Book
+                                        </a>
+                                    }
+                                </div>
+                            }
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <!-- Empty State -->
+            <div class="bg-white rounded-3xl shadow-lg p-12 text-center">
+                <div class="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <i class="fas fa-car text-gray-400 text-4xl"></i>
+                </div>
+                <h3 class="text-3xl font-bold text-gray-900 mb-3">No Cars Available</h3>
+                <p class="text-gray-600 text-lg mb-8">
+                    @if (isAdmin)
+                    {
+                        <text>Start building your fleet by adding your first vehicle</text>
+                    }
+                    else
+                    {
+                        <text>We're currently updating our fleet. Please check back soon!</text>
+                    }
+                </p>
+                @if (isAdmin)
+                {
+                    <a asp-action="Create"
+                       class="inline-flex items-center px-8 py-4 bg-gradient-to-r from-primary-500 to-primary-700 hover:from-primary-600 hover:to-primary-800 text-white rounded-xl font-bold text-lg transform hover:scale-105 transition-all duration-300 shadow-lg">
+                        <i class="fas fa-plus-circle mr-2"></i>
+                        Add First Car
+                    </a>
+                }
+            </div>
+        }
+
+    </div>
+</section>
+
+@section Scripts {
+    <script>
+        const searchInput = document.getElementById('searchInput');
+        const categoryFilter = document.getElementById('categoryFilter');
+        const availabilityFilter = document.getElementById('availabilityFilter');
+
+        function filterCars() {
+            const searchTerm = searchInput.value.toLowerCase();
+            const category = categoryFilter.value;
+            const availability = availabilityFilter.value;
+
+            document.querySelectorAll('.car-card').forEach(card => {
+                const brand = card.dataset.brand;
+                const model = card.dataset.model;
+                const cardCategory = card.dataset.category;
+                const isAvailable = card.dataset.available;
+
+                const matchesSearch = brand.includes(searchTerm) || model.includes(searchTerm);
+                const matchesCategory = !category || cardCategory === category;
+                const matchesAvailability = !availability ||
+                    (availability === 'available' && isAvailable === 'true') ||
+                    (availability === 'unavailable' && isAvailable === 'false');
+
+                card.style.display = matchesSearch && matchesCategory && matchesAvailability ? '' : 'none';
+            });
+        }
+
+        searchInput.addEventListener('input', filterCars);
+        categoryFilter.addEventListener('change', filterCars);
+        availabilityFilter.addEventListener('change', filterCars);
+
+        function resetFilters() {
+            searchInput.value = '';
+            categoryFilter.value = '';
+            availabilityFilter.value = '';
+            filterCars();
+        }
+    </script>
+}

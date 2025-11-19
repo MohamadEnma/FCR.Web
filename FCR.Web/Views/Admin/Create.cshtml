@@ -1,62 +1,198 @@
-﻿@model FCR.Web.ViewModels.UserViewModel
+﻿@model FCR.Web.Services.Base.RegisterDto
 
-<h2>Create New User</h2>
-
-@if (TempData["SuccessMessage"] != null)
-{
-    <div class="alert alert-success">@TempData["SuccessMessage"]</div>
-}
-@if (!ViewData.ModelState.IsValid)
-{
-    <div class="alert alert-danger">
-        <ul>
-            @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
-            {
-                <li>@error.ErrorMessage</li>
-            }
-        </ul>
-    </div>
+@{
+    ViewData["Title"] = "Create New User";
 }
 
-<form asp-action="Create" method="post">
-    <div class="form-group">
-        <label asp-for="Email"></label>
-        <input asp-for="Email" class="form-control" />
-        <span asp-validation-for="Email" class="text-danger"></span>
-    </div>
+<!-- Create User Section -->
+<section class="py-12 bg-gray-50 min-h-screen">
+    <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
 
-    <div class="form-group">
-        <label asp-for="Password"></label>
-        <input asp-for="Password" class="form-control" />
-        <span asp-validation-for="Password" class="text-danger"></span>
-        <small class="form-text text-muted">
-            Password must be at least 6 characters long and contain at least one non-alphanumeric character.
-        </small>
-    </div>
+        <!-- Header -->
+        <div class="mb-8">
+            <a asp-controller="Admin" asp-action="Users" class="inline-flex items-center text-primary-600 hover:text-primary-800 font-medium mb-4">
+                <i class="fas fa-arrow-left mr-2"></i>
+                Back to Users
+            </a>
+            <h1 class="text-4xl font-black text-gray-900">Create New User</h1>
+            <p class="text-gray-600 mt-2">Add a new user to the system</p>
+        </div>
 
-    <div class="form-group">
-        <label asp-for="FirstName"></label>
-        <input asp-for="FirstName" class="form-control" />
-        <span asp-validation-for="FirstName" class="text-danger"></span>
-    </div>
+        <!-- Success Message -->
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="mb-6 bg-green-50 border-l-4 border-green-500 rounded-lg p-4">
+                <div class="flex items-center">
+                    <i class="fas fa-check-circle text-green-500 mr-3 text-xl"></i>
+                    <p class="text-green-700 font-medium">@TempData["SuccessMessage"]</p>
+                </div>
+            </div>
+        }
 
-    <div class="form-group">
-        <label asp-for="LastName"></label>
-        <input asp-for="LastName" class="form-control" />
-        <span asp-validation-for="LastName" class="text-danger"></span>
-    </div>
+        <!-- Error Messages -->
+        @if (!ViewData.ModelState.IsValid)
+        {
+            <div class="mb-6 bg-red-50 border-l-4 border-red-500 rounded-lg p-4">
+                <div class="flex items-start">
+                    <i class="fas fa-exclamation-circle text-red-500 mr-3 text-xl mt-0.5"></i>
+                    <div>
+                        <p class="text-red-700 font-bold mb-2">Please fix the following errors:</p>
+                        <ul class="list-disc list-inside space-y-1">
+                            @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                            {
+                                <li class="text-red-600">@error.ErrorMessage</li>
+                            }
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        }
 
-    <div class="form-check mb-3">
-        <input asp-for="IsAdmin" class="form-check-input" />
-        <label asp-for="IsAdmin" class="form-check-label"></label>
-    </div>
+        <!-- Form Card -->
+        <div class="bg-white rounded-2xl shadow-lg p-8">
+            <form asp-action="Create" method="post" class="space-y-6">
 
-    <button type="submit" class="btn btn-primary">Create</button>
-    <a asp-action="Users" class="btn btn-secondary">Back to List</a>
-</form>
+                <!-- First Name -->
+                <div>
+                    <label asp-for="FirstName" class="block text-sm font-bold text-gray-700 mb-2">
+                        <i class="fas fa-user text-primary-500 mr-2"></i>First Name
+                    </label>
+                    <input asp-for="FirstName"
+                           type="text"
+                           class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-primary-500 focus:ring-2 focus:ring-primary-200 transition-all duration-300 outline-none"
+                           placeholder="Enter first name">
+                    <span asp-validation-for="FirstName" class="text-red-500 text-sm mt-1"></span>
+                </div>
+
+                <!-- Last Name -->
+                <div>
+                    <label asp-for="LastName" class="block text-sm font-bold text-gray-700 mb-2">
+                        <i class="fas fa-user text-primary-500 mr-2"></i>Last Name
+                    </label>
+                    <input asp-for="LastName"
+                           type="text"
+                           class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-primary-500 focus:ring-2 focus:ring-primary-200 transition-all duration-300 outline-none"
+                           placeholder="Enter last name">
+                    <span asp-validation-for="LastName" class="text-red-500 text-sm mt-1"></span>
+                </div>
+
+                <!-- Email -->
+                <div>
+                    <label asp-for="Email" class="block text-sm font-bold text-gray-700 mb-2">
+                        <i class="fas fa-envelope text-primary-500 mr-2"></i>Email Address
+                    </label>
+                    <input asp-for="Email"
+                           type="email"
+                           class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-primary-500 focus:ring-2 focus:ring-primary-200 transition-all duration-300 outline-none"
+                           placeholder="user@example.com">
+                    <span asp-validation-for="Email" class="text-red-500 text-sm mt-1"></span>
+                </div>
+
+                <!-- Password -->
+                <div>
+                    <label asp-for="Password" class="block text-sm font-bold text-gray-700 mb-2">
+                        <i class="fas fa-lock text-primary-500 mr-2"></i>Password
+                    </label>
+                    <div class="relative">
+                        <input asp-for="Password"
+                               type="password"
+                               id="password-input"
+                               class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-primary-500 focus:ring-2 focus:ring-primary-200 transition-all duration-300 outline-none"
+                               placeholder="Enter secure password">
+                        <button type="button"
+                                onclick="togglePassword()"
+                                class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-primary-500 transition-colors">
+                            <i class="fas fa-eye" id="toggle-icon"></i>
+                        </button>
+                    </div>
+                    <span asp-validation-for="Password" class="text-red-500 text-sm mt-1"></span>
+                    <p class="text-xs text-gray-500 mt-1">
+                        <i class="fas fa-info-circle mr-1"></i>
+                        Password must be at least 6 characters with uppercase, lowercase, number, and special character.
+                    </p>
+                </div>
+
+                <!-- Phone Number (if in RegisterDto) -->
+                @if (Model != null && Model.GetType().GetProperty("PhoneNumber") != null)
+                {
+                    <div>
+                        <label for="PhoneNumber" class="block text-sm font-bold text-gray-700 mb-2">
+                            <i class="fas fa-phone text-primary-500 mr-2"></i>Phone Number
+                        </label>
+                        <input name="PhoneNumber"
+                               type="tel"
+                               class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-primary-500 focus:ring-2 focus:ring-primary-200 transition-all duration-300 outline-none"
+                               placeholder="+1 (555) 123-4567">
+                    </div>
+                }
+
+                <!-- Admin Role Toggle -->
+                <div class="bg-gray-50 rounded-xl p-6 border-2 border-gray-200">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <label class="text-sm font-bold text-gray-700 mb-1 block">
+                                <i class="fas fa-crown text-yellow-500 mr-2"></i>Administrator Access
+                            </label>
+                            <p class="text-sm text-gray-600">Grant this user admin privileges</p>
+                        </div>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" name="IsAdmin" value="true" class="sr-only peer">
+                            <div class="w-14 h-7 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:start-[4px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-primary-600"></div>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="flex gap-4 pt-4">
+                    <button type="submit"
+                            class="flex-1 px-6 py-3 bg-gradient-to-r from-primary-500 to-primary-700 hover:from-primary-600 hover:to-primary-800 text-white rounded-xl font-bold transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl">
+                        <i class="fas fa-user-plus mr-2"></i>
+                        Create User
+                    </button>
+                    <a asp-action="Users"
+                       class="flex-1 px-6 py-3 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-xl font-bold text-center transform hover:scale-105 transition-all duration-300">
+                        <i class="fas fa-times mr-2"></i>
+                        Cancel
+                    </a>
+                </div>
+            </form>
+        </div>
+
+        <!-- Help Text -->
+        <div class="mt-6 bg-blue-50 border-l-4 border-blue-500 rounded-lg p-4">
+            <div class="flex items-start">
+                <i class="fas fa-info-circle text-blue-500 mr-3 mt-0.5"></i>
+                <div>
+                    <p class="text-blue-700 font-medium">User Creation Guidelines</p>
+                    <ul class="text-blue-600 text-sm mt-2 space-y-1">
+                        <li>• Users will receive a welcome email with login instructions</li>
+                        <li>• Admin users have access to all management features</li>
+                        <li>• Regular users can only manage their own bookings</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</section>
 
 @section Scripts {
-    @{
-        await Html.RenderPartialAsync("_ValidationScriptsPartial");
-    }
+    <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        function togglePassword() {
+            const passwordInput = document.getElementById('password-input');
+            const toggleIcon = document.getElementById('toggle-icon');
+
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                toggleIcon.classList.remove('fa-eye');
+                toggleIcon.classList.add('fa-eye-slash');
+            } else {
+                passwordInput.type = 'password';
+                toggleIcon.classList.remove('fa-eye-slash');
+                toggleIcon.classList.add('fa-eye');
+            }
+        }
+    </script>
 }

@@ -1,132 +1,332 @@
-﻿@model IEnumerable<FCR.Dal.Classes.Booking>
+﻿@model IEnumerable<FCR.Web.Services.Base.BookingResponseDto>
 
 @{
     ViewData["Title"] = "My Bookings";
+    var now = DateTime.UtcNow;
 }
 
-<div class="container py-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1 class="display-6">
-            <i class="bi bi-journal-bookmark me-2"></i>My Bookings
-        </h1>
-        <a asp-controller="Home" asp-action="Index" class="btn btn-outline-primary">
-            <i class="bi bi-plus-circle me-1"></i>New Booking
-        </a>
-    </div>
+<!-- My Bookings Section -->
+<section class="py-12 bg-gradient-to-br from-gray-50 to-gray-100 min-h-screen">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
-    <div class="card shadow-sm">
-        <div class="card-body p-0">
-            <div class="table-responsive">
-                <table class="table table-hover mb-0">
-                    <thead class="table-light">
-                        <tr>
-                            <th>Vehicle</th>
-                            <th>Rental Period</th>
-                            <th class="text-end">Price</th>
-                            <th>Status</th>
-                            <th class="text-end">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach (var item in Model)
-                        {
-                            <tr>
-                                <td>
-                                    <div class="d-flex align-items-center">
-                                        @if (item.Car.Images.Any())
-                                        {
-                                            <img src="@item.Car.Images.First().Url"
-                                                 class="rounded me-3"
-                                                 style="width: 80px; height: 60px; object-fit: cover;"
-                                                 alt="@item.Car.Brand @item.Car.Model">
-                                        }
-                                        <div>
-                                            <h6 class="mb-1">@item.Car.Brand @item.Car.Model</h6>
-                                            <small class="text-muted">Booking #@item.BookingId</small>
-                                        </div>
+        <!-- Header -->
+        <div class="mb-8 flex flex-col md:flex-row md:items-center md:justify-between">
+            <div>
+                <h1 class="text-4xl md:text-5xl font-black text-gray-900 mb-2">
+                    <i class="fas fa-calendar-check text-primary-500 mr-3"></i>
+                    My Bookings
+                </h1>
+                <p class="text-gray-600 text-lg">Manage and track all your reservations</p>
+            </div>
+            <a asp-controller="Cars" asp-action="Index"
+               class="mt-4 md:mt-0 inline-flex items-center px-6 py-3 bg-gradient-to-r from-primary-500 to-primary-700 hover:from-primary-600 hover:to-primary-800 text-white rounded-xl font-bold transform hover:scale-105 transition-all duration-300 shadow-lg">
+                <i class="fas fa-plus-circle mr-2"></i>
+                New Booking
+            </a>
+        </div>
+
+        <!-- Success/Error Messages -->
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="mb-6 bg-green-50 border-l-4 border-green-500 rounded-lg p-4 animate-slide-up">
+                <div class="flex items-center">
+                    <i class="fas fa-check-circle text-green-500 mr-3 text-xl"></i>
+                    <p class="text-green-700 font-medium">@TempData["SuccessMessage"]</p>
+                </div>
+            </div>
+        }
+
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <div class="mb-6 bg-red-50 border-l-4 border-red-500 rounded-lg p-4 animate-slide-up">
+                <div class="flex items-center">
+                    <i class="fas fa-exclamation-circle text-red-500 mr-3 text-xl"></i>
+                    <p class="text-red-700 font-medium">@TempData["ErrorMessage"]</p>
+                </div>
+            </div>
+        }
+
+        @if (Model != null && Model.Any())
+        {
+            <!-- Stats Cards -->
+            var activeBookings = Model.Count(b => !b.IsCancelled && b.PickupDate <= now && b.ReturnDate >= now);
+            var upcomingBookings = Model.Count(b => !b.IsCancelled && b.PickupDate > now);
+            var completedBookings = Model.Count(b => !b.IsCancelled && b.ReturnDate < now);
+            var cancelledBookings = Model.Count(b => b.IsCancelled);
+
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+                <div class="bg-white rounded-2xl shadow-lg p-6 border-l-4 border-green-500 transform hover:scale-105 transition-all duration-300">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-gray-600 text-sm font-medium mb-1">Active Now</p>
+                            <p class="text-3xl font-black text-gray-900">@activeBookings</p>
+                        </div>
+                        <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
+                            <i class="fas fa-car text-green-600 text-xl"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-2xl shadow-lg p-6 border-l-4 border-blue-500 transform hover:scale-105 transition-all duration-300">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-gray-600 text-sm font-medium mb-1">Upcoming</p>
+                            <p class="text-3xl font-black text-gray-900">@upcomingBookings</p>
+                        </div>
+                        <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
+                            <i class="fas fa-calendar-alt text-blue-600 text-xl"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-2xl shadow-lg p-6 border-l-4 border-gray-500 transform hover:scale-105 transition-all duration-300">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-gray-600 text-sm font-medium mb-1">Completed</p>
+                            <p class="text-3xl font-black text-gray-900">@completedBookings</p>
+                        </div>
+                        <div class="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center">
+                            <i class="fas fa-check-circle text-gray-600 text-xl"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-2xl shadow-lg p-6 border-l-4 border-red-500 transform hover:scale-105 transition-all duration-300">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-gray-600 text-sm font-medium mb-1">Cancelled</p>
+                            <p class="text-3xl font-black text-gray-900">@cancelledBookings</p>
+                        </div>
+                        <div class="w-12 h-12 bg-red-100 rounded-xl flex items-center justify-center">
+                            <i class="fas fa-times-circle text-red-600 text-xl"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Filter Tabs -->
+            <div class="bg-white rounded-2xl shadow-lg p-6 mb-8">
+                <div class="flex flex-wrap gap-3">
+                    <button onclick="filterBookings('all')"
+                            class="filter-btn active px-6 py-2 bg-primary-500 text-white rounded-xl font-semibold transition-all duration-300">
+                        All Bookings
+                    </button>
+                    <button onclick="filterBookings('active')"
+                            class="filter-btn px-6 py-2 bg-gray-100 text-gray-700 hover:bg-gray-200 rounded-xl font-semibold transition-all duration-300">
+                        <i class="fas fa-car mr-2"></i>Active
+                    </button>
+                    <button onclick="filterBookings('upcoming')"
+                            class="filter-btn px-6 py-2 bg-gray-100 text-gray-700 hover:bg-gray-200 rounded-xl font-semibold transition-all duration-300">
+                        <i class="fas fa-calendar-alt mr-2"></i>Upcoming
+                    </button>
+                    <button onclick="filterBookings('completed')"
+                            class="filter-btn px-6 py-2 bg-gray-100 text-gray-700 hover:bg-gray-200 rounded-xl font-semibold transition-all duration-300">
+                        <i class="fas fa-check-circle mr-2"></i>Completed
+                    </button>
+                    <button onclick="filterBookings('cancelled')"
+                            class="filter-btn px-6 py-2 bg-gray-100 text-gray-700 hover:bg-gray-200 rounded-xl font-semibold transition-all duration-300">
+                        <i class="fas fa-times-circle mr-2"></i>Cancelled
+                    </button>
+                </div>
+            </div>
+
+            <!-- Bookings List -->
+            <div class="space-y-6" id="bookingsList">
+                @foreach (var booking in Model.OrderByDescending(b => b.BookingDate))
+                {
+                    var rentalDays = (booking.ReturnDate - booking.PickupDate).Days;
+                    var isActive = !booking.IsCancelled && booking.PickupDate <= now && booking.ReturnDate >= now;
+                    var isUpcoming = !booking.IsCancelled && booking.PickupDate > now;
+                    var isCompleted = !booking.IsCancelled && booking.ReturnDate < now;
+                    var isCancelled = booking.IsCancelled;
+                    var canCancel = !isCancelled && isUpcoming && booking.PickupDate > now.AddDays(1);
+
+                    var statusClass = isCancelled ? "cancelled" : isActive ? "active" : isUpcoming ? "upcoming" : "completed";
+                    var daysUntilPickup = isUpcoming ? (booking.PickupDate - now).Days : 0;
+                    var daysUntilReturn = isActive ? (booking.ReturnDate - now).Days : 0;
+
+                   
+                    var carBrand = booking.CarBrand ?? "Unknown";
+                    var carModel = booking.CarModel ?? "Vehicle";
+                    var carImage = booking.CarImageUrl;  
+                    var dailyRate = booking.DailyRate;
+
+                    <div class="booking-card bg-white rounded-3xl shadow-lg overflow-hidden transform hover:-translate-y-1 transition-all duration-300 @statusClass"
+                         data-status="@statusClass">
+                        <div class="flex flex-col lg:flex-row">
+
+                            <!-- Car Image -->
+                            <div class="lg:w-1/3 relative">
+                                @if (!string.IsNullOrEmpty(carImage))
+                                {
+                                    <img src="@carImage"
+                                         alt="@carBrand @carModel"
+                                         class="w-full h-64 lg:h-full object-cover">
+                                }
+                                else
+                                {
+                                    <div class="w-full h-64 lg:h-full bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
+                                        <i class="fas fa-car text-gray-400 text-5xl"></i>
                                     </div>
-                                </td>
-                                <td>
-                                    <div>@item.PickupDate.ToString("MMM d, yyyy")</div>
-                                    <div class="small text-muted">to @item.ReturnDate.ToString("MMM d, yyyy")</div>
-                                    <div class="small text-muted">
-                                        @((item.ReturnDate - item.PickupDate).Days) day@((item.ReturnDate - item.PickupDate).Days != 1 ? "s" : "")
-                                    </div>
-                                </td>
-                                <td class="text-end">
-                                    <div class="fw-bold">@item.TotalPrice.ToString("C")</div>
-                                    <div class="small text-muted">@item.Car.DailyRate.ToString("C")/day</div>
-                                </td>
-                                <td>
-                                    @if (item.IsCancelled)
+                                }
+
+                                <!-- Status Badge -->
+                                <div class="absolute top-4 right-4">
+                                    @if (isCancelled)
                                     {
-                                        <span class="badge bg-danger rounded-pill">
-                                            <i class="bi bi-x-circle me-1"></i>Cancelled
+                                        <span class="px-4 py-2 bg-red-500 text-white rounded-full font-bold text-sm shadow-lg">
+                                            <i class="fas fa-times-circle mr-1"></i>Cancelled
                                         </span>
                                     }
-                                    else if (item.PickupDate > DateTime.Now)
+                                    else if (isActive)
                                     {
-                                        <span class="badge bg-success rounded-pill">
-                                            <i class="bi bi-check-circle me-1"></i>Confirmed
+                                        <span class="px-4 py-2 bg-green-500 text-white rounded-full font-bold text-sm shadow-lg animate-pulse">
+                                            <i class="fas fa-car mr-1"></i>Active
                                         </span>
-                                        <div class="small text-muted mt-1">
-                                            Starts in @((item.PickupDate - DateTime.Now).Days) day@((item.PickupDate - DateTime.Now).Days != 1 ? "s" : ""))
-                                        </div>
                                     }
-                                    else if (item.ReturnDate < DateTime.Now)
+                                    else if (isUpcoming)
                                     {
-                                        <span class="badge bg-secondary rounded-pill">
-                                            <i class="bi bi-clock-history me-1"></i>Completed
+                                        <span class="px-4 py-2 bg-blue-500 text-white rounded-full font-bold text-sm shadow-lg">
+                                            <i class="fas fa-calendar-check mr-1"></i>Confirmed
                                         </span>
                                     }
                                     else
                                     {
-                                        <span class="badge bg-primary rounded-pill">
-                                            <i class="bi bi-lightning-charge me-1"></i>Active
+                                        <span class="px-4 py-2 bg-gray-500 text-white rounded-full font-bold text-sm shadow-lg">
+                                            <i class="fas fa-check-circle mr-1"></i>Completed
                                         </span>
-                                        <div class="small text-muted mt-1">
-                                            Due in @((item.ReturnDate - DateTime.Now).Days) day@((item.ReturnDate - DateTime.Now).Days != 1 ? "s" : ""))
-                                        </div>
                                     }
-                                </td>
-                                <td class="text-end">
-                                    <div class="d-flex justify-content-end gap-2">
-                                        <a asp-action="Details" asp-route-id="@item.BookingId"
-                                           class="btn btn-sm btn-outline-primary"
-                                           title="View Details">
-                                            <i class="bi bi-eye"></i>
-                                        </a>
+                                </div>
+                            </div>
 
-                                        @if (!item.IsCancelled && item.PickupDate > DateTime.Now.AddDays(1))
-                                        {
-                                            <form asp-action="Cancel" asp-route-id="@item.BookingId" method="post">
-                                                <button type="submit"
-                                                        class="btn btn-sm btn-outline-danger"
-                                                        title="Cancel Booking"
-                                                        onclick="return confirm('Are you sure you want to cancel this booking?')">
-                                                    <i class="bi bi-x-circle"></i>
-                                                </button>
-                                            </form>
-                                        }
+                            <!-- Booking Details -->
+                            <div class="lg:w-2/3 p-6 lg:p-8">
+                                <div class="flex flex-col h-full">
+
+                                    <!-- Header -->
+                                    <div class="mb-4">
+                                        <h3 class="text-2xl font-black text-gray-900 mb-1">
+                                            @carBrand @carModel
+                                        </h3>
+                                        <p class="text-gray-600 text-sm">
+                                            Booking #@booking.BookingId • Booked on @booking.BookingDate.ToString("MMM dd, yyyy")
+                                        </p>
                                     </div>
-                                </td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
 
-    @if (!Model.Any())
-    {
-        <div class="text-center py-5">
-            <i class="bi bi-journal-x text-muted" style="font-size: 3rem;"></i>
-            <h5 class="mt-3">No bookings found</h5>
-            <p class="text-muted">You haven't made any bookings yet</p>
-            <a asp-controller="Cars" asp-action="Index" class="btn btn-primary mt-2">
-                <i class="bi bi-car-front me-1"></i>Browse Cars
-            </a>
-        </div>
-    }
-</div>
+                                    <!-- Dates Grid -->
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                                        <div class="bg-blue-50 rounded-xl p-4">
+                                            <p class="text-blue-600 text-xs font-semibold mb-1">
+                                                <i class="fas fa-calendar-plus mr-1"></i>Pickup
+                                            </p>
+                                            <p class="text-lg font-bold text-gray-900">
+                                                @booking.PickupDate.ToString("MMM dd, yyyy")
+                                            </p>
+                                            <p class="text-xs text-gray-600">
+                                                @booking.PickupDate.ToString("dddd")
+                                                @if (isUpcoming && daysUntilPickup > 0)
+                                                {
+                                                    <span class="ml-2 text-blue-600 font-semibold">
+                                                        • Starts in @daysUntilPickup day@(daysUntilPickup != 1 ? "s" : "")
+                                                    </span>
+                                                }
+                                            </p>
+                                        </div>
+                                        <div class="bg-purple-50 rounded-xl p-4">
+                                            <p class="text-purple-600 text-xs font-semibold mb-1">
+                                                <i class="fas fa-calendar-minus mr-1"></i>Return
+                                            </p>
+                                            <p class="text-lg font-bold text-gray-900">
+                                                @booking.ReturnDate.ToString("MMM dd, yyyy")
+                                            </p>
+                                            <p class="text-xs text-gray-600">
+                                                @booking.ReturnDate.ToString("dddd")
+                                                @if (isActive && daysUntilReturn > 0)
+                                                {
+                                                    <span class="ml-2 text-green-600 font-semibold">
+                                                        • Due in @daysUntilReturn day@(daysUntilReturn != 1 ? "s" : "")
+                                                    </span>
+                                                }
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    <!-- Price & Actions -->
+                                    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between mt-auto pt-4 border-t border-gray-200 gap-4">
+                                        <div>
+                                            <p class="text-gray-600 text-sm mb-1">Total Price</p>
+                                            <p class="text-3xl font-black text-primary-600">
+                                                $@booking.TotalPrice.ToString("N2")
+                                            </p>
+                                            <p class="text-xs text-gray-500">@rentalDays day@(rentalDays != 1 ? "s" : "") × $@dailyRate/day</p>
+                                        </div>
+                                        <div class="flex gap-2 w-full sm:w-auto">
+                                            <a asp-action="Details" asp-route-id="@booking.BookingId"
+                                               class="flex-1 sm:flex-none px-6 py-3 bg-primary-500 hover:bg-primary-600 text-white rounded-xl font-bold text-center transition-all duration-300 transform hover:scale-105">
+                                                <i class="fas fa-eye mr-2"></i>View Details
+                                            </a>
+                                            @if (canCancel)
+                                            {
+                                                <form asp-action="Cancel" asp-route-id="@booking.BookingId" method="post" class="flex-1 sm:flex-none"
+                                                      onsubmit="return confirm('Are you sure you want to cancel this booking?');">
+                                                    <button type="submit"
+                                                            class="w-full px-6 py-3 bg-red-500 hover:bg-red-600 text-white rounded-xl font-bold transition-all duration-300 transform hover:scale-105">
+                                                        <i class="fas fa-times-circle mr-2"></i>Cancel
+                                                    </button>
+                                                </form>
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <!-- Empty State -->
+            <div class="bg-white rounded-3xl shadow-lg p-12 text-center">
+                <div class="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <i class="fas fa-calendar-times text-gray-400 text-4xl"></i>
+                </div>
+                <h3 class="text-3xl font-bold text-gray-900 mb-3">No Bookings Yet</h3>
+                <p class="text-gray-600 text-lg mb-8">Start your journey by booking your dream car today!</p>
+                <a asp-controller="Cars" asp-action="Index"
+                   class="inline-flex items-center px-8 py-4 bg-gradient-to-r from-primary-500 to-primary-700 hover:from-primary-600 hover:to-primary-800 text-white rounded-xl font-bold text-lg transform hover:scale-105 transition-all duration-300 shadow-lg">
+                    <i class="fas fa-car mr-3"></i>
+                    Browse Our Fleet
+                </a>
+            </div>
+        }
+
+    </div>
+</section>
+
+@section Scripts {
+    <script>
+        function filterBookings(status) {
+            const cards = document.querySelectorAll('.booking-card');
+            const buttons = document.querySelectorAll('.filter-btn');
+
+            // Update button states
+            buttons.forEach(btn => {
+                btn.classList.remove('active', 'bg-primary-500', 'text-white');
+                btn.classList.add('bg-gray-100', 'text-gray-700');
+            });
+            event.target.classList.remove('bg-gray-100', 'text-gray-700');
+            event.target.classList.add('active', 'bg-primary-500', 'text-white');
+
+            // Filter cards
+            cards.forEach(card => {
+                if (status === 'all') {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = card.dataset.status === status ? 'block' : 'none';
+                }
+            });
+        }
+    </script>
+}

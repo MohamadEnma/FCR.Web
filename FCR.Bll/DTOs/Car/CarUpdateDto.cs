@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
@@ -68,5 +69,6 @@ namespace FCR.Bll.DTOs
 
         // Images 
         public List<string>? ImageUrls { get; set; }
+        public List<IFormFile>? ImageFiles { get; set; }
     }
 }

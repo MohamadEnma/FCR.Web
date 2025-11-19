@@ -1,40 +1,206 @@
-﻿@model FCR.Web.ViewModels.UserViewModel
+﻿@model dynamic
 
-<h2>Edit User</h2>
+@{
+    ViewData["Title"] = "Edit User";
+    var userId = ViewBag.UserId as string;
+    var email = ViewBag.Email as string;
+    var firstName = ViewBag.FirstName as string;
+    var lastName = ViewBag.LastName as string;
+    var isAdmin = ViewBag.IsAdmin as bool? ?? false;
+}
 
-<form asp-action="Edit" method="post">
-    <input type="hidden" asp-for="Id" />
+<!-- Edit User Section -->
+<section class="py-12 bg-gray-50 min-h-screen">
+    <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
 
-    <div class="form-group">
-        <label asp-for="Email"></label>
-        <input asp-for="Email" class="form-control" />
-        <span asp-validation-for="Email" class="text-danger"></span>
+        <!-- Header -->
+        <div class="mb-8">
+            <a asp-controller="Admin" asp-action="Users" class="inline-flex items-center text-primary-600 hover:text-primary-800 font-medium mb-4">
+                <i class="fas fa-arrow-left mr-2"></i>
+                Back to Users
+            </a>
+            <h1 class="text-4xl font-black text-gray-900">Edit User</h1>
+            <p class="text-gray-600 mt-2">Update user information and permissions</p>
+        </div>
+
+        <!-- Success Message -->
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="mb-6 bg-green-50 border-l-4 border-green-500 rounded-lg p-4">
+                <div class="flex items-center">
+                    <i class="fas fa-check-circle text-green-500 mr-3 text-xl"></i>
+                    <p class="text-green-700 font-medium">@TempData["SuccessMessage"]</p>
+                </div>
+            </div>
+        }
+
+        <!-- Error Messages -->
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <div class="mb-6 bg-red-50 border-l-4 border-red-500 rounded-lg p-4">
+                <div class="flex items-center">
+                    <i class="fas fa-exclamation-circle text-red-500 mr-3 text-xl"></i>
+                    <p class="text-red-700 font-medium">@TempData["ErrorMessage"]</p>
+                </div>
+            </div>
+        }
+
+        <div asp-validation-summary="ModelOnly" class="mb-6 bg-red-50 border-l-4 border-red-500 rounded-lg p-4 hidden"></div>
+
+        <!-- Form Card -->
+        <div class="bg-white rounded-2xl shadow-lg p-8">
+            <form asp-action="Edit" method="post" class="space-y-6">
+
+                <input type="hidden" name="Id" value="@userId" />
+
+                <!-- User Info Display -->
+                <div class="bg-blue-50 rounded-xl p-6 border-l-4 border-blue-500">
+                    <div class="flex items-start">
+                        <i class="fas fa-info-circle text-blue-500 mr-3 mt-1"></i>
+                        <div>
+                            <p class="text-blue-700 font-bold mb-2">User ID</p>
+                            <p class="text-blue-600 font-mono text-sm">@userId</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- First Name -->
+                <div>
+                    <label for="FirstName" class="block text-sm font-bold text-gray-700 mb-2">
+                        <i class="fas fa-user text-primary-500 mr-2"></i>First Name
+                    </label>
+                    <input type="text"
+                           name="FirstName"
+                           value="@firstName"
+                           class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-primary-500 focus:ring-2 focus:ring-primary-200 transition-all duration-300 outline-none"
+                           placeholder="Enter first name">
+                </div>
+
+                <!-- Last Name -->
+                <div>
+                    <label for="LastName" class="block text-sm font-bold text-gray-700 mb-2">
+                        <i class="fas fa-user text-primary-500 mr-2"></i>Last Name
+                    </label>
+                    <input type="text"
+                           name="LastName"
+                           value="@lastName"
+                           class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-primary-500 focus:ring-2 focus:ring-primary-200 transition-all duration-300 outline-none"
+                           placeholder="Enter last name">
+                </div>
+
+                <!-- Email (Read-only) -->
+                <div>
+                    <label for="Email" class="block text-sm font-bold text-gray-700 mb-2">
+                        <i class="fas fa-envelope text-primary-500 mr-2"></i>Email Address
+                    </label>
+                    <input type="email"
+                           name="Email"
+                           value="@email"
+                           readonly
+                           class="w-full px-4 py-3 border-2 border-gray-200 bg-gray-50 rounded-xl cursor-not-allowed"
+                           placeholder="user@example.com">
+                    <p class="text-xs text-gray-500 mt-1">
+                        <i class="fas fa-lock mr-1"></i>
+                        Email cannot be changed
+                    </p>
+                </div>
+
+                <!-- Password -->
+                <div>
+                    <label for="Password" class="block text-sm font-bold text-gray-700 mb-2">
+                        <i class="fas fa-lock text-primary-500 mr-2"></i>New Password (Optional)
+                    </label>
+                    <div class="relative">
+                        <input type="password"
+                               name="Password"
+                               id="password-input"
+                               class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-primary-500 focus:ring-2 focus:ring-primary-200 transition-all duration-300 outline-none"
+                               placeholder="Leave blank to keep current password">
+                        <button type="button"
+                                onclick="togglePassword()"
+                                class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-primary-500 transition-colors">
+                            <i class="fas fa-eye" id="toggle-icon"></i>
+                        </button>
+                    </div>
+                    <p class="text-xs text-gray-500 mt-1">
+                        <i class="fas fa-info-circle mr-1"></i>
+                        Leave blank to keep the current password. Otherwise, enter a new password with at least 6 characters.
+                    </p>
+                </div>
+
+                <!-- Admin Role Toggle -->
+                <div class="bg-gray-50 rounded-xl p-6 border-2 border-gray-200">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <label class="text-sm font-bold text-gray-700 mb-1 block">
+                                <i class="fas fa-crown text-yellow-500 mr-2"></i>Administrator Access
+                            </label>
+                            <p class="text-sm text-gray-600">Grant or revoke admin privileges</p>
+                        </div>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox"
+                                   name="IsAdmin"
+                                   value="true"
+                                   @(isAdmin ? "checked" : "")
+                                   class="sr-only peer">
+                            <div class="w-14 h-7 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:start-[4px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-primary-600"></div>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="flex gap-4 pt-4">
+                    <button type="submit"
+                            class="flex-1 px-6 py-3 bg-gradient-to-r from-primary-500 to-primary-700 hover:from-primary-600 hover:to-primary-800 text-white rounded-xl font-bold transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl">
+                        <i class="fas fa-save mr-2"></i>
+                        Save Changes
+                    </button>
+                    <a asp-action="Users"
+                       class="flex-1 px-6 py-3 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-xl font-bold text-center transform hover:scale-105 transition-all duration-300">
+                        <i class="fas fa-times mr-2"></i>
+                        Cancel
+                    </a>
+                </div>
+            </form>
+        </div>
+
+        <!-- Danger Zone -->
+        <div class="mt-8 bg-red-50 border-2 border-red-200 rounded-2xl p-6">
+            <h3 class="text-xl font-bold text-red-700 mb-4 flex items-center">
+                <i class="fas fa-exclamation-triangle mr-2"></i>
+                Danger Zone
+            </h3>
+            <p class="text-red-600 mb-4">Deleting a user is permanent and cannot be undone.</p>
+            <form asp-action="Delete" asp-route-id="@userId" method="post"
+                  onsubmit="return confirm('Are you sure you want to delete this user? This action cannot be undone.');">
+                <button type="submit"
+                        class="px-6 py-3 bg-red-600 hover:bg-red-700 text-white rounded-xl font-bold transform hover:scale-105 transition-all duration-300">
+                    <i class="fas fa-trash-alt mr-2"></i>
+                    Delete User
+                </button>
+            </form>
+        </div>
+
     </div>
-    <div class="form-group">
-        <label asp-for="Password"></label>
-        <input asp-for="Password" class="form-control" />
-        <span asp-validation-for="Password" class="text-danger"></span>
-        <small class="form-text text-muted">Leave blank to keep current password</small>
-    </div>
+</section>
 
-    <div class="form-group">
-        <label asp-for="FirstName"></label>
-        <input asp-for="FirstName" class="form-control" />
-        <span asp-validation-for="FirstName" class="text-danger"></span>
-    </div>
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
 
-    <div class="form-group">
-        <label asp-for="LastName"></label>
-        <input asp-for="LastName" class="form-control" />
-        <span asp-validation-for="LastName" class="text-danger"></span>
-    </div>
+    <script>
+        function togglePassword() {
+            const passwordInput = document.getElementById('password-input');
+            const toggleIcon = document.getElementById('toggle-icon');
 
-    <div class="form-check">
-        <input asp-for="IsAdmin" class="form-check-input" />
-        <label asp-for="IsAdmin" class="form-check-label"></label>
-    </div>
-    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-
-    <button type="submit" class="btn btn-primary">Save</button>
-    <a asp-action="Users" class="btn btn-secondary">Back to List</a>
-</form>
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                toggleIcon.classList.remove('fa-eye');
+                toggleIcon.classList.add('fa-eye-slash');
+            } else {
+                passwordInput.type = 'password';
+                toggleIcon.classList.remove('fa-eye-slash');
+                toggleIcon.classList.add('fa-eye');
+            }
+        }
+    </script>
+}

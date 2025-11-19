@@ -1,0 +1,15 @@
+{
+  "name": "fcr-web",
+  "version": "1.0.0",
+  "description": "FCR Car Rental Web Application",
+  "scripts": {
+    "build:css": "npx tailwindcss -i Styles/input.css -o wwwroot/css/output.css --minify",
+    "watch:css": "npx tailwindcss -i Styles/input.css -o wwwroot/css/output.css --watch"
+  },
+  "keywords": [ "car-rental", "tailwind", "asp.net-core" ],
+  "author": "Mohamad Enma",
+  "license": "MIT",
+  "devDependencies": {
+    "tailwindcss": "^3.4.0"
+  }
+}

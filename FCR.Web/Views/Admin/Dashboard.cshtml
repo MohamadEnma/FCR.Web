@@ -2,38 +2,252 @@
     ViewData["Title"] = "Admin Dashboard";
 }
 
-<div class="container">
-    <h1>Admin Dashboard</h1>
+<!-- Admin Dashboard -->
+<section class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 py-12">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
-    <div class="row mt-4">
-        <div class="col-md-4">
-            <div class="card">
-                <div class="card-body">
-                    <h5 class="card-title">Users</h5>
-                    <p class="card-text">Manage system users and permissions</p>
-                    <a asp-action="Users" class="btn btn-primary">Go to Users</a>
+        <!-- Header -->
+        <div class="mb-12">
+            <div class="flex items-center justify-between mb-4">
+                <div>
+                    <h1 class="text-4xl md:text-5xl font-black text-gray-900 mb-2">
+                        Admin Dashboard
+                    </h1>
+                    <p class="text-gray-600 text-lg">
+                        Welcome back, <span class="font-semibold text-primary-600">@User.Identity?.Name</span>
+                    </p>
+                </div>
+                <div class="text-right">
+                    <p class="text-sm text-gray-500">Current Time (UTC)</p>
+                    <p class="text-lg font-bold text-gray-900" id="current-time">
+                        @DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss")
+                    </p>
+                </div>
+            </div>
+
+            <!-- Quick Stats -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mt-8">
+                <div class="bg-gradient-to-br from-blue-500 to-blue-700 rounded-2xl p-6 text-white shadow-lg transform hover:scale-105 transition-all duration-300">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
+                            <i class="fas fa-users text-2xl"></i>
+                        </div>
+                        <i class="fas fa-arrow-up text-white/80"></i>
+                    </div>
+                    <p class="text-white/80 text-sm font-medium mb-1">Total Users</p>
+                    <p class="text-4xl font-black" id="total-users">--</p>
+                </div>
+
+                <div class="bg-gradient-to-br from-green-500 to-green-700 rounded-2xl p-6 text-white shadow-lg transform hover:scale-105 transition-all duration-300">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
+                            <i class="fas fa-calendar-check text-2xl"></i>
+                        </div>
+                        <i class="fas fa-arrow-up text-white/80"></i>
+                    </div>
+                    <p class="text-white/80 text-sm font-medium mb-1">Total Bookings</p>
+                    <p class="text-4xl font-black" id="total-bookings">--</p>
+                </div>
+
+                <div class="bg-gradient-to-br from-purple-500 to-purple-700 rounded-2xl p-6 text-white shadow-lg transform hover:scale-105 transition-all duration-300">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
+                            <i class="fas fa-car text-2xl"></i>
+                        </div>
+                        <i class="fas fa-arrow-up text-white/80"></i>
+                    </div>
+                    <p class="text-white/80 text-sm font-medium mb-1">Total Cars</p>
+                    <p class="text-4xl font-black" id="total-cars">--</p>
+                </div>
+
+                <div class="bg-gradient-to-br from-orange-500 to-orange-700 rounded-2xl p-6 text-white shadow-lg transform hover:scale-105 transition-all duration-300">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
+                            <i class="fas fa-dollar-sign text-2xl"></i>
+                        </div>
+                        <i class="fas fa-arrow-up text-white/80"></i>
+                    </div>
+                    <p class="text-white/80 text-sm font-medium mb-1">Revenue (MTD)</p>
+                    <p class="text-4xl font-black">$--K</p>
                 </div>
             </div>
         </div>
 
-        <div class="col-md-4">
-            <div class="card">
-                <div class="card-body">
-                    <h5 class="card-title">Bookings</h5>
-                    <p class="card-text">View and manage all bookings</p>
-                    <a asp-controller="Bookings" asp-action="index" class="btn btn-primary">Go to Bookings</a>
+        <!-- Management Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
+
+            <!-- Users Card -->
+            <div class="group bg-white rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden transform hover:-translate-y-2">
+                <div class="bg-gradient-to-br from-blue-500 to-blue-700 p-8 text-white">
+                    <div class="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 group-hover:rotate-12 transition-transform duration-300">
+                        <i class="fas fa-users text-3xl"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-2">Users</h3>
+                    <p class="text-blue-100">Manage system users and permissions</p>
                 </div>
+                <div class="p-6">
+                    <ul class="space-y-3 mb-6">
+                        <li class="flex items-center text-gray-700">
+                            <i class="fas fa-check-circle text-blue-500 mr-3"></i>
+                            View all users
+                        </li>
+                        <li class="flex items-center text-gray-700">
+                            <i class="fas fa-check-circle text-blue-500 mr-3"></i>
+                            Create new users
+                        </li>
+                        <li class="flex items-center text-gray-700">
+                            <i class="fas fa-check-circle text-blue-500 mr-3"></i>
+                            Assign roles
+                        </li>
+                        <li class="flex items-center text-gray-700">
+                            <i class="fas fa-check-circle text-blue-500 mr-3"></i>
+                            Manage permissions
+                        </li>
+                    </ul>
+                    <a asp-action="Users"
+                       class="block w-full px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-700 hover:from-blue-600 hover:to-blue-800 text-white rounded-xl font-bold text-center transform hover:scale-105 transition-all duration-300 shadow-lg">
+                        <i class="fas fa-arrow-right mr-2"></i>
+                        Manage Users
+                    </a>
+                </div>
+            </div>
+
+            <!-- Bookings Card -->
+            <div class="group bg-white rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden transform hover:-translate-y-2">
+                <div class="bg-gradient-to-br from-green-500 to-green-700 p-8 text-white">
+                    <div class="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 group-hover:rotate-12 transition-transform duration-300">
+                        <i class="fas fa-calendar-check text-3xl"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-2">Bookings</h3>
+                    <p class="text-green-100">View and manage all bookings</p>
+                </div>
+                <div class="p-6">
+                    <ul class="space-y-3 mb-6">
+                        <li class="flex items-center text-gray-700">
+                            <i class="fas fa-check-circle text-green-500 mr-3"></i>
+                            View all bookings
+                        </li>
+                        <li class="flex items-center text-gray-700">
+                            <i class="fas fa-check-circle text-green-500 mr-3"></i>
+                            Confirm bookings
+                        </li>
+                        <li class="flex items-center text-gray-700">
+                            <i class="fas fa-check-circle text-green-500 mr-3"></i>
+                            Cancel bookings
+                        </li>
+                        <li class="flex items-center text-gray-700">
+                            <i class="fas fa-check-circle text-green-500 mr-3"></i>
+                            View booking history
+                        </li>
+                    </ul>
+                    <a asp-controller="Bookings" asp-action="Index"
+                       class="block w-full px-6 py-3 bg-gradient-to-r from-green-500 to-green-700 hover:from-green-600 hover:to-green-800 text-white rounded-xl font-bold text-center transform hover:scale-105 transition-all duration-300 shadow-lg">
+                        <i class="fas fa-arrow-right mr-2"></i>
+                        Manage Bookings
+                    </a>
+                </div>
+            </div>
+
+            <!-- Cars Card -->
+            <div class="group bg-white rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden transform hover:-translate-y-2">
+                <div class="bg-gradient-to-br from-purple-500 to-purple-700 p-8 text-white">
+                    <div class="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 group-hover:rotate-12 transition-transform duration-300">
+                        <i class="fas fa-car text-3xl"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-2">Cars</h3>
+                    <p class="text-purple-100">Manage vehicle inventory</p>
+                </div>
+                <div class="p-6">
+                    <ul class="space-y-3 mb-6">
+                        <li class="flex items-center text-gray-700">
+                            <i class="fas fa-check-circle text-purple-500 mr-3"></i>
+                            View all cars
+                        </li>
+                        <li class="flex items-center text-gray-700">
+                            <i class="fas fa-check-circle text-purple-500 mr-3"></i>
+                            Add new vehicles
+                        </li>
+                        <li class="flex items-center text-gray-700">
+                            <i class="fas fa-check-circle text-purple-500 mr-3"></i>
+                            Update availability
+                        </li>
+                        <li class="flex items-center text-gray-700">
+                            <i class="fas fa-check-circle text-purple-500 mr-3"></i>
+                            Manage pricing
+                        </li>
+                    </ul>
+                    <a asp-controller="Cars" asp-action="Index"
+                       class="block w-full px-6 py-3 bg-gradient-to-r from-purple-500 to-purple-700 hover:from-purple-600 hover:to-purple-800 text-white rounded-xl font-bold text-center transform hover:scale-105 transition-all duration-300 shadow-lg">
+                        <i class="fas fa-arrow-right mr-2"></i>
+                        Manage Fleet
+                    </a>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Additional Admin Actions -->
+        <div class="bg-white rounded-3xl shadow-lg p-8">
+            <h2 class="text-2xl font-bold text-gray-900 mb-6">
+                <i class="fas fa-tools text-primary-500 mr-3"></i>
+                Quick Actions
+            </h2>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <a asp-action="Create"
+                   class="flex flex-col items-center justify-center p-6 bg-blue-50 hover:bg-blue-100 rounded-2xl transition-all duration-300 transform hover:scale-105 group">
+                    <div class="w-12 h-12 bg-blue-500 rounded-xl flex items-center justify-center mb-3 group-hover:rotate-12 transition-transform">
+                        <i class="fas fa-user-plus text-white text-xl"></i>
+                    </div>
+                    <span class="font-semibold text-gray-700">Add User</span>
+                </a>
+
+                <a asp-controller="Bookings" asp-action="Index"
+                   class="flex flex-col items-center justify-center p-6 bg-green-50 hover:bg-green-100 rounded-2xl transition-all duration-300 transform hover:scale-105 group">
+                    <div class="w-12 h-12 bg-green-500 rounded-xl flex items-center justify-center mb-3 group-hover:rotate-12 transition-transform">
+                        <i class="fas fa-calendar-plus text-white text-xl"></i>
+                    </div>
+                    <span class="font-semibold text-gray-700">New Booking</span>
+                </a>
+
+                <a asp-controller="Cars" asp-action="Create"
+                   class="flex flex-col items-center justify-center p-6 bg-purple-50 hover:bg-purple-100 rounded-2xl transition-all duration-300 transform hover:scale-105 group">
+                    <div class="w-12 h-12 bg-purple-500 rounded-xl flex items-center justify-center mb-3 group-hover:rotate-12 transition-transform">
+                        <i class="fas fa-plus-circle text-white text-xl"></i>
+                    </div>
+                    <span class="font-semibold text-gray-700">Add Car</span>
+                </a>
+
+                <a asp-action="Statistics"
+                   class="flex flex-col items-center justify-center p-6 bg-orange-50 hover:bg-orange-100 rounded-2xl transition-all duration-300 transform hover:scale-105 group">
+                    <div class="w-12 h-12 bg-orange-500 rounded-xl flex items-center justify-center mb-3 group-hover:rotate-12 transition-transform">
+                        <i class="fas fa-chart-line text-white text-xl"></i>
+                    </div>
+                    <span class="font-semibold text-gray-700">Statistics</span>
+                </a>
             </div>
         </div>
 
-        <div class="col-md-4">
-            <div class="card">
-                <div class="card-body">
-                    <h5 class="card-title">Cars</h5>
-                    <p class="card-text">Manage vehicle inventory</p>
-                    <a asp-controller="Cars" asp-action="Index" class="btn btn-primary">Go to Cars</a>
-                </div>
-            </div>
-        </div>
     </div>
-</div>
+</section>
+
+@section Scripts {
+    <script>
+        // Update current time every second
+        function updateTime() {
+            const now = new Date();
+            const utcTime = now.toISOString().replace('T', ' ').substring(0, 19);
+            document.getElementById('current-time').textContent = utcTime;
+        }
+
+        setInterval(updateTime, 1000);
+
+        // Load statistics (you can connect this to your API)
+        document.addEventListener('DOMContentLoaded', function() {
+            // Example: Load stats from API
+            // For now, using placeholder values
+            document.getElementById('total-users').textContent = '127';
+            document.getElementById('total-bookings').textContent = '856';
+            document.getElementById('total-cars').textContent = '50';
+        });
+    </script>
+}

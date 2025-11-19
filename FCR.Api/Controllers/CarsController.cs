@@ -179,9 +179,10 @@ namespace FCR.Api.Controllers
         /// </summary>
         [HttpPost]
         [Authorize(Roles = "Admin")]
+        [Consumes("multipart/form-data")]
         [ProducesResponseType(typeof(ServiceResponse<CarResponseDto>), StatusCodes.Status201Created)]
         [ProducesResponseType(typeof(ServiceResponse<CarResponseDto>), StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> CreateCar([FromBody] CarCreateDto dto)
+        public async Task<IActionResult> CreateCar([FromForm] CarCreateDto dto)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ServiceResponse<CarResponseDto>.ErrorResponse(
@@ -206,10 +207,11 @@ namespace FCR.Api.Controllers
         /// </summary>
         [HttpPut("{id}")]
         [Authorize(Roles = "Admin")]
+        [Consumes("multipart/form-data")]
         [ProducesResponseType(typeof(ServiceResponse<CarResponseDto>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ServiceResponse<CarResponseDto>), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ServiceResponse<CarResponseDto>), StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> UpdateCar(int id, [FromBody] CarUpdateDto dto)
+        public async Task<IActionResult> UpdateCar(int id, [FromForm] CarUpdateDto dto)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ServiceResponse<CarResponseDto>.ErrorResponse(
@@ -230,9 +232,10 @@ namespace FCR.Api.Controllers
         /// </summary>
         [HttpPatch("{id}/availability")]
         [Authorize(Roles = "Admin")]
+        [Consumes("multipart/form-data")]
         [ProducesResponseType(typeof(ServiceResponse<bool>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ServiceResponse<bool>), StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> UpdateAvailability(int id, [FromBody] UpdateCarAvailabilityDto dto)
+        public async Task<IActionResult> UpdateAvailability(int id, [FromForm] UpdateCarAvailabilityDto dto)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ServiceResponse<bool>.ErrorResponse(
@@ -273,6 +276,7 @@ namespace FCR.Api.Controllers
         /// </summary>
         [HttpPost("{carId}/images")]
         [Authorize(Roles = "Admin")]
+        [Consumes("multipart/form-data")]
         [ProducesResponseType(typeof(ServiceResponse<IEnumerable<ImageResponseDto>>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ServiceResponse<IEnumerable<ImageResponseDto>>), StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> UploadCarImages(int carId, [FromForm] List<IFormFile> images)

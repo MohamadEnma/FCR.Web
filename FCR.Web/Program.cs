@@ -21,11 +21,18 @@ namespace FCR.Web
 
             builder.Services.AddHttpContextAccessor();
 
-            builder.Services.AddAuthentication(options =>
-            {
-                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-            })
+            builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+    .AddCookie(options =>
+    {
+        options.LoginPath = "/Account/Login";
+        options.LogoutPath = "/Account/Logout";
+        options.AccessDeniedPath = "/Account/AccessDenied";
+        options.ExpireTimeSpan = TimeSpan.FromHours(24);
+        options.SlidingExpiration = true;
+        options.Cookie.HttpOnly = true;
+        options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+        options.Cookie.SameSite = SameSiteMode.Lax;
+    })
  .AddJwtBearer(options =>
  {
      options.TokenValidationParameters = new TokenValidationParameters
@@ -34,10 +41,10 @@ namespace FCR.Web
          ValidateAudience = true,
          ValidateLifetime = true,
          ValidateIssuerSigningKey = true,
-         ValidIssuer = builder.Configuration["JwtSettings:Issuer"],
-         ValidAudience = builder.Configuration["JwtSettings:Audience"],
+         ValidIssuer = builder.Configuration["Jwt:Issuer"],
+         ValidAudience = builder.Configuration["Jwt:Audience"],
          IssuerSigningKey = new SymmetricSecurityKey(
-             Encoding.UTF8.GetBytes(builder.Configuration["JwtSettings:SecretKey"])),
+             Encoding.UTF8.GetBytes(builder.Configuration["Jwt:SecretKey"])),
 
          // IMPORTANT: This maps the role claim correctly
          RoleClaimType = "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"

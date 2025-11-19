@@ -1,0 +1,174 @@
+﻿@model FCR.Web.Services.Base.RegisterDto
+
+@{
+    ViewData["Title"] = "Register";
+}
+
+<!-- Register Section -->
+<section class="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div class="absolute inset-0 overflow-hidden">
+        <div class="absolute top-20 left-20 w-72 h-72 bg-green-200/30 rounded-full blur-3xl animate-float"></div>
+        <div class="absolute bottom-20 right-20 w-96 h-96 bg-teal-200/30 rounded-full blur-3xl animate-float" style="animation-delay: 1s;"></div>
+    </div>
+
+    <div class="relative max-w-md w-full">
+        <!-- Logo & Title -->
+        <div class="text-center mb-8">
+            <a asp-controller="Home" asp-action="Index" class="inline-flex items-center justify-center space-x-3 mb-6">
+                <div class="w-16 h-16 bg-gradient-to-br from-green-500 to-emerald-700 rounded-2xl flex items-center justify-center transform hover:rotate-12 transition-transform duration-300">
+                    <i class="fas fa-car text-white text-2xl"></i>
+                </div>
+                <span class="text-3xl font-bold bg-gradient-to-r from-green-600 to-emerald-800 bg-clip-text text-transparent">
+                    Friberg Rentals
+                </span>
+            </a>
+            <h2 class="text-4xl font-black text-gray-900 mb-2">Create Account</h2>
+            <p class="text-gray-600">Join us and start your journey</p>
+        </div>
+
+        <!-- Register Card -->
+        <div class="bg-white rounded-3xl shadow-2xl p-8 md:p-10">
+
+            <!-- Error Messages -->
+            @if (TempData["ErrorMessage"] != null)
+            {
+                <div class="mb-6 bg-red-50 border-l-4 border-red-500 rounded-lg p-4">
+                    <div class="flex items-center">
+                        <i class="fas fa-exclamation-circle text-red-500 mr-3"></i>
+                        <p class="text-red-700 font-medium">@TempData["ErrorMessage"]</p>
+                    </div>
+                </div>
+            }
+
+            <div asp-validation-summary="ModelOnly" class="mb-6 bg-red-50 border-l-4 border-red-500 rounded-lg p-4 hidden"></div>
+
+            <!-- Register Form -->
+            <form method="post" asp-controller="Auth" asp-action="Register" class="space-y-5">
+
+                <!-- First Name -->
+                <div>
+                    <label asp-for="FirstName" class="block text-sm font-bold text-gray-700 mb-2">
+                        <i class="fas fa-user text-green-500 mr-2"></i>First Name
+                    </label>
+                    <input asp-for="FirstName"
+                           type="text"
+                           required
+                           placeholder="John"
+                           class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-green-500 focus:ring-2 focus:ring-green-200 transition-all duration-300 outline-none">
+                    <span asp-validation-for="FirstName" class="text-red-500 text-sm mt-1"></span>
+                </div>
+
+                <!-- Last Name -->
+                <div>
+                    <label asp-for="LastName" class="block text-sm font-bold text-gray-700 mb-2">
+                        <i class="fas fa-user text-green-500 mr-2"></i>Last Name
+                    </label>
+                    <input asp-for="LastName"
+                           type="text"
+                           required
+                           placeholder="Doe"
+                           class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-green-500 focus:ring-2 focus:ring-green-200 transition-all duration-300 outline-none">
+                    <span asp-validation-for="LastName" class="text-red-500 text-sm mt-1"></span>
+                </div>
+
+                <!-- Email -->
+                <div>
+                    <label asp-for="Email" class="block text-sm font-bold text-gray-700 mb-2">
+                        <i class="fas fa-envelope text-green-500 mr-2"></i>Email Address
+                    </label>
+                    <input asp-for="Email"
+                           type="email"
+                           required
+                           placeholder="john@example.com"
+                           class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-green-500 focus:ring-2 focus:ring-green-200 transition-all duration-300 outline-none">
+                    <span asp-validation-for="Email" class="text-red-500 text-sm mt-1"></span>
+                </div>
+
+                <!-- Password -->
+                <div>
+                    <label asp-for="Password" class="block text-sm font-bold text-gray-700 mb-2">
+                        <i class="fas fa-lock text-green-500 mr-2"></i>Password
+                    </label>
+                    <div class="relative">
+                        <input asp-for="Password"
+                               type="password"
+                               id="password-input"
+                               required
+                               placeholder="Create a strong password"
+                               class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-green-500 focus:ring-2 focus:ring-green-200 transition-all duration-300 outline-none">
+                        <button type="button"
+                                onclick="togglePassword()"
+                                class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-green-500 transition-colors">
+                            <i class="fas fa-eye" id="toggle-icon"></i>
+                        </button>
+                    </div>
+                    <span asp-validation-for="Password" class="text-red-500 text-sm mt-1"></span>
+                    <p class="text-xs text-gray-500 mt-1">Must be at least 8 characters with uppercase, lowercase, and number</p>
+                </div>
+
+                <!-- Terms & Conditions -->
+                <div class="flex items-start">
+                    <input type="checkbox" required class="w-4 h-4 mt-1 text-green-600 border-gray-300 rounded focus:ring-green-500">
+                    <label class="ml-2 text-sm text-gray-700">
+                        I agree to the
+                        <a asp-controller="Home" asp-action="Privacy" class="font-semibold text-green-600 hover:text-green-800" target="_blank">Terms of Service</a>
+                        and
+                        <a asp-controller="Home" asp-action="Privacy" class="font-semibold text-green-600 hover:text-green-800" target="_blank">Privacy Policy</a>
+                    </label>
+                </div>
+
+                <!-- Submit Button -->
+                <button type="submit"
+                        class="w-full px-6 py-4 bg-gradient-to-r from-green-500 to-emerald-700 hover:from-green-600 hover:to-emerald-800 text-white rounded-xl font-bold text-lg transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-2xl flex items-center justify-center group">
+                    <i class="fas fa-user-plus mr-2 group-hover:translate-x-1 transition-transform"></i>
+                    Create Account
+                </button>
+            </form>
+
+            <!-- Login Link -->
+            <div class="mt-8 text-center">
+                <p class="text-gray-600">
+                    Already have an account?
+                    <a asp-controller="Auth" asp-action="Login" class="font-bold text-green-600 hover:text-green-800 transition-colors">
+                        Sign in
+                    </a>
+                </p>
+            </div>
+        </div>
+
+        <!-- Back to Home -->
+        <div class="text-center mt-6">
+            <a asp-controller="Home" asp-action="Index" class="text-gray-600 hover:text-green-600 font-medium transition-colors">
+                <i class="fas fa-arrow-left mr-2"></i>Back to Home
+            </a>
+        </div>
+    </div>
+</section>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        function togglePassword() {
+            const passwordInput = document.getElementById('password-input');
+            const toggleIcon = document.getElementById('toggle-icon');
+
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                toggleIcon.classList.remove('fa-eye');
+                toggleIcon.classList.add('fa-eye-slash');
+            } else {
+                passwordInput.type = 'password';
+                toggleIcon.classList.remove('fa-eye-slash');
+                toggleIcon.classList.add('fa-eye');
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const validationSummary = document.querySelector('[asp-validation-summary]');
+            if (validationSummary && validationSummary.querySelector('li')) {
+                validationSummary.classList.remove('hidden');
+            }
+        });
+    </script>
+}

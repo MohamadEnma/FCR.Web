@@ -20,7 +20,7 @@ namespace FCR.Web.Controllers
 
         // GET: Auth/Login
         [HttpGet]
-        public IActionResult Login(string returnUrl = null)
+        public IActionResult Login(string? returnUrl = null)
         {
             ViewData["ReturnUrl"] = returnUrl;
             return View();
@@ -29,7 +29,7 @@ namespace FCR.Web.Controllers
         // POST: Auth/Login
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Login(LoginDto model, string returnUrl = null)
+        public async Task<IActionResult> Login(LoginDto model, string? returnUrl = null)
         {
             ViewData["ReturnUrl"] = returnUrl;
 
@@ -42,33 +42,53 @@ namespace FCR.Web.Controllers
             {
                 var response = await _apiClient.LoginAsync(model);
 
-                // Parse JWT token and create claims
-                var handler = new JwtSecurityTokenHandler();
-                var jwtToken = handler.ReadJwtToken(response.Token);
-
-                var claims = jwtToken.Claims.ToList();
-                claims.Add(new Claim("AccessToken", response.Token));
-
-                var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-                var authProperties = new AuthenticationProperties
+                // Check if login was successful
+                if (response?.Success == true && response.Data != null)
                 {
-                    IsPersistent = true,
-                    ExpiresUtc = jwtToken.ValidTo
-                };
+                    var loginData = response.Data;
 
-                await HttpContext.SignInAsync(
-                    CookieAuthenticationDefaults.AuthenticationScheme,
-                    new ClaimsPrincipal(claimsIdentity),
-                    authProperties);
+                    // Parse JWT token and create claims
+                    var handler = new JwtSecurityTokenHandler();
+                    var jwtToken = handler.ReadJwtToken(loginData.Token);
 
-                TempData["SuccessMessage"] = "Login successful!";
+                    var claims = jwtToken.Claims.ToList();
+                    claims.Add(new Claim("AccessToken", loginData.Token));
 
-                if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
-                {
-                    return Redirect(returnUrl);
+                    var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+                    var authProperties = new AuthenticationProperties
+                    {
+                        IsPersistent = true,
+                        ExpiresUtc = jwtToken.ValidTo
+                    };
+
+                    await HttpContext.SignInAsync(
+                        CookieAuthenticationDefaults.AuthenticationScheme,
+                        new ClaimsPrincipal(claimsIdentity),
+                        authProperties);
+
+                    // Store JWT token in cookie for API calls
+                    Response.Cookies.Append("jwt", loginData.Token, new CookieOptions
+                    {
+                        HttpOnly = true,
+                        Secure = true,
+                        SameSite = SameSiteMode.Strict,
+                        Expires = jwtToken.ValidTo
+                    });
+
+                    TempData["SuccessMessage"] = "Login successful!";
+
+                    if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
+                    {
+                        return Redirect(returnUrl);
+                    }
+
+                    return RedirectToAction("Index", "Home");
                 }
-
-                return RedirectToAction("Index", "Home");
+                else
+                {
+                    ModelState.AddModelError("", response?.Message ?? "Login failed.");
+                    return View(model);
+                }
             }
             catch (ApiException ex)
             {
@@ -99,8 +119,16 @@ namespace FCR.Web.Controllers
             {
                 var response = await _apiClient.RegisterAsync(model);
 
-                TempData["SuccessMessage"] = "Registration successful! Please login.";
-                return RedirectToAction(nameof(Login));
+                if (response?.Success == true)
+                {
+                    TempData["SuccessMessage"] = "Registration successful! Please login.";
+                    return RedirectToAction(nameof(Login));
+                }
+                else
+                {
+                    ModelState.AddModelError("", response?.Message ?? "Registration failed.");
+                    return View(model);
+                }
             }
             catch (ApiException ex)
             {
@@ -116,8 +144,18 @@ namespace FCR.Web.Controllers
         public async Task<IActionResult> Logout()
         {
             await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+
+            // Remove JWT cookie
+            Response.Cookies.Delete("jwt");
+
             TempData["SuccessMessage"] = "You have been logged out.";
             return RedirectToAction("Index", "Home");
+        }
+
+        // GET: Auth/AccessDenied
+        public IActionResult AccessDenied()
+        {
+            return View();
         }
     }
 }

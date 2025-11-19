@@ -5,8 +5,10 @@ using FCR.Dal.Classes;
 using FCR.Dal.Repositories.Interfaces;
 using Mapster;
 using MapsterMapper;
+using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -24,23 +26,40 @@ namespace FCR.Bll.Services
             _mapper = mapper;
         }
 
+        #region Public Methods
+
         public async Task<ServiceResponse<CarResponseDto>> CreateCarAsync(
             CarCreateDto carDto,
             CancellationToken cancellationToken = default)
         {
             try
             {
-                
+                // 1. Create car entity
                 var car = _mapper.Map<Car>(carDto);
-
                 await _unitOfWork.Cars.AddAsync(car, cancellationToken);
                 await _unitOfWork.SaveChangesAsync(cancellationToken);
 
+                // 2. Process and save images
+                var images = await ProcessImagesAsync(
+                    car.CarId,
+                    carDto.ImageUrls,
+                    carDto.ImageFiles,
+                    $"{car.Brand} {car.Model}",
+                    cancellationToken);
+
+                if (images.Any())
+                {
+                    await _unitOfWork.Images.AddRangeAsync(images, cancellationToken);
+                    await _unitOfWork.SaveChangesAsync(cancellationToken);
+                }
+
+                // 3. Reload and return
+                car = await _unitOfWork.Cars.GetCarWithImagesAsync(car.CarId, cancellationToken);
                 var response = _mapper.Map<CarResponseDto>(car);
 
                 return ServiceResponse<CarResponseDto>.SuccessResponse(
                     response,
-                    "Car created successfully");
+                    "Car created successfully with images");
             }
             catch (Exception ex)
             {
@@ -57,7 +76,8 @@ namespace FCR.Bll.Services
         {
             try
             {
-                var car = await _unitOfWork.Cars.GetByIdAsync(carId, cancellationToken);
+                // 1. Get existing car
+                var car = await _unitOfWork.Cars.GetCarWithImagesAsync(carId, cancellationToken);
                 if (car == null || car.IsDeleted)
                 {
                     return ServiceResponse<CarResponseDto>.ErrorResponse(
@@ -65,12 +85,30 @@ namespace FCR.Bll.Services
                         "Invalid car ID");
                 }
 
-               
+                // 2. Update car properties
                 carDto.Adapt(car);
-
+                car.UpdatedAt = DateTime.UtcNow;
                 await _unitOfWork.Cars.UpdateAsync(car, cancellationToken);
+
+                // 3. Add new images if provided
+                var hasExistingPrimary = car.Images?.Any(i => i.IsPrimary) ?? false;
+                var newImages = await ProcessImagesAsync(
+                    car.CarId,
+                    carDto.ImageUrls,
+                    carDto.ImageFiles,
+                    $"{car.Brand} {car.Model}",
+                    cancellationToken,
+                    !hasExistingPrimary);
+
+                if (newImages.Any())
+                {
+                    await _unitOfWork.Images.AddRangeAsync(newImages, cancellationToken);
+                }
+
                 await _unitOfWork.SaveChangesAsync(cancellationToken);
 
+                // 4. Reload and return
+                car = await _unitOfWork.Cars.GetCarWithImagesAsync(carId, cancellationToken);
                 var response = _mapper.Map<CarResponseDto>(car);
 
                 return ServiceResponse<CarResponseDto>.SuccessResponse(
@@ -91,7 +129,7 @@ namespace FCR.Bll.Services
         {
             try
             {
-                var car = await _unitOfWork.Cars.GetByIdAsync(carId, cancellationToken);
+                var car = await _unitOfWork.Cars.GetCarWithImagesAsync(carId, cancellationToken);
                 if (car == null)
                 {
                     return ServiceResponse<bool>.ErrorResponse(
@@ -99,8 +137,13 @@ namespace FCR.Bll.Services
                         "Invalid car ID");
                 }
 
+                // Soft delete car
                 car.IsDeleted = true;
                 car.IsAvailable = false;
+                car.UpdatedAt = DateTime.UtcNow;
+
+                // Delete physical image files
+                await DeletePhysicalImagesAsync(car.Images);
 
                 await _unitOfWork.Cars.UpdateAsync(car, cancellationToken);
                 await _unitOfWork.SaveChangesAsync(cancellationToken);
@@ -116,7 +159,6 @@ namespace FCR.Bll.Services
                     ex.Message);
             }
         }
-
         public async Task<ServiceResponse<CarResponseDto>> GetCarByIdAsync(
             int carId,
             CancellationToken cancellationToken = default)
@@ -407,5 +449,99 @@ namespace FCR.Bll.Services
             }
         }
 
+        #endregion
+
+        #region Private Helper Methods
+
+        private async Task<List<Image>> ProcessImagesAsync(
+            int carId,
+            List<string>? imageUrls,
+            List<IFormFile>? imageFiles,
+            string altText,
+            CancellationToken cancellationToken,
+            bool setFirstAsPrimary = true)
+        {
+            var images = new List<Image>();
+            int displayOrder = 0;
+
+            // Process URL-based images
+            if (imageUrls != null && imageUrls.Any())
+            {
+                foreach (var url in imageUrls.Where(u => !string.IsNullOrWhiteSpace(u)))
+                {
+                    images.Add(new Image
+                    {
+                        CarId = carId,
+                        Url = url.Trim(),
+                        AltText = altText,
+                        IsPrimary = setFirstAsPrimary && displayOrder == 0,
+                        DisplayOrder = displayOrder++,
+                        UploadedAt = DateTime.UtcNow
+                    });
+                }
+            }
+
+            // Process file uploads
+            if (imageFiles != null && imageFiles.Any())
+            {
+                foreach (var file in imageFiles)
+                {
+                    var imageUrl = await SaveImageFileAsync(file, cancellationToken);
+
+                    images.Add(new Image
+                    {
+                        CarId = carId,
+                        Url = imageUrl,
+                        AltText = altText,
+                        IsPrimary = setFirstAsPrimary && displayOrder == 0,
+                        DisplayOrder = displayOrder++,
+                        UploadedAt = DateTime.UtcNow
+                    });
+                }
+            }
+
+            return images;
+        }
+
+        private async Task<string> SaveImageFileAsync(
+            IFormFile file,
+            CancellationToken cancellationToken)
+        {
+            var fileName = $"{Guid.NewGuid()}_{Path.GetFileName(file.FileName)}";
+            var uploadPath = Path.Combine("wwwroot", "images", "cars", fileName);
+
+            Directory.CreateDirectory(Path.GetDirectoryName(uploadPath)!);
+
+            using (var stream = new FileStream(uploadPath, FileMode.Create))
+            {
+                await file.CopyToAsync(stream, cancellationToken);
+            }
+
+            return $"/images/cars/{fileName}";
+        }
+
+        private Task DeletePhysicalImagesAsync(ICollection<Image>? images)
+        {
+            if (images == null || !images.Any())
+                return Task.CompletedTask;
+
+            foreach (var image in images)
+            {
+                if (image.Url.StartsWith("/images/cars/"))
+                {
+                    var filePath = Path.Combine("wwwroot", image.Url.TrimStart('/'));
+                    if (File.Exists(filePath))
+                    {
+                        File.Delete(filePath);
+                    }
+                }
+            }
+
+            return Task.CompletedTask;
+        }
+
+        #endregion
     }
 }
+
+ 

@@ -1,151 +1,304 @@
-﻿@model FCR.Web.ViewModels.BookingViewModel
+﻿@model FCR.Web.Services.Base.BookingCreateDto
 
 @{
-    ViewData["Title"] = $"Book {Model.CarBrand} {Model.CarModel}";
+    ViewData["Title"] = $"Book {ViewBag.CarBrand} {ViewBag.CarModel}";
+    var car = ViewBag.Car as FCR.Web.Services.Base.CarResponseDto;
+    var images = ViewBag.CarImages as List<FCR.Web.Services.Base.ImageResponseDto>;
 }
 
-<div class="container py-4">
-    <div class="row">
-        <div class="col-lg-8 mx-auto">
-            <div class="card shadow-sm">
-                <div class="card-header bg-primary text-white">
-                    <h2 class="h5 mb-0">
-                        <i class="bi bi-calendar-check me-2"></i>Book @Model.CarBrand @Model.CarModel
-                    </h2>
-                </div>
-                <div class="card-body">
-                    <div class="row">
-                        <!-- Car Images Gallery -->
-                        <div class="col-md-6 mb-4 mb-md-0">
-                            @if (Model.CarImages.Any())
-                            {
-                                <div id="carGallery" class="carousel slide" data-bs-ride="carousel">
-                                    <div class="carousel-inner rounded-3">
-                                        @for (int i = 0; i < Model.CarImages.Count; i++)
-                                        {
-                                            <div class="carousel-item @(i == 0 ? "active" : "")">
-                                                <img src="@Model.CarImages[i].Url"
-                                                     class="d-block w-100 img-fluid"
-                                                     style="height: 300px; object-fit: cover;"
-                                                     alt="@Model.CarImages[i].AltText">
-                                            </div>
-                                        }
-                                    </div>
-                                    <button class="carousel-control-prev" type="button" data-bs-target="#carGallery" data-bs-slide="prev">
-                                        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-                                        <span class="visually-hidden">Previous</span>
-                                    </button>
-                                    <button class="carousel-control-next" type="button" data-bs-target="#carGallery" data-bs-slide="next">
-                                        <span class="carousel-control-next-icon" aria-hidden="true"></span>
-                                        <span class="visually-hidden">Next</span>
-                                    </button>
-                                </div>
-                            }
-                            else
-                            {
-                                <div class="text-center py-4 bg-light rounded">
-                                    <i class="bi bi-image text-muted" style="font-size: 3rem;"></i>
-                                    <p class="mt-2 text-muted">No images available</p>
-                                </div>
-                            }
+<!-- Booking Create Section -->
+<section class="py-12 bg-gradient-to-br from-gray-50 to-gray-100 min-h-screen">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
 
-                            <div class="mt-3">
-                                <h5 class="mb-2">@Model.CarBrand @Model.CarModel</h5>
-                                <div class="d-flex justify-content-between text-muted">
-                                    <span><i class="bi bi-speedometer2 me-1"></i> @Model.DailyRate.ToString("C")/day</span>
-                                    
+        <!-- Header -->
+        <div class="mb-8">
+            <a asp-controller="Cars" asp-action="Details" asp-route-id="@Model.CarId"
+               class="inline-flex items-center text-primary-600 hover:text-primary-800 font-medium mb-4">
+                <i class="fas fa-arrow-left mr-2"></i>
+                Back to Car Details
+            </a>
+            <h1 class="text-4xl font-black text-gray-900">Complete Your Booking</h1>
+            <p class="text-gray-600 mt-2">Reserve your dream car today</p>
+        </div>
+
+        <!-- Main Booking Card -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+
+            <!-- Left Column - Car Details -->
+            <div class="lg:col-span-2">
+                <div class="bg-white rounded-3xl shadow-xl overflow-hidden">
+
+                    <!-- Car Images Gallery -->
+                    @if (images != null && images.Any())
+                    {
+                        <div class="relative">
+                            <div id="carouselImages" class="relative h-96 overflow-hidden">
+                                @for (int i = 0; i < images.Count; i++)
+                                {
+                                    <div class="carousel-item @(i == 0 ? "active" : "hidden") duration-700 ease-in-out">
+                                        <img src="@images[i].Url"
+                                             class="absolute block w-full h-full object-cover"
+                                             alt="@images[i].AltText">
+                                    </div>
+                                }
+                            </div>
+
+                            @if (images.Count > 1)
+                            {
+                                <!-- Previous button -->
+                                <button type="button"
+                                        class="absolute top-1/2 left-4 z-10 -translate-y-1/2 w-12 h-12 bg-white/80 hover:bg-white rounded-full flex items-center justify-center transition-all duration-300 shadow-lg"
+                                        onclick="previousSlide()">
+                                    <i class="fas fa-chevron-left text-gray-800"></i>
+                                </button>
+
+                                <!-- Next button -->
+                                <button type="button"
+                                        class="absolute top-1/2 right-4 z-10 -translate-y-1/2 w-12 h-12 bg-white/80 hover:bg-white rounded-full flex items-center justify-center transition-all duration-300 shadow-lg"
+                                        onclick="nextSlide()">
+                                    <i class="fas fa-chevron-right text-gray-800"></i>
+                                </button>
+
+                                <!-- Indicators -->
+                                <div class="absolute bottom-5 left-1/2 z-10 flex -translate-x-1/2 space-x-3">
+                                    @for (int i = 0; i < images.Count; i++)
+                                    {
+                                        <button type="button"
+                                                class="carousel-indicator w-3 h-3 rounded-full @(i == 0 ? "bg-white" : "bg-white/50")"
+                                                onclick="goToSlide(@i)">
+                                        </button>
+                                    }
                                 </div>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="h-96 bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
+                            <div class="text-center">
+                                <i class="fas fa-car text-gray-400 text-6xl mb-4"></i>
+                                <p class="text-gray-500">No images available</p>
                             </div>
                         </div>
+                    }
 
-                        <!-- Booking Form -->
-                        <div class="col-md-6">
-                            <form asp-action="Create" id="bookingForm">
-                                <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
-                                <input type="hidden" asp-for="CarId" />
-                                <input type="hidden" asp-for="DailyRate" />
+                    <!-- Car Info -->
+                    <div class="p-8">
+                        <div class="mb-6">
+                            <h2 class="text-3xl font-black text-gray-900 mb-2">
+                                @car?.Brand @car?.Model
+                            </h2>
+                            <p class="text-gray-600">@car?.Category • @car?.Year</p>
+                        </div>
 
-                                <div class="mb-3">
-                                    <label asp-for="PickupDate" class="form-label fw-bold"></label>
-                                    <div class="input-group">
-                                        <span class="input-group-text"><i class="bi bi-calendar-plus"></i></span>
-                                        <input asp-for="PickupDate"
-                                               class="form-control"
-                                               type="date"
-                                               min="@DateTime.Today.ToString("yyyy-MM-dd")"
-                                               onchange="calculateTotal()">
-                                    </div>
-                                    <span asp-validation-for="PickupDate" class="text-danger small"></span>
+                        <!-- Car Features -->
+                        @if (car != null)
+                        {
+                            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                                <div class="bg-blue-50 rounded-xl p-4 text-center">
+                                    <i class="fas fa-gas-pump text-blue-600 text-2xl mb-2"></i>
+                                    <p class="text-xs text-gray-600 mb-1">Fuel Type</p>
+                                    <p class="font-bold text-gray-900">@car.FuelType</p>
                                 </div>
-
-                                <div class="mb-3">
-                                    <label asp-for="ReturnDate" class="form-label fw-bold"></label>
-                                    <div class="input-group">
-                                        <span class="input-group-text"><i class="bi bi-calendar-minus"></i></span>
-                                        <input asp-for="ReturnDate"
-                                               class="form-control"
-                                               type="date"
-                                               min="@DateTime.Today.AddDays(1).ToString("yyyy-MM-dd")"
-                                               onchange="calculateTotal()">
-                                    </div>
-                                    <span asp-validation-for="ReturnDate" class="text-danger small"></span>
+                                <div class="bg-green-50 rounded-xl p-4 text-center">
+                                    <i class="fas fa-cog text-green-600 text-2xl mb-2"></i>
+                                    <p class="text-xs text-gray-600 mb-1">Transmission</p>
+                                    <p class="font-bold text-gray-900">@car.Transmission</p>
                                 </div>
-
-                                <div class="card bg-light mb-4">
-                                    <div class="card-body">
-                                        <div class="d-flex justify-content-between align-items-center">
-                                            <h6 class="mb-0">Estimated Total:</h6>
-                                            <div id="totalPrice" class="h4 mb-0 text-primary">$0.00</div>
-                                        </div>
-                                        <div class="text-muted small mt-1">
-                                            <span id="totalDays">0 days</span> × @Model.DailyRate.ToString("C")/day
-                                        </div>
-                                    </div>
+                                <div class="bg-purple-50 rounded-xl p-4 text-center">
+                                    <i class="fas fa-users text-purple-600 text-2xl mb-2"></i>
+                                    <p class="text-xs text-gray-600 mb-1">Seats</p>
+                                    <p class="font-bold text-gray-900">@car.Seats</p>
                                 </div>
+                                <div class="bg-orange-50 rounded-xl p-4 text-center">
+                                    <i class="fas fa-tag text-orange-600 text-2xl mb-2"></i>
+                                    <p class="text-xs text-gray-600 mb-1">Daily Rate</p>
+                                    <p class="font-bold text-gray-900">$@car.DailyRate</p>
+                                </div>
+                            </div>
+                        }
 
-                                <button type="submit" class="btn btn-primary w-100 py-2">
-                                    <i class="bi bi-check-circle me-2"></i>Confirm Booking
-                                </button>
-                            </form>
+                        <!-- Important Info -->
+                        <div class="bg-blue-50 border-l-4 border-blue-500 rounded-r-xl p-4">
+                            <div class="flex items-start">
+                                <i class="fas fa-info-circle text-blue-500 mr-3 mt-0.5"></i>
+                                <div>
+                                    <p class="font-bold text-blue-700 mb-2">Before you book:</p>
+                                    <ul class="text-blue-600 text-sm space-y-1">
+                                        <li>• Valid driver's license required</li>
+                                        <li>• Minimum age: 21 years</li>
+                                        <li>• Full insurance included</li>
+                                        <li>• Free cancellation up to 24 hours before pickup</li>
+                                    </ul>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
+
+            <!-- Right Column - Booking Form -->
+            <div class="lg:col-span-1">
+                <div class="bg-white rounded-3xl shadow-xl p-8 sticky top-24">
+                    <h3 class="text-2xl font-bold text-gray-900 mb-6">
+                        <i class="fas fa-calendar-check text-primary-500 mr-2"></i>
+                        Booking Details
+                    </h3>
+
+                    <!-- Error Messages -->
+                    <div asp-validation-summary="ModelOnly" class="mb-6 bg-red-50 border-l-4 border-red-500 rounded-r-lg p-4 hidden"></div>
+
+                    @if (TempData["ErrorMessage"] != null)
+                    {
+                        <div class="mb-6 bg-red-50 border-l-4 border-red-500 rounded-r-lg p-4">
+                            <p class="text-red-700">@TempData["ErrorMessage"]</p>
+                        </div>
+                    }
+
+                    <!-- Booking Form -->
+                    <form asp-action="Create" method="post" id="bookingForm" class="space-y-6">
+                        <input type="hidden" asp-for="CarId" />
+
+                        <!-- Pickup Date -->
+                        <div>
+                            <label asp-for="PickupDate" class="block text-sm font-bold text-gray-700 mb-2">
+                                <i class="fas fa-calendar-plus text-green-500 mr-2"></i>Pickup Date
+                            </label>
+                            <input asp-for="PickupDate"
+                                   type="date"
+                                   min="@DateTime.Today.ToString("yyyy-MM-dd")"
+                                   onchange="calculateTotal()"
+                                   class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-primary-500 focus:ring-2 focus:ring-primary-200 transition-all duration-300 outline-none">
+                            <span asp-validation-for="PickupDate" class="text-red-500 text-sm mt-1"></span>
+                        </div>
+
+                        <!-- Return Date -->
+                        <div>
+                            <label asp-for="ReturnDate" class="block text-sm font-bold text-gray-700 mb-2">
+                                <i class="fas fa-calendar-minus text-red-500 mr-2"></i>Return Date
+                            </label>
+                            <input asp-for="ReturnDate"
+                                   type="date"
+                                   min="@DateTime.Today.AddDays(1).ToString("yyyy-MM-dd")"
+                                   onchange="calculateTotal()"
+                                   class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-primary-500 focus:ring-2 focus:ring-primary-200 transition-all duration-300 outline-none">
+                            <span asp-validation-for="ReturnDate" class="text-red-500 text-sm mt-1"></span>
+                        </div>
+
+                        <!-- Price Summary -->
+                        <div class="bg-gradient-to-br from-primary-50 to-blue-50 rounded-2xl p-6 border-2 border-primary-200">
+                            <div class="mb-4">
+                                <div class="flex justify-between text-gray-700 mb-2">
+                                    <span class="font-medium">Daily Rate</span>
+                                    <span class="font-bold">$@car?.DailyRate</span>
+                                </div>
+                                <div class="flex justify-between text-gray-700">
+                                    <span class="font-medium">Number of Days</span>
+                                    <span class="font-bold" id="totalDays">0 days</span>
+                                </div>
+                            </div>
+                            <hr class="border-primary-200 mb-4">
+                            <div class="flex justify-between items-center">
+                                <span class="text-xl font-black text-gray-900">Total Price</span>
+                                <span class="text-3xl font-black text-primary-600" id="totalPrice">$0.00</span>
+                            </div>
+                        </div>
+
+                        <!-- Submit Button -->
+                        <button type="submit"
+                                class="w-full px-6 py-4 bg-gradient-to-r from-primary-500 to-primary-700 hover:from-primary-600 hover:to-primary-800 text-white rounded-xl font-bold text-lg transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-2xl">
+                            <i class="fas fa-check-circle mr-2"></i>
+                            Confirm Booking
+                        </button>
+
+                        <p class="text-xs text-gray-500 text-center">
+                            By booking, you agree to our
+                            <a asp-controller="Home" asp-action="Privacy" class="text-primary-600 hover:text-primary-800">Terms & Conditions</a>
+                        </p>
+                    </form>
+                </div>
+            </div>
+
         </div>
+
     </div>
-</div>
+</section>
 
 @section Scripts {
-    @{
-        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    <partial name="_ValidationScriptsPartial" />
 
-        <script>
-            // Initialize price calculation on page load
-            document.addEventListener('DOMContentLoaded', function() {
-                calculateTotal();
-            });
+    <script>
+        const dailyRate = @(car?.DailyRate ?? 0);
+        let currentSlide = 0;
 
-            function calculateTotal() {
-                const dailyRate = parseFloat('@Model.DailyRate');
-                const pickupDate = new Date(document.getElementById('PickupDate').value);
-                const returnDate = new Date(document.getElementById('ReturnDate').value);
+        // Initialize price calculation
+        document.addEventListener('DOMContentLoaded', function() {
+            calculateTotal();
+        });
 
-                if (pickupDate && returnDate && returnDate > pickupDate) {
-                    const timeDiff = returnDate - pickupDate;
-                    const days = Math.ceil(timeDiff / (1000 * 60 * 60 * 24));
-                    const total = days * dailyRate;
+        function calculateTotal() {
+            const pickupInput = document.querySelector('input[name="PickupDate"]');
+            const returnInput = document.querySelector('input[name="ReturnDate"]');
 
-                    document.getElementById('totalDays').textContent = days + ' day' + (days !== 1 ? 's' : '');
-                    document.getElementById('totalPrice').textContent = '$' + total.toFixed(2);
-                } else {
-                    document.getElementById('totalPrice').textContent = '$0.00';
-                    document.getElementById('totalDays').textContent = '0 days';
-                }
+            if (!pickupInput.value || !returnInput.value) {
+                document.getElementById('totalPrice').textContent = '$0.00';
+                document.getElementById('totalDays').textContent = '0 days';
+                return;
             }
-        </script>
-    }
-    }
-    
 
- 
+            const pickupDate = new Date(pickupInput.value);
+            const returnDate = new Date(returnInput.value);
 
+            if (returnDate > pickupDate) {
+                const timeDiff = returnDate - pickupDate;
+                const days = Math.ceil(timeDiff / (1000 * 60 * 60 * 24));
+                const total = days * dailyRate;
+
+                document.getElementById('totalDays').textContent = days + ' day' + (days !== 1 ? 's' : '');
+                document.getElementById('totalPrice').textContent = '$' + total.toFixed(2);
+            } else {
+                document.getElementById('totalPrice').textContent = '$0.00';
+                document.getElementById('totalDays').textContent = '0 days';
+            }
+        }
+
+        // Carousel functions
+        function showSlide(n) {
+            const slides = document.querySelectorAll('.carousel-item');
+            const indicators = document.querySelectorAll('.carousel-indicator');
+
+            if (slides.length === 0) return;
+
+            if (n >= slides.length) currentSlide = 0;
+            if (n < 0) currentSlide = slides.length - 1;
+
+            slides.forEach(slide => slide.classList.add('hidden'));
+            indicators.forEach(indicator => indicator.classList.remove('bg-white'));
+            indicators.forEach(indicator => indicator.classList.add('bg-white/50'));
+
+            slides[currentSlide].classList.remove('hidden');
+            if (indicators[currentSlide]) {
+                indicators[currentSlide].classList.remove('bg-white/50');
+                indicators[currentSlide].classList.add('bg-white');
+            }
+        }
+
+        function nextSlide() {
+            currentSlide++;
+            showSlide(currentSlide);
+        }
+
+        function previousSlide() {
+            currentSlide--;
+            showSlide(currentSlide);
+        }
+
+        function goToSlide(n) {
+            currentSlide = n;
+            showSlide(currentSlide);
+        }
+
+        // Auto-play carousel
+        setInterval(nextSlide, 5000);
+    </script>
+}

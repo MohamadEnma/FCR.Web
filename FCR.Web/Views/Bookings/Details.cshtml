@@ -1,141 +1,272 @@
-﻿@model FCR.Dal.Classes.Booking
+﻿@model FCR.Web.Services.Base.BookingResponseDto
 
 @{
     ViewData["Title"] = $"Booking #{Model.BookingId} Details";
+    var rentalDays = (Model.ReturnDate - Model.PickupDate).Days;
+    var now = DateTime.UtcNow;
+    var isUpcoming = Model.PickupDate > now;
+    var isActive = Model.PickupDate <= now && Model.ReturnDate >= now;
+    var isCompleted = Model.ReturnDate < now;
+    var canCancel = !Model.IsCancelled && isUpcoming;
+    var canModify = !Model.IsCancelled && Model.PickupDate > now.AddDays(1);
 }
 
-<div class="container py-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1 class="display-6">
-            <i class="bi bi-journal-text me-2"></i>Booking Details #@Model.BookingId
-        </h1>
-        <div>
-            <a asp-action="MyBookings" class="btn btn-outline-secondary">
-                <i class="bi bi-arrow-left me-1"></i>My Bookings
-            </a>
-        </div>
-    </div>
+<!-- Booking Details Section -->
+<section class="py-12 bg-gradient-to-br from-gray-50 to-gray-100 min-h-screen">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
-    <div class="card shadow-sm mb-4">
-        <div class="card-header bg-primary text-white">
-            <h5 class="mb-0">
-                <i class="bi bi-car-front me-2"></i>
-                @Model.Car.Brand @Model.Car.Model
-            </h5>
-        </div>
-        <div class="card-body">
-            <div class="row">
-                <div class="col-md-6">
-                    <div class="mb-4">
-                        <h6 class="text-muted border-bottom pb-2">Rental Information</h6>
-                        <dl class="row">
-                            <dt class="col-sm-5">Booking Date:</dt>
-                           @*  <dd class="col-sm-7">@Model.BookingDate.ToString("f")</dd> *@
-
-                            <dt class="col-sm-5">Pickup Date:</dt>
-                            <dd class="col-sm-7">@Model.PickupDate.ToString("f")</dd>
-
-                            <dt class="col-sm-5">Return Date:</dt>
-                            <dd class="col-sm-7">@Model.ReturnDate.ToString("f")</dd>
-
-                            <dt class="col-sm-5">Rental Duration:</dt>
-                            <dd class="col-sm-7">@((Model.ReturnDate - Model.PickupDate).Days) days</dd>
-
-                            <dt class="col-sm-5">Daily Rate:</dt>
-                            <dd class="col-sm-7">@Model.Car.DailyRate.ToString("C")</dd>
-                        </dl>
-                    </div>
-                </div>
-                <div class="col-md-6">
-                    <div class="mb-4">
-                        <h6 class="text-muted border-bottom pb-2">Payment & Status</h6>
-                        <dl class="row">
-                            <dt class="col-sm-5">Total Price:</dt>
-                            <dd class="col-sm-7 fw-bold">@Model.TotalPrice.ToString("C")</dd>
-
-                            <dt class="col-sm-5">Status:</dt>
-                            <dd class="col-sm-7">
-                                @if (Model.IsCancelled)
-                                {
-                                    <span class="badge bg-danger rounded-pill">
-                                        <i class="bi bi-x-circle me-1"></i>Cancelled
-                                    </span>
-                                }
-                                else if (Model.PickupDate > DateTime.Now)
-                                {
-                                    <span class="badge bg-success rounded-pill">
-                                        <i class="bi bi-check-circle me-1"></i>Confirmed
-                                    </span>
-                                }
-                                else if (Model.ReturnDate < DateTime.Now)
-                                {
-                                    <span class="badge bg-secondary rounded-pill">
-                                        <i class="bi bi-clock-history me-1"></i>Completed
-                                    </span>
-                                }
-                                else
-                                {
-                                    <span class="badge bg-primary rounded-pill">
-                                        <i class="bi bi-lightning-charge me-1"></i>Active
-                                    </span>
-                                }
-                            </dd>
-
-                            @if (Model.IsCancelled)
-                            {
-                                <dt class="col-sm-5">Cancellation Date:</dt>
-                                <dd class="col-sm-7">@Model.CancellationDate?.ToString("f")</dd>
-                            }
-                        </dl>
-                    </div>
-                </div>
+        <!-- Header -->
+        <div class="mb-8 flex flex-col md:flex-row md:items-center md:justify-between">
+            <div>
+                <a asp-action="MyBookings" class="inline-flex items-center text-primary-600 hover:text-primary-800 font-medium mb-4">
+                    <i class="fas fa-arrow-left mr-2"></i>
+                    Back to My Bookings
+                </a>
+                <h1 class="text-4xl font-black text-gray-900">
+                    <i class="fas fa-file-alt text-primary-500 mr-3"></i>
+                    Booking #@Model.BookingId
+                </h1>
+                <p class="text-gray-600 mt-2">Complete details of your reservation</p>
             </div>
 
-            @if (Model.Car.Images.Any())
-            {
-                <div class="mt-4">
-                    <h6 class="text-muted border-bottom pb-2">Vehicle Images</h6>
-                    <div class="row g-2">
-                        @foreach (var image in Model.Car.Images.Take(3))
-                        {
-                            <div class="col-md-4">
-                                <img src="@image.Url" class="img-fluid rounded"
-                                     style="height: 180px; width: 100%; object-fit: cover;"
-                                     alt="@Model.Car.Brand @Model.Car.Model">
-                            </div>
-                        }
+            <!-- Status Badge -->
+            <div class="mt-4 md:mt-0">
+                @if (Model.IsCancelled)
+                {
+                    <span class="inline-flex items-center px-6 py-3 bg-red-500 text-white rounded-2xl font-bold text-lg shadow-lg">
+                        <i class="fas fa-times-circle mr-2"></i>Cancelled
+                    </span>
+                }
+                else if (isCompleted)
+                {
+                    <span class="inline-flex items-center px-6 py-3 bg-gray-500 text-white rounded-2xl font-bold text-lg shadow-lg">
+                        <i class="fas fa-check-circle mr-2"></i>Completed
+                    </span>
+                }
+                else if (isActive)
+                {
+                    <span class="inline-flex items-center px-6 py-3 bg-green-500 text-white rounded-2xl font-bold text-lg shadow-lg animate-pulse">
+                        <i class="fas fa-car mr-2"></i>Active
+                    </span>
+                }
+                else if (isUpcoming)
+                {
+                    <span class="inline-flex items-center px-6 py-3 bg-blue-500 text-white rounded-2xl font-bold text-lg shadow-lg">
+                        <i class="fas fa-calendar-check mr-2"></i>Confirmed
+                    </span>
+                }
+            </div>
+        </div>
+
+        <!-- Main Content Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+
+            <!-- Left Column - Main Details -->
+            <div class="lg:col-span-2 space-y-8">
+
+                <!-- Vehicle Card -->
+                <div class="bg-white rounded-3xl shadow-xl overflow-hidden">
+                    <div class="bg-gradient-to-r from-primary-500 to-primary-700 p-6 text-white">
+                        <h2 class="text-2xl font-bold flex items-center">
+                            <i class="fas fa-car mr-3"></i>
+                            Vehicle Information
+                        </h2>
+                    </div>
+
+                    <div class="p-6">
+                        <!-- Car Title -->
+                        <div class="mb-6">
+                            <h3 class="text-3xl font-black text-gray-900 mb-2">
+                                @Model.CarBrand? @Model.CarModel?
+                            </h3>
+                            <p class="text-gray-600">• @Model.CarYear?</p>
+                        </div>
+                      
                     </div>
                 </div>
-            }
+
+                <!-- Rental Information Card -->
+                <div class="bg-white rounded-3xl shadow-xl overflow-hidden">
+                    <div class="bg-gradient-to-r from-green-500 to-emerald-600 p-6 text-white">
+                        <h2 class="text-2xl font-bold flex items-center">
+                            <i class="fas fa-calendar-alt mr-3"></i>
+                            Rental Information
+                        </h2>
+                    </div>
+
+                    <div class="p-6">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+                            <!-- Booking Date -->
+                            <div class="bg-gray-50 rounded-2xl p-4">
+                                <p class="text-gray-600 text-sm font-semibold mb-2">
+                                    <i class="fas fa-calendar-plus text-gray-500 mr-2"></i>
+                                    Booking Date
+                                </p>
+                                <p class="text-xl font-bold text-gray-900">
+                                    @Model.BookingDate.ToString("MMM dd, yyyy")
+                                </p>
+                                <p class="text-sm text-gray-600">@Model.BookingDate.ToString("hh:mm tt")</p>
+                            </div>
+
+                            <!-- Rental Duration -->
+                            <div class="bg-gradient-to-br from-orange-50 to-amber-50 rounded-2xl p-4 border-2 border-orange-200">
+                                <p class="text-orange-700 text-sm font-semibold mb-2">
+                                    <i class="fas fa-clock mr-2"></i>
+                                    Rental Duration
+                                </p>
+                                <p class="text-3xl font-black text-orange-600">
+                                    @rentalDays Day@(rentalDays != 1 ? "s" : "")
+                                </p>
+                            </div>
+
+                            <!-- Pickup Date -->
+                            <div class="bg-blue-50 rounded-2xl p-6 border-l-4 border-blue-500">
+                                <p class="text-blue-600 font-semibold mb-2">
+                                    <i class="fas fa-play-circle mr-2"></i>Pickup Date
+                                </p>
+                                <p class="text-2xl font-black text-gray-900">
+                                    @Model.PickupDate.ToString("MMM dd, yyyy")
+                                </p>
+                                <p class="text-sm text-gray-600 mt-1">@Model.PickupDate.ToString("dddd, hh:mm tt")</p>
+                            </div>
+
+                            <!-- Return Date -->
+                            <div class="bg-purple-50 rounded-2xl p-6 border-l-4 border-purple-500">
+                                <p class="text-purple-600 font-semibold mb-2">
+                                    <i class="fas fa-stop-circle mr-2"></i>Return Date
+                                </p>
+                                <p class="text-2xl font-black text-gray-900">
+                                    @Model.ReturnDate.ToString("MMM dd, yyyy")
+                                </p>
+                                <p class="text-sm text-gray-600 mt-1">@Model.ReturnDate.ToString("dddd, hh:mm tt")</p>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Cancellation Info (if cancelled) -->
+                @if (Model.IsCancelled && Model.CancellationDate.HasValue)
+                {
+                    <div class="bg-red-50 border-2 border-red-200 rounded-3xl p-6">
+                        <div class="flex items-start">
+                            <div class="w-12 h-12 bg-red-500 rounded-xl flex items-center justify-center mr-4 flex-shrink-0">
+                                <i class="fas fa-times-circle text-white text-xl"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-xl font-bold text-red-800 mb-2">Booking Cancelled</h3>
+                                <p class="text-red-700">
+                                    This booking was cancelled on <strong>@Model.CancellationDate.Value.ToString("MMMM dd, yyyy")</strong> at @Model.CancellationDate.Value.ToString("hh:mm tt")
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                }
+
+            </div>
+
+            <!-- Right Column - Summary & Actions -->
+            <div class="lg:col-span-1 space-y-6">
+
+                <!-- Price Summary Card -->
+                <div class="bg-white rounded-3xl shadow-xl overflow-hidden sticky top-24">
+                    <div class="bg-gradient-to-r from-primary-500 to-primary-700 p-6 text-white">
+                        <h2 class="text-xl font-bold flex items-center">
+                            <i class="fas fa-receipt mr-3"></i>
+                            Price Summary
+                        </h2>
+                    </div>
+
+                    <div class="p-6">
+                        <div class="space-y-4 mb-6">
+                            <div class="flex justify-between text-gray-700">
+                                <span class="font-medium">Daily Rate</span>
+                                <span class="font-bold">$@Model.DailyRate?</span>
+                            </div>
+                            <div class="flex justify-between text-gray-700">
+                                <span class="font-medium">Number of Days</span>
+                                <span class="font-bold">×@rentalDays</span>
+                            </div>
+                            <hr class="border-gray-200">
+                            <div class="flex justify-between items-center pt-2">
+                                <span class="text-xl font-black text-gray-900">Total</span>
+                                <span class="text-3xl font-black text-primary-600">
+                                    $@Model.TotalPrice.ToString("N2")
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- Customer Info -->
+                        @if (Model.UserId != null)
+                        {
+                            <div class="bg-gray-50 rounded-2xl p-4 mb-6">
+                                <p class="text-gray-600 text-sm font-semibold mb-3">
+                                    <i class="fas fa-user text-gray-500 mr-2"></i>
+                                    Customer
+                                </p>
+                                <div class="flex items-center">
+                                    <div class="w-10 h-10 bg-gradient-to-br from-primary-400 to-primary-600 rounded-full flex items-center justify-center text-white font-bold mr-3">
+                                        @(Model.UserFullName ?? "")
+                                    </div>
+                                    <div>
+                                        <p class="font-bold text-gray-900">@Model.UserFullName</p>
+                                        <p class="text-sm text-gray-600">@Model.UserEmail</p>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+
+                        <!-- Action Buttons -->
+                        <div class="space-y-3">
+                            @if (canModify)
+                            {
+                                <a asp-action="Edit" asp-route-id="@Model.BookingId"
+                                   class="block w-full px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-700 hover:from-blue-600 hover:to-blue-800 text-white rounded-xl font-bold text-center transform hover:scale-105 transition-all duration-300 shadow-lg">
+                                    <i class="fas fa-edit mr-2"></i>
+                                    Modify Booking
+                                </a>
+                            }
+
+                            @if (canCancel)
+                            {
+                                <form asp-action="Delete" asp-route-id="@Model.BookingId" method="get">
+                                    <button type="submit"
+                                            class="w-full px-6 py-3 bg-red-500 hover:bg-red-600 text-white rounded-xl font-bold transform hover:scale-105 transition-all duration-300 shadow-lg">
+                                        <i class="fas fa-times-circle mr-2"></i>
+                                        Cancel Booking
+                                    </button>
+                                </form>
+                            }
+
+                            <a asp-action="MyBookings"
+                               class="block w-full px-6 py-3 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-xl font-bold text-center transform hover:scale-105 transition-all duration-300">
+                                <i class="fas fa-list mr-2"></i>
+                                View All Bookings
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Help Card -->
+                <div class="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl p-6 border-2 border-blue-200">
+                    <h3 class="text-lg font-bold text-gray-900 mb-3 flex items-center">
+                        <i class="fas fa-question-circle text-blue-600 mr-2"></i>
+                        Need Help?
+                    </h3>
+                    <p class="text-gray-700 text-sm mb-4">
+                        Have questions about your booking? Our support team is here to help 24/7.
+                    </p>
+                    <a asp-controller="Home" asp-action="Contact"
+                       class="inline-flex items-center text-blue-600 hover:text-blue-800 font-bold text-sm">
+                        <i class="fas fa-headset mr-2"></i>
+                        Contact Support
+                    </a>
+                </div>
+
+            </div>
+
         </div>
+
     </div>
-
-    <div class="d-flex justify-content-between">
-        @if (!Model.IsCancelled && Model.PickupDate > DateTime.Now)
-        {
-            <form asp-action="Cancel" asp-route-id="@Model.BookingId" method="post">
-                <button type="submit" class="btn btn-danger"
-                        onclick="return confirm('Are you sure you want to cancel this booking?')">
-                    <i class="bi bi-x-circle me-1"></i>Cancel Booking
-                </button>
-            </form>
-        }
-        else
-        {
-            <div></div> <!-- Empty div for flex spacing -->
-        }
-
-        <div>
-            <a asp-action="MyBookings" class="btn btn-outline-secondary me-2">
-                <i class="bi bi-arrow-left me-1"></i>Back to List
-            </a>
-            @if (!Model.IsCancelled && Model.PickupDate > DateTime.Now.AddDays(1))
-            {
-                <a asp-action="Edit" asp-route-id="@Model.BookingId" class="btn btn-primary">
-                    <i class="bi bi-pencil me-1"></i>Modify Booking
-                </a>
-            }
-        </div>
-    </div>
-</div>
-
+</section>
