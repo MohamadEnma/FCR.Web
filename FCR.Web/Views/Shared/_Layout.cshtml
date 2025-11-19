@@ -103,6 +103,7 @@
                         @if (User.IsInRole("Admin"))
                         {
                             <a asp-controller="Admin" asp-action="Dashboard" class="text-gray-700 hover:text-primary-600 font-medium transition-colors">Admin</a>
+                            <a asp-controller="AdminCars" asp-action="Index" class="text-gray-700 hover:text-primary-600 font-medium transition-colors">Manage Cars</a>
                         }
 
                         <form asp-controller="Auth" asp-action="Logout" method="post" class="inline">
@@ -137,6 +138,13 @@
                 @if (User.Identity?.IsAuthenticated == true)
                 {
                     <a asp-controller="Bookings" asp-action="MyBookings" class="block text-gray-700 hover:text-primary-600 font-medium py-2">My Bookings</a>
+                    
+                    @if (User.IsInRole("Admin"))
+                    {
+                        <a asp-controller="Admin" asp-action="Dashboard" class="block text-gray-700 hover:text-primary-600 font-medium py-2">Admin</a>
+                        <a asp-controller="AdminCars" asp-action="Index" class="block text-gray-700 hover:text-primary-600 font-medium py-2">Manage Cars</a>
+                    }
+                    
                     <form asp-controller="Auth" asp-action="Logout" method="post">
                         <button type="submit" class="w-full text-left text-red-600 font-medium py-2">Logout</button>
                     </form>
