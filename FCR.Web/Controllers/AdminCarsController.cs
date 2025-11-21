@@ -1,5 +1,6 @@
 
 using FCR.Web.Models;
+using FCR.Web.Services;
 using FCR.Web.Services.Base;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -12,12 +13,14 @@ namespace FCR.Web.Controllers
         private readonly IClient _apiClient;
         private readonly ILogger<AdminCarsController> _logger;
         private readonly IWebHostEnvironment _env;
+        private readonly ICarViewService _carViewService;
 
-        public AdminCarsController(IClient apiClient, ILogger<AdminCarsController> logger, IWebHostEnvironment env)
+        public AdminCarsController(IClient apiClient, ILogger<AdminCarsController> logger, IWebHostEnvironment env, ICarViewService carViewService)
         {
             _apiClient = apiClient;
             _logger = logger;
             _env = env;
+            _carViewService = carViewService;
         }
 
         // GET: AdminCars/Index
@@ -31,61 +34,26 @@ namespace FCR.Web.Controllers
             double? maxPrice,
             int? minSeats)
         {
-            try
+            var cars = await _carViewService.GetFilteredCarsAsync(
+                searchTerm, category, transmission, fuelType, 
+                isAvailable, minPrice, maxPrice, minSeats);
+
+            // Pass filter values to view
+            ViewBag.SearchTerm = searchTerm;
+            ViewBag.Category = category;
+            ViewBag.Transmission = transmission;
+            ViewBag.FuelType = fuelType;
+            ViewBag.IsAvailable = isAvailable;
+            ViewBag.MinPrice = minPrice;
+            ViewBag.MaxPrice = maxPrice;
+            ViewBag.MinSeats = minSeats;
+
+            if (cars.Count == 0 && (searchTerm != null || category != null || transmission != null || fuelType != null))
             {
-                IEnumerable<CarResponseDto> cars;
-
-                // Apply filters if any
-                if (!string.IsNullOrEmpty(category) || !string.IsNullOrEmpty(transmission) ||
-                    !string.IsNullOrEmpty(fuelType) || minSeats.HasValue || maxPrice.HasValue)
-                {
-                    var response = await _apiClient.FilterAsync(category, transmission, fuelType, minSeats, maxPrice);
-                    cars = response?.Data ?? new List<CarResponseDto>();
-                }
-                else
-                {
-                    var response = await _apiClient.CarsGETAsync();
-                    cars = response?.Data ?? new List<CarResponseDto>();
-                }
-
-                // Apply search term filter
-                if (!string.IsNullOrEmpty(searchTerm))
-                {
-                    cars = cars.Where(c =>
-                        c.Brand?.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) == true ||
-                        c.ModelName?.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) == true);
-                }
-
-                // Apply availability filter
-                if (isAvailable.HasValue)
-                {
-                    cars = cars.Where(c => c.IsAvailable == isAvailable.Value);
-                }
-
-                // Apply min price filter
-                if (minPrice.HasValue)
-                {
-                    cars = cars.Where(c => c.DailyRate >= minPrice.Value);
-                }
-
-                // Pass filter values to view
-                ViewBag.SearchTerm = searchTerm;
-                ViewBag.Category = category;
-                ViewBag.Transmission = transmission;
-                ViewBag.FuelType = fuelType;
-                ViewBag.IsAvailable = isAvailable;
-                ViewBag.MinPrice = minPrice;
-                ViewBag.MaxPrice = maxPrice;
-                ViewBag.MinSeats = minSeats;
-
-                return View(cars.ToList());
+                TempData["InfoMessage"] = "No cars found matching your criteria.";
             }
-            catch (ApiException ex)
-            {
-                _logger.LogError(ex, "Error loading cars in admin panel");
-                TempData["ErrorMessage"] = "Unable to load cars. Please try again later.";
-                return View(new List<CarResponseDto>());
-            }
+
+            return View(cars);
         }
 
         // GET: AdminCars/Create
@@ -406,27 +374,15 @@ namespace FCR.Web.Controllers
         [HttpGet]
         public async Task<IActionResult> Details(int id)
         {
-            try
-            {
-                var response = await _apiClient.CarsGET2Async(id);
+            var car = await _carViewService.GetCarDetailsAsync(id);
 
-                if (response?.Data == null)
-                {
-                    return NotFound();
-                }
-
-                return View(response.Data);
-            }
-            catch (ApiException ex) when (ex.StatusCode == 404)
+            if (car == null)
             {
-                return NotFound();
-            }
-            catch (ApiException ex)
-            {
-                _logger.LogError(ex, "Error loading car details for ID {CarId}", id);
-                TempData["ErrorMessage"] = "Unable to load car details.";
+                TempData["ErrorMessage"] = "Car not found.";
                 return RedirectToAction(nameof(Index));
             }
+
+            return View(car);
         }
 
         // GET: AdminCars/Delete/5
