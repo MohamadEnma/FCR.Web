@@ -21,6 +21,9 @@ namespace FCR.Web
             // Register token handler
             builder.Services.AddTransient<AuthTokenHandler>();
 
+            // Register CarViewService
+            builder.Services.AddScoped<ICarViewService, CarViewService>();
+
             var retryPolicy = HttpPolicyExtensions
             .HandleTransientHttpError()
             .OrResult(msg => msg.StatusCode == System.Net.HttpStatusCode.NotFound)
