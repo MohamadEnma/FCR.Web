@@ -289,11 +289,22 @@ namespace FCR.Web.Controllers
                     {
                         foreach (var file in uploadedImages)
                         {
-                            var memoryStream = new MemoryStream();
-                            await file.CopyToAsync(memoryStream);
-                            memoryStream.Position = 0;
+                            MemoryStream? memoryStream = null;
+                            try
+                            {
+                                memoryStream = new MemoryStream();
+                                await file.CopyToAsync(memoryStream);
+                                memoryStream.Position = 0;
 
-                            fileParameters.Add(new FileParameter(memoryStream, file.FileName, file.ContentType));
+                                fileParameters.Add(new FileParameter(memoryStream, file.FileName, file.ContentType));
+                                memoryStream = null; // Stream ownership transferred to fileParameters
+                            }
+                            catch
+                            {
+                                // Dispose the stream if it wasn't added to fileParameters
+                                memoryStream?.Dispose();
+                                throw;
+                            }
                         }
 
                         if (fileParameters.Any())
