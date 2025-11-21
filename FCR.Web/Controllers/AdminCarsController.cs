@@ -248,7 +248,7 @@ namespace FCR.Web.Controllers
                 // Update car details
                 var response = await _apiClient.CarsPUTAsync(id, model);
 
-                if (response?.Success != true)
+                if (response == null || response.Success != true)
                 {
                     TempData["ErrorMessage"] = response?.Message ?? "Failed to update car.";
                     var carResponse = await _apiClient.CarsGET2Async(id);
@@ -267,6 +267,7 @@ namespace FCR.Web.Controllers
                     var maxFileSize = 5 * 1024 * 1024; // 5MB
                     var fileParameters = new List<FileParameter>();
 
+                    // Validate files first before creating streams
                     foreach (var file in uploadedImages)
                     {
                         var extension = Path.GetExtension(file.FileName).ToLowerInvariant();
@@ -282,26 +283,46 @@ namespace FCR.Web.Controllers
                             TempData["ErrorMessage"] = $"File too large: {file.FileName}. Maximum size is 5MB.";
                             return RedirectToAction(nameof(Edit), new { id });
                         }
-
-                        var memoryStream = new MemoryStream();
-                        await file.CopyToAsync(memoryStream);
-                        memoryStream.Position = 0;
-
-                        fileParameters.Add(new FileParameter(memoryStream, file.FileName, file.ContentType));
                     }
 
-                    if (fileParameters.Any())
+                    try
                     {
-                        var imageResponse = await _apiClient.ImagesPOSTAsync(id, fileParameters);
-                        
-                        foreach (var param in fileParameters)
+                        foreach (var file in uploadedImages)
                         {
-                            param.Data.Dispose();
+                            MemoryStream? memoryStream = null;
+                            try
+                            {
+                                memoryStream = new MemoryStream();
+                                await file.CopyToAsync(memoryStream);
+                                memoryStream.Position = 0;
+
+                                fileParameters.Add(new FileParameter(memoryStream, file.FileName, file.ContentType));
+                                memoryStream = null; // Stream ownership transferred to fileParameters
+                            }
+                            catch
+                            {
+                                // Dispose the stream if it wasn't added to fileParameters
+                                memoryStream?.Dispose();
+                                throw;
+                            }
                         }
 
-                        if (imageResponse?.Success != true)
+                        if (fileParameters.Any())
                         {
-                            TempData["WarningMessage"] = "Car updated but some images failed to upload.";
+                            var imageResponse = await _apiClient.ImagesPOSTAsync(id, fileParameters);
+
+                            if (imageResponse?.Success != true)
+                            {
+                                TempData["WarningMessage"] = "Car updated but some images failed to upload.";
+                            }
+                        }
+                    }
+                    finally
+                    {
+                        // Ensure all memory streams are disposed
+                        foreach (var param in fileParameters)
+                        {
+                            param.Data?.Dispose();
                         }
                     }
                 }

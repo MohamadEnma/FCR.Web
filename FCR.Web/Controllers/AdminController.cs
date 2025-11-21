@@ -98,22 +98,6 @@ namespace FCR.Web.Controllers
             }
         }
 
-        // GET: Admin/Statistics
-        public async Task<IActionResult> Statistics()
-        {
-            try
-            {
-                var stats = await _apiClient.StatisticsAsync();
-                return View(stats);
-            }
-            catch (ApiException ex)
-            {
-                _logger.LogError(ex, "Error loading statistics");
-                ViewBag.ErrorMessage = "Unable to load statistics.";
-                return View();
-            }
-        }
-
         // GET: Admin/Create
         [HttpGet]
         public IActionResult Create()
