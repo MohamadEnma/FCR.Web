@@ -305,7 +305,7 @@ namespace FCR.Web.Controllers
             catch (ApiException ex) when (ex.StatusCode == 400)
             {
                 _logger.LogError(ex, "Error deleting user - bad request");
-                TempData["ErrorMessage"] = "Cannot delete this user. You may be trying to delete your own account.";
+                TempData["ErrorMessage"] = ex.Message ?? "Cannot delete this user. The operation was rejected by the server.";
                 return RedirectToAction(nameof(Users));
             }
             catch (ApiException ex)

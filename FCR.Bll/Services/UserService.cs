@@ -305,9 +305,10 @@ namespace FCR.Bll.Services
                         "Invalid user ID");
                 }
 
-                // Admin delete - skip password verification
-                // Admin delete - skip active bookings check
-                // Admin can delete users with active bookings (they'll handle cleanup)
+                // Admin-specific delete bypasses standard user validations:
+                // - No password verification required (admin authority is sufficient)
+                // - No active bookings check (admin assumes responsibility for data cleanup)
+                // This improves performance by avoiding expensive queries and allows admins to force deletion when necessary.
 
                 var result = await _userManager.DeleteAsync(user);
 
