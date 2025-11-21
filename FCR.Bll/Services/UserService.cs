@@ -291,6 +291,45 @@ namespace FCR.Bll.Services
             }
         }
 
+        public async Task<ServiceResponse<bool>> AdminDeleteUserAsync(
+            string userId,
+            CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                var user = await _userManager.FindByIdAsync(userId);
+                if (user == null)
+                {
+                    return ServiceResponse<bool>.ErrorResponse(
+                        "User not found",
+                        "Invalid user ID");
+                }
+
+                // Admin delete - skip password verification
+                // Admin delete - skip active bookings check
+                // Admin can delete users with active bookings (they'll handle cleanup)
+
+                var result = await _userManager.DeleteAsync(user);
+
+                if (!result.Succeeded)
+                {
+                    return ServiceResponse<bool>.ErrorResponse(
+                        "Failed to delete user",
+                        result.Errors.Select(e => e.Description).ToList());
+                }
+
+                return ServiceResponse<bool>.SuccessResponse(
+                    true,
+                    "User deleted successfully by admin");
+            }
+            catch (Exception ex)
+            {
+                return ServiceResponse<bool>.ErrorResponse(
+                    "Failed to delete user",
+                    ex.Message);
+            }
+        }
+
         public async Task<ServiceResponse<bool>> ChangeEmailAsync(
     string userId,
     string newEmail,

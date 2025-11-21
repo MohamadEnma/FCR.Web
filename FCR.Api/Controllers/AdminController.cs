@@ -106,12 +106,8 @@ namespace FCR.Api.Controllers
                     "Cannot delete own account",
                     "Admins cannot delete their own accounts"));
 
-            var deleteDto = new DeleteAccountDto
-            {
-                Password = "AdminOverride" // Admin doesn't need password
-            };
-
-            var result = await _userService.DeleteAccountAsync(id, deleteDto);
+            // Use admin-specific delete that bypasses validations
+            var result = await _userService.AdminDeleteUserAsync(id);
 
             if (!result.Success)
                 return NotFound(result);

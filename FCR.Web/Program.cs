@@ -33,7 +33,7 @@ namespace FCR.Web
             builder.Services.AddHttpClient<IClient, Client>(client =>
             {
                 client.BaseAddress = new Uri("https://localhost:7172");
-                client.Timeout = TimeSpan.FromSeconds(30);
+                client.Timeout = TimeSpan.FromSeconds(120); // Increase from 30 to 120 seconds
             })
             .AddHttpMessageHandler<AuthTokenHandler>()
             .AddPolicyHandler(retryPolicy) 

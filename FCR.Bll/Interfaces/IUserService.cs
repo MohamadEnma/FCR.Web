@@ -38,6 +38,10 @@ namespace FCR.Bll.Interfaces
             DeleteAccountDto deleteDto,
             CancellationToken cancellationToken = default);
 
+        Task<ServiceResponse<bool>> AdminDeleteUserAsync(
+            string userId,
+            CancellationToken cancellationToken = default);
+
         Task<ServiceResponse<bool>> ChangeEmailAsync(
            string userId,
            string newEmail,

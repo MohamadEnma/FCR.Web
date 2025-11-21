@@ -258,5 +258,63 @@ namespace FCR.Web.Controllers
             }
         }
 
+        // GET: Admin/Delete/{id}
+        [HttpGet]
+        public async Task<IActionResult> Delete(string id)
+        {
+            try
+            {
+                var response = await _apiClient.UsersGET2Async(id);
+
+                if (response?.Data == null)
+                {
+                    TempData["ErrorMessage"] = "User not found.";
+                    return RedirectToAction(nameof(Users));
+                }
+
+                return View(response.Data);
+            }
+            catch (ApiException ex)
+            {
+                _logger.LogError(ex, "Error loading user for deletion");
+                TempData["ErrorMessage"] = "Unable to load user details.";
+                return RedirectToAction(nameof(Users));
+            }
+        }
+
+        // POST: Admin/Delete/{id}
+        [HttpPost, ActionName("Delete")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteConfirmed(string id)
+        {
+            try
+            {
+                var response = await _apiClient.UsersDELETEAsync(id);
+
+                if (response?.Success == true)
+                {
+                    TempData["SuccessMessage"] = "User deleted successfully.";
+                    return RedirectToAction(nameof(Users));
+                }
+                else
+                {
+                    TempData["ErrorMessage"] = response?.Message ?? "Failed to delete user.";
+                    return RedirectToAction(nameof(Users));
+                }
+            }
+            catch (ApiException ex) when (ex.StatusCode == 400)
+            {
+                _logger.LogError(ex, "Error deleting user - bad request");
+                TempData["ErrorMessage"] = "Cannot delete this user. You may be trying to delete your own account.";
+                return RedirectToAction(nameof(Users));
+            }
+            catch (ApiException ex)
+            {
+                _logger.LogError(ex, "Error deleting user");
+                TempData["ErrorMessage"] = "Error deleting user. Please try again.";
+                return RedirectToAction(nameof(Users));
+            }
+        }
+
     }
 }
