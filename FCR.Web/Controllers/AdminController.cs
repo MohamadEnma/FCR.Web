@@ -174,14 +174,53 @@ namespace FCR.Web.Controllers
                 }
                 else
                 {
-                    ModelState.AddModelError("", response?.Message ?? "Failed to create user.");
+                    // Check if errors exist in response
+                    if (response?.Errors != null && response.Errors.Any())
+                    {
+                        foreach (var error in response.Errors)
+                        {
+                            ModelState.AddModelError("", error);
+                        }
+                    }
+                    else
+                    {
+                        ModelState.AddModelError("", response?.Message ?? "Failed to create user.");
+                    }
                     return View(model);
                 }
             }
             catch (ApiException ex)
             {
-                _logger.LogError(ex, "Error creating user");
-                ModelState.AddModelError("", ex.Message ?? "Error creating user. Please try again.");
+                _logger.LogError(ex, "API Exception: Status {StatusCode}, Response: {Response}", ex.StatusCode, ex.Response);
+
+                // User was created successfully (Status 200) but deserialization failed
+                if (ex.StatusCode == 200)
+                {
+                    TempData["SuccessMessage"] = "User created successfully!";
+                    return RedirectToAction(nameof(Users));
+                }
+
+                // Try to parse error from response
+                try
+                {
+                    var errorResponse = System.Text.Json.JsonSerializer.Deserialize<ServiceResponse<object>>(ex.Response);
+                    if (errorResponse?.Errors != null)
+                    {
+                        foreach (var error in errorResponse.Errors)
+                        {
+                            ModelState.AddModelError("", error);
+                        }
+                    }
+                    else
+                    {
+                        ModelState.AddModelError("", errorResponse?.Message ?? "Error creating user.");
+                    }
+                }
+                catch
+                {
+                    ModelState.AddModelError("", "Error creating user. Please try again.");
+                }
+
                 return View(model);
             }
         }
@@ -258,5 +297,57 @@ namespace FCR.Web.Controllers
             }
         }
 
+
+        // GET: Admin/Delete/{id}
+        [HttpGet]
+        public async Task<IActionResult> Delete(string id)
+        {
+            try
+            {
+                var response = await _apiClient.UsersGET2Async(id);
+
+                if (response?.Data == null)
+                {
+                    TempData["ErrorMessage"] = "User not found.";
+                    return RedirectToAction(nameof(Users));
+                }
+
+                return View(response.Data);
+            }
+            catch (ApiException ex)
+            {
+                _logger.LogError(ex, "Error loading user for deletion");
+                TempData["ErrorMessage"] = "Unable to load user details.";
+                return RedirectToAction(nameof(Users));
+            }
+        }
+
+        // POST: Admin/Delete/{id}
+        [HttpPost, ActionName("Delete")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteConfirmed(string id)
+        {
+            try
+            {
+                var response = await _apiClient.UsersDELETEAsync(id);
+
+                if (response?.Success == true)
+                {
+                    TempData["SuccessMessage"] = "User deleted successfully.";
+                    return RedirectToAction(nameof(Users));
+                }
+                else
+                {
+                    TempData["ErrorMessage"] = response?.Message ?? "Failed to delete user.";
+                    return RedirectToAction(nameof(Users));
+                }
+            }
+            catch (ApiException ex)
+            {
+                _logger.LogError(ex, "Error deleting user");
+                TempData["ErrorMessage"] = "Error deleting user. Please try again.";
+                return RedirectToAction(nameof(Users));
+            }
+        }
     }
 }

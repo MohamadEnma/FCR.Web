@@ -1,4 +1,17 @@
 ﻿@using FCR.Web
 @using FCR.Web.ViewModels
+@inject IConfiguration Configuration
+@functions {
+    public string GetFullImageUrl(string? relativePath)
+    {
+        if (string.IsNullOrEmpty(relativePath))
+            return "/images/placeholder-car.jpg";
+
+        if (relativePath.StartsWith("http"))
+            return relativePath;
+
+        return $"https://localhost:7172{relativePath}";
+    }
+}
 
 @addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers

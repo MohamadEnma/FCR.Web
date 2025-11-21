@@ -504,19 +504,28 @@ namespace FCR.Bll.Services
         }
 
         private async Task<string> SaveImageFileAsync(
-            IFormFile file,
-            CancellationToken cancellationToken)
+      IFormFile file,
+      CancellationToken cancellationToken)
         {
             var fileName = $"{Guid.NewGuid()}_{Path.GetFileName(file.FileName)}";
-            var uploadPath = Path.Combine("wwwroot", "images", "cars", fileName);
 
-            Directory.CreateDirectory(Path.GetDirectoryName(uploadPath)!);
+            // Get absolute path to API project's wwwroot
+            var webRootPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
+            var uploadsFolder = Path.Combine(webRootPath, "images", "cars");
 
-            using (var stream = new FileStream(uploadPath, FileMode.Create))
+            // Create directory if it doesn't exist
+            Directory.CreateDirectory(uploadsFolder);
+
+            // Full file path where image will be saved
+            var filePath = Path.Combine(uploadsFolder, fileName);
+
+            // Save the file
+            using (var stream = new FileStream(filePath, FileMode.Create))
             {
                 await file.CopyToAsync(stream, cancellationToken);
             }
 
+            // Return URL path (not file system path)
             return $"/images/cars/{fileName}";
         }
 

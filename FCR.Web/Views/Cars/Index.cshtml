@@ -139,7 +139,9 @@
                         <div class="relative h-56 bg-gray-200">
                             @if (!string.IsNullOrEmpty(car.PrimaryImageUrl))
                             {
-                                <img src="@car.PrimaryImageUrl" alt="@car.Brand @car.ModelName" class="w-full h-full object-cover">
+                                <img src="@GetImageUrl(car.PrimaryImageUrl)"
+                                     alt="@car.Brand @car.ModelName"
+                                     class="w-full h-full object-cover">
                             }
                             else
                             {
@@ -224,3 +226,16 @@
         }
     </div>
 </div>
+@functions {
+    public string GetImageUrl(string? imagePath)
+    {
+        if (string.IsNullOrEmpty(imagePath))
+            return "/images/placeholder-car.jpg";
+
+        if (imagePath.StartsWith("http"))
+            return imagePath;
+
+        var apiBaseUrl = Configuration["ApiSettings:BaseUrl"] ?? "https://localhost:7172";
+        return $"{apiBaseUrl}{imagePath}";
+    }
+}

@@ -23,8 +23,4 @@
     <ProjectReference Include="..\FCR.Dal\FCR.Dal.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="wwwroot\uploads\cars\" />
-  </ItemGroup>
-
 </Project>

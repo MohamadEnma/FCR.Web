@@ -91,9 +91,6 @@ namespace FCR.Api.Controllers
             return Ok(result);
         }
 
-        /// <summary>
-        /// Delete user account (Admin only)
-        /// </summary>
         [HttpDelete("users/{id}")]
         [ProducesResponseType(typeof(ServiceResponse<bool>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ServiceResponse<bool>), StatusCodes.Status404NotFound)]
@@ -106,12 +103,8 @@ namespace FCR.Api.Controllers
                     "Cannot delete own account",
                     "Admins cannot delete their own accounts"));
 
-            var deleteDto = new DeleteAccountDto
-            {
-                Password = "AdminOverride" // Admin doesn't need password
-            };
-
-            var result = await _userService.DeleteAccountAsync(id, deleteDto);
+            // Use fast admin delete
+            var result = await _userService.AdminDeleteUserAsync(id);
 
             if (!result.Success)
                 return NotFound(result);

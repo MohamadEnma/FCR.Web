@@ -67,5 +67,8 @@ namespace FCR.Bll.Interfaces
         Task<ServiceResponse<bool>> ValidateImageFileAsync(
             IFormFile file,
             CancellationToken cancellationToken = default);
+
+
+
     }
 }

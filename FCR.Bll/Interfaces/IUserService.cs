@@ -43,5 +43,9 @@ namespace FCR.Bll.Interfaces
            string newEmail,
            string password,
            CancellationToken cancellationToken = default);
+
+        Task<ServiceResponse<bool>> AdminDeleteUserAsync(
+            string userId,
+            CancellationToken cancellationToken = default);
     }
 }

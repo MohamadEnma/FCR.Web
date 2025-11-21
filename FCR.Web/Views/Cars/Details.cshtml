@@ -1,8 +1,23 @@
 ﻿@model FCR.Web.Services.Base.CarResponseDto
+@inject IConfiguration Configuration
+
 @{
     ViewData["Title"] = $"{Model.Brand} {Model.ModelName} - Details";
     var images = Model.Images?.OrderBy(i => i.DisplayOrder).ToList() ?? new List<FCR.Web.Services.Base.ImageResponseDto>();
     var primaryImage = images.FirstOrDefault(i => i.IsPrimary) ?? images.FirstOrDefault();
+
+    // ✅ Helper function to get full image URL
+    string GetImageUrl(string? imagePath)
+    {
+        if (string.IsNullOrEmpty(imagePath))
+            return null;
+
+        if (imagePath.StartsWith("http"))
+            return imagePath;
+
+        var apiBaseUrl = Configuration["ApiSettings:BaseUrl"] ?? "https://localhost:7172";
+        return $"{apiBaseUrl}{imagePath}";
+    }
 }
 
 <div class="min-h-screen bg-gray-50 pt-24 pb-12">
@@ -61,9 +76,18 @@
 
                     <!-- Primary Image -->
                     <div class="relative bg-gray-200">
-                        @if (primaryImage != null && !string.IsNullOrEmpty(primaryImage.Url))
+                        @{
+                            var primaryImageUrl = GetImageUrl(primaryImage?.Url);
+                        }
+
+                        @if (primaryImageUrl != null)
                         {
-                            <img id="main-image" src="@primaryImage.Url" alt="@Model.Brand @Model.ModelName" class="w-full h-96 object-cover cursor-pointer" onclick="openLightbox('@primaryImage.Url')">
+                            <img id="main-image"
+                                 src="@primaryImageUrl"
+                                 alt="@Model.Brand @Model.ModelName"
+                                 class="w-full h-96 object-cover cursor-pointer"
+                                 onclick="openLightbox('@primaryImageUrl')"
+                                 onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\'w-full h-96 flex items-center justify-center bg-gradient-to-br from-gray-300 to-gray-400\'><i class=\'fas fa-car text-9xl text-gray-500\'></i></div>';">
                         }
                         else
                         {
@@ -80,17 +104,24 @@
                             <div class="flex space-x-3 overflow-x-auto">
                                 @foreach (var image in images)
                                 {
-                                    <div class="relative flex-shrink-0 cursor-pointer group" onclick="changeMainImage('@image.Url')">
-                                        <img src="@image.Url" alt="@image.AltText" class="w-24 h-24 object-cover rounded-lg border-2 border-gray-300 hover:border-primary-500 transition-colors">
-                                        @if (image.IsPrimary)
-                                        {
-                                            <div class="absolute top-1 left-1">
-                                                <span class="px-2 py-0.5 bg-yellow-500 text-white text-xs font-bold rounded">
-                                                    <i class="fas fa-star"></i>
-                                                </span>
-                                            </div>
-                                        }
-                                    </div>
+                                    var thumbnailUrl = GetImageUrl(image.Url);
+                                    @if (thumbnailUrl != null)
+                                    {
+                                        <div class="relative flex-shrink-0 cursor-pointer group" onclick="changeMainImage('@thumbnailUrl')">
+                                            <img src="@thumbnailUrl"
+                                                 alt="@image.AltText"
+                                                 class="w-24 h-24 object-cover rounded-lg border-2 border-gray-300 hover:border-primary-500 transition-colors"
+                                                 onerror="this.style.display='none';">
+                                            @if (image.IsPrimary)
+                                            {
+                                                <div class="absolute top-1 left-1">
+                                                    <span class="px-2 py-0.5 bg-yellow-500 text-white text-xs font-bold rounded">
+                                                        <i class="fas fa-star"></i>
+                                                    </span>
+                                                </div>
+                                            }
+                                        </div>
+                                    }
                                 }
                             </div>
                             <p class="text-sm text-gray-500 mt-2">

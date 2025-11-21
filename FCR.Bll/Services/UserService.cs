@@ -381,5 +381,41 @@ namespace FCR.Bll.Services
                     ex.Message);
             }
         }
+
+        public async Task<ServiceResponse<bool>> AdminDeleteUserAsync(
+    string userId,
+    CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                var user = await _userManager.FindByIdAsync(userId);
+                if (user == null)
+                {
+                    return ServiceResponse<bool>.ErrorResponse(
+                        "User not found",
+                        "Invalid user ID");
+                }
+
+                // Admin delete - skip all validation checks
+                var result = await _userManager.DeleteAsync(user);
+
+                if (!result.Succeeded)
+                {
+                    return ServiceResponse<bool>.ErrorResponse(
+                        "Failed to delete user",
+                        result.Errors.Select(e => e.Description).ToList());
+                }
+
+                return ServiceResponse<bool>.SuccessResponse(
+                    true,
+                    "User deleted successfully by admin");
+            }
+            catch (Exception ex)
+            {
+                return ServiceResponse<bool>.ErrorResponse(
+                    "Failed to delete user",
+                    ex.Message);
+            }
+        }
     }
 }
