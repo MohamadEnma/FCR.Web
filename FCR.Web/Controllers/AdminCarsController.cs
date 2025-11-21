@@ -1,3 +1,5 @@
+
+using FCR.Web.Models;
 using FCR.Web.Services.Base;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -33,14 +35,14 @@ namespace FCR.Web.Controllers
         {
             try
             {
-                IEnumerable<CarResponseDto> cars;
+                IEnumerable<Services.Base.CarResponseDto> cars;
 
                 // Apply filters if any
                 if (!string.IsNullOrEmpty(category) || !string.IsNullOrEmpty(transmission) ||
                     !string.IsNullOrEmpty(fuelType) || minSeats.HasValue || maxPrice.HasValue)
                 {
                     var response = await _apiClient.FilterAsync(category, transmission, fuelType, minSeats, maxPrice);
-                    cars = response?.Data ?? new List<CarResponseDto>();
+                    cars = response?.Data ?? new List<Services.Base.CarResponseDto>();
                 }
                 else
                 {
@@ -53,7 +55,7 @@ namespace FCR.Web.Controllers
                 {
                     cars = cars.Where(c =>
                         c.Brand?.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) == true ||
-                        c.Model?.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) == true);
+                        c.ModelName?.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) == true);
                 }
 
                 // Apply availability filter
@@ -106,8 +108,21 @@ namespace FCR.Web.Controllers
         // POST: AdminCars/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(CarCreateDto model, List<IFormFile>? uploadedImages, List<string>? imageUrls)
+        public async Task<IActionResult> Create([FromForm] CarCreateDto model, List<IFormFile>? uploadedImages, List<string>? imageUrls)
         {
+            //  DEBUG: Log what's being received
+            _logger.LogInformation("Received Brand: {Brand}", model.Brand);
+            _logger.LogInformation("Received Model: {Model}", model.ModelName);
+            _logger.LogInformation("Received Year: {Year}", model.Year);
+            _logger.LogInformation("ModelState Valid: {IsValid}", ModelState.IsValid);
+
+            foreach (var error in ModelState.Values.SelectMany(v => v.Errors))
+            {
+                _logger.LogError("ModelState Error: {Error}", error.ErrorMessage);
+            }
+
+
+
             if (!ModelState.IsValid)
             {
                 return View(model);
@@ -117,6 +132,9 @@ namespace FCR.Web.Controllers
             {
                 // Prepare image URLs collection
                 var allImageUrls = new List<string>();
+
+                //  Declare fileParameters
+                var fileParameters = new List<FileParameter>();
 
                 // Add URL-based images if provided
                 if (imageUrls != null && imageUrls.Any(url => !string.IsNullOrWhiteSpace(url)))
@@ -149,26 +167,43 @@ namespace FCR.Web.Controllers
                             return View(model);
                         }
 
-                        var uniqueFileName = $"{Guid.NewGuid()}{extension}";
-                        var filePath = Path.Combine(uploadsFolder, uniqueFileName);
-
-                        using (var fileStream = new FileStream(filePath, FileMode.Create))
-                        {
-                            await file.CopyToAsync(fileStream);
-                        }
-
-                        allImageUrls.Add($"/images/cars/{uniqueFileName}");
+                        //  Create FileParameter for API
+                        var memoryStream = new MemoryStream();
+                        await file.CopyToAsync(memoryStream);
+                        memoryStream.Position = 0;
+                        fileParameters.Add(new FileParameter(memoryStream, file.FileName, file.ContentType));
                     }
                 }
 
-                // Assign image URLs to model
-                model.ImageUrls = allImageUrls;
+                // Call API with individual parameters
+                var response = await _apiClient.CarsPOSTAsync(
+                    brand: model.Brand,
+                    modelName: model.ModelName,
+                    category: model.Category,
+                    year: model.Year,
+                    dailyRate: (double)model.DailyRate,
+                    weeklyRate: model.WeeklyRate.HasValue ? (double?)model.WeeklyRate.Value : null,
+                    monthlyRate: model.MonthlyRate.HasValue ? (double?)model.MonthlyRate.Value : null,
+                    transmission: model.Transmission,
+                    fuelType: model.FuelType,
+                    seats: model.Seats,
+                    color: model.Color,
+                    mileage: model.Mileage,
+                    licensePlate: model.LicensePlate,
+                    description: model.Description,
+                    imageUrls: allImageUrls,
+                    imageFiles: fileParameters
+                );
 
-                var response = await _apiClient.CarsPOSTAsync(model);
+                // ? Dispose streams
+                foreach (var param in fileParameters)
+                {
+                    param.Data?.Dispose();
+                }
 
                 if (response?.Success == true && response.Data != null)
                 {
-                    TempData["SuccessMessage"] = $"Car '{model.Brand} {model.Model}' created successfully!";
+                    TempData["SuccessMessage"] = $"Car '{model.Brand} {model.ModelName}' created successfully!";
                     return RedirectToAction(nameof(Index));
                 }
                 else
@@ -205,12 +240,12 @@ namespace FCR.Web.Controllers
                 var updateDto = new CarUpdateDto
                 {
                     Brand = car.Brand,
-                    Model = car.Model,
+                    ModelName = car.ModelName,
                     Category = car.Category,
                     Year = car.Year,
-                    DailyRate = car.DailyRate,
-                    WeeklyRate = car.WeeklyRate,
-                    MonthlyRate = car.MonthlyRate,
+                    DailyRate = (decimal)car.DailyRate,
+                    WeeklyRate = car.WeeklyRate.HasValue ? (decimal?)car.WeeklyRate.Value : null,
+                    MonthlyRate = car.MonthlyRate.HasValue ? (decimal?)car.MonthlyRate.Value : null,
                     IsAvailable = car.IsAvailable,
                     Transmission = car.Transmission,
                     FuelType = car.FuelType,
@@ -246,7 +281,26 @@ namespace FCR.Web.Controllers
             try
             {
                 // Update car details
-                var response = await _apiClient.CarsPUTAsync(id, model);
+                var response = await _apiClient.CarsPUTAsync(
+                    id: id,
+                    brand: model.Brand,
+                    modelName: model.ModelName,
+                    category: model.Category,
+                    year: model.Year,
+                    dailyRate: (double)model.DailyRate,
+                    weeklyRate: model.WeeklyRate.HasValue ? (double?)model.WeeklyRate.Value : null,
+                    monthlyRate: model.MonthlyRate.HasValue ? (double?)model.MonthlyRate.Value : null,
+                    isAvailable: model.IsAvailable,
+                    transmission: model.Transmission,
+                    fuelType: model.FuelType,
+                    seats: model.Seats,
+                    color: model.Color,
+                    mileage: model.Mileage,
+                    licensePlate: model.LicensePlate,
+                    description: model.Description,
+                    imageUrls: model.ImageUrls ?? new List<string>(),
+                    imageFiles: new List<FileParameter>()  
+                );
 
                 if (response == null || response.Success != true)
                 {
@@ -335,7 +389,7 @@ namespace FCR.Web.Controllers
                     TempData["InfoMessage"] = "URL-based image addition is not yet implemented via the edit page.";
                 }
 
-                TempData["SuccessMessage"] = $"Car '{model.Brand} {model.Model}' updated successfully!";
+                TempData["SuccessMessage"] = $"Car '{model.Brand} {model.ModelName}' updated successfully!";
                 return RedirectToAction(nameof(Details), new { id });
             }
             catch (ApiException ex)
