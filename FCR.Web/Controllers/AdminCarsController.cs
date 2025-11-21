@@ -248,7 +248,7 @@ namespace FCR.Web.Controllers
                 // Update car details
                 var response = await _apiClient.CarsPUTAsync(id, model);
 
-                if (response?.Success != true)
+                if (response == null || response.Success != true)
                 {
                     TempData["ErrorMessage"] = response?.Message ?? "Failed to update car.";
                     var carResponse = await _apiClient.CarsGET2Async(id);
@@ -267,41 +267,47 @@ namespace FCR.Web.Controllers
                     var maxFileSize = 5 * 1024 * 1024; // 5MB
                     var fileParameters = new List<FileParameter>();
 
-                    foreach (var file in uploadedImages)
+                    try
                     {
-                        var extension = Path.GetExtension(file.FileName).ToLowerInvariant();
-
-                        if (!allowedExtensions.Contains(extension))
+                        foreach (var file in uploadedImages)
                         {
-                            TempData["ErrorMessage"] = $"Invalid file type: {file.FileName}. Only JPG, PNG, GIF, and WEBP are allowed.";
-                            return RedirectToAction(nameof(Edit), new { id });
+                            var extension = Path.GetExtension(file.FileName).ToLowerInvariant();
+
+                            if (!allowedExtensions.Contains(extension))
+                            {
+                                TempData["ErrorMessage"] = $"Invalid file type: {file.FileName}. Only JPG, PNG, GIF, and WEBP are allowed.";
+                                return RedirectToAction(nameof(Edit), new { id });
+                            }
+
+                            if (file.Length > maxFileSize)
+                            {
+                                TempData["ErrorMessage"] = $"File too large: {file.FileName}. Maximum size is 5MB.";
+                                return RedirectToAction(nameof(Edit), new { id });
+                            }
+
+                            var memoryStream = new MemoryStream();
+                            await file.CopyToAsync(memoryStream);
+                            memoryStream.Position = 0;
+
+                            fileParameters.Add(new FileParameter(memoryStream, file.FileName, file.ContentType));
                         }
 
-                        if (file.Length > maxFileSize)
+                        if (fileParameters.Any())
                         {
-                            TempData["ErrorMessage"] = $"File too large: {file.FileName}. Maximum size is 5MB.";
-                            return RedirectToAction(nameof(Edit), new { id });
+                            var imageResponse = await _apiClient.ImagesPOSTAsync(id, fileParameters);
+
+                            if (imageResponse?.Success != true)
+                            {
+                                TempData["WarningMessage"] = "Car updated but some images failed to upload.";
+                            }
                         }
-
-                        var memoryStream = new MemoryStream();
-                        await file.CopyToAsync(memoryStream);
-                        memoryStream.Position = 0;
-
-                        fileParameters.Add(new FileParameter(memoryStream, file.FileName, file.ContentType));
                     }
-
-                    if (fileParameters.Any())
+                    finally
                     {
-                        var imageResponse = await _apiClient.ImagesPOSTAsync(id, fileParameters);
-                        
+                        // Ensure all memory streams are disposed
                         foreach (var param in fileParameters)
                         {
-                            param.Data.Dispose();
-                        }
-
-                        if (imageResponse?.Success != true)
-                        {
-                            TempData["WarningMessage"] = "Car updated but some images failed to upload.";
+                            param.Data?.Dispose();
                         }
                     }
                 }
