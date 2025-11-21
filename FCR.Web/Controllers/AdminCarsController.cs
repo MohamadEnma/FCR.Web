@@ -1,3 +1,4 @@
+using FCR.Web.Models;
 using FCR.Web.Services.Base;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -53,7 +54,7 @@ namespace FCR.Web.Controllers
                 {
                     cars = cars.Where(c =>
                         c.Brand?.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) == true ||
-                        c.Model?.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) == true);
+                        c.ModelName?.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) == true);
                 }
 
                 // Apply availability filter
@@ -88,7 +89,7 @@ namespace FCR.Web.Controllers
             }
         }
 
-        // GET: AdminCars/Create
+        //  AdminCars/Create
         [HttpGet]
         public IActionResult Create()
         {
@@ -106,8 +107,21 @@ namespace FCR.Web.Controllers
         // POST: AdminCars/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(CarCreateDto model, List<IFormFile>? uploadedImages, List<string>? imageUrls)
+        public async Task<IActionResult> Create([FromForm]CarCreateDto model, List<IFormFile>? uploadedImages, List<string>? imageUrls)
         {
+            //  DEBUG: Log what's being received
+            _logger.LogInformation("Received Brand: {Brand}", model.Brand);
+            _logger.LogInformation("Received Model: {Model}", model.ModelName);
+            _logger.LogInformation("Received Year: {Year}", model.Year);
+            _logger.LogInformation("ModelState Valid: {IsValid}", ModelState.IsValid);
+
+            foreach (var error in ModelState.Values.SelectMany(v => v.Errors))
+            {
+                _logger.LogError("ModelState Error: {Error}", error.ErrorMessage);
+            }
+
+
+
             if (!ModelState.IsValid)
             {
                 return View(model);
@@ -117,6 +131,9 @@ namespace FCR.Web.Controllers
             {
                 // Prepare image URLs collection
                 var allImageUrls = new List<string>();
+
+                //  Declare fileParameters
+                var fileParameters = new List<FileParameter>();
 
                 // Add URL-based images if provided
                 if (imageUrls != null && imageUrls.Any(url => !string.IsNullOrWhiteSpace(url)))
@@ -149,26 +166,43 @@ namespace FCR.Web.Controllers
                             return View(model);
                         }
 
-                        var uniqueFileName = $"{Guid.NewGuid()}{extension}";
-                        var filePath = Path.Combine(uploadsFolder, uniqueFileName);
-
-                        using (var fileStream = new FileStream(filePath, FileMode.Create))
-                        {
-                            await file.CopyToAsync(fileStream);
-                        }
-
-                        allImageUrls.Add($"/images/cars/{uniqueFileName}");
+                        //  Create FileParameter for API
+                        var memoryStream = new MemoryStream();
+                        await file.CopyToAsync(memoryStream);
+                        memoryStream.Position = 0;
+                        fileParameters.Add(new FileParameter(memoryStream, file.FileName, file.ContentType));
                     }
                 }
 
-                // Assign image URLs to model
-                model.ImageUrls = allImageUrls;
+                // Call API with individual parameters
+                var response = await _apiClient.CarsPOSTAsync(
+                    brand: model.Brand,
+                    modelName: model.ModelName,
+                    category: model.Category,
+                    year: model.Year,
+                    dailyRate: (double)model.DailyRate,
+                    weeklyRate: model.WeeklyRate.HasValue ? (double?)model.WeeklyRate.Value : null,
+                    monthlyRate: model.MonthlyRate.HasValue ? (double?)model.MonthlyRate.Value : null,
+                    transmission: model.Transmission,
+                    fuelType: model.FuelType,
+                    seats: model.Seats,
+                    color: model.Color,
+                    mileage: model.Mileage,
+                    licensePlate: model.LicensePlate,
+                    description: model.Description,
+                    imageUrls: allImageUrls,
+                    imageFiles: fileParameters
+                );
 
-                var response = await _apiClient.CarsPOSTAsync(model);
+                // ? Dispose streams
+                foreach (var param in fileParameters)
+                {
+                    param.Data?.Dispose();
+                }
 
                 if (response?.Success == true && response.Data != null)
                 {
-                    TempData["SuccessMessage"] = $"Car '{model.Brand} {model.Model}' created successfully!";
+                    TempData["SuccessMessage"] = $"Car '{model.Brand} {model.ModelName}' created successfully!";
                     return RedirectToAction(nameof(Index));
                 }
                 else
@@ -204,13 +238,14 @@ namespace FCR.Web.Controllers
 
                 var updateDto = new CarUpdateDto
                 {
+                    CarId = car.CarId, 
                     Brand = car.Brand,
-                    Model = car.Model,
+                    ModelName = car.ModelName,
                     Category = car.Category,
                     Year = car.Year,
-                    DailyRate = car.DailyRate,
-                    WeeklyRate = car.WeeklyRate,
-                    MonthlyRate = car.MonthlyRate,
+                    DailyRate = (decimal)car.DailyRate,  
+                    WeeklyRate = car.WeeklyRate.HasValue ? (decimal?)car.WeeklyRate.Value : null,
+                    MonthlyRate = car.MonthlyRate.HasValue ? (decimal?)car.MonthlyRate.Value : null,
                     IsAvailable = car.IsAvailable,
                     Transmission = car.Transmission,
                     FuelType = car.FuelType,
@@ -235,6 +270,11 @@ namespace FCR.Web.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, CarUpdateDto model, List<IFormFile>? uploadedImages, List<string>? imageUrls)
         {
+            if (id != model.CarId)
+            {
+                return BadRequest();
+            }
+
             if (!ModelState.IsValid)
             {
                 var carResponse = await _apiClient.CarsGET2Async(id);
@@ -245,8 +285,27 @@ namespace FCR.Web.Controllers
 
             try
             {
-                // Update car details
-                var response = await _apiClient.CarsPUTAsync(id, model);
+                //Call CarsPUTAsync with all individual parameters
+                var response = await _apiClient.CarsPUTAsync(
+                    id: id,
+                    brand: model.Brand,
+                    modelName: model.ModelName,
+                    category: model.Category,
+                    year: model.Year,
+                    dailyRate: (double)model.DailyRate,
+                    weeklyRate: model.WeeklyRate.HasValue ? (double?)model.WeeklyRate.Value : null,
+                    monthlyRate: model.MonthlyRate.HasValue ? (double?)model.MonthlyRate.Value : null,
+                    isAvailable: model.IsAvailable,
+                    transmission: model.Transmission,
+                    fuelType: model.FuelType,
+                    seats: model.Seats,
+                    color: model.Color,
+                    mileage: model.Mileage,
+                    licensePlate: model.LicensePlate,
+                    description: model.Description,
+                    imageUrls: model.ImageUrls ?? new List<string>(),
+                    imageFiles: new List<FileParameter>()  // Empty for now, images handled separately below
+                );
 
                 if (response?.Success != true)
                 {
@@ -260,9 +319,6 @@ namespace FCR.Web.Controllers
                 // Handle new image uploads
                 if (uploadedImages != null && uploadedImages.Any())
                 {
-                    var uploadsFolder = Path.Combine(_env.WebRootPath, "images", "cars");
-                    Directory.CreateDirectory(uploadsFolder);
-
                     var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif", ".webp" };
                     var maxFileSize = 5 * 1024 * 1024; // 5MB
                     var fileParameters = new List<FileParameter>();
@@ -293,10 +349,10 @@ namespace FCR.Web.Controllers
                     if (fileParameters.Any())
                     {
                         var imageResponse = await _apiClient.ImagesPOSTAsync(id, fileParameters);
-                        
+
                         foreach (var param in fileParameters)
                         {
-                            param.Data.Dispose();
+                            param.Data?.Dispose();
                         }
 
                         if (imageResponse?.Success != true)
@@ -306,15 +362,7 @@ namespace FCR.Web.Controllers
                     }
                 }
 
-                // Handle URL-based images
-                if (imageUrls != null && imageUrls.Any(url => !string.IsNullOrWhiteSpace(url)))
-                {
-                    // Note: URL-based image addition would need a separate API endpoint
-                    // For now, we'll just show a message
-                    TempData["InfoMessage"] = "URL-based image addition is not yet implemented via the edit page.";
-                }
-
-                TempData["SuccessMessage"] = $"Car '{model.Brand} {model.Model}' updated successfully!";
+                TempData["SuccessMessage"] = $"Car '{model.Brand} {model.ModelName}' updated successfully!";
                 return RedirectToAction(nameof(Details), new { id });
             }
             catch (ApiException ex)

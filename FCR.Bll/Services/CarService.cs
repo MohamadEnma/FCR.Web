@@ -44,7 +44,7 @@ namespace FCR.Bll.Services
                     car.CarId,
                     carDto.ImageUrls,
                     carDto.ImageFiles,
-                    $"{car.Brand} {car.Model}",
+                    $"{car.Brand} {car.ModelName}",
                     cancellationToken);
 
                 if (images.Any())
@@ -96,7 +96,7 @@ namespace FCR.Bll.Services
                     car.CarId,
                     carDto.ImageUrls,
                     carDto.ImageFiles,
-                    $"{car.Brand} {car.Model}",
+                    $"{car.Brand} {car.ModelName}",
                     cancellationToken,
                     !hasExistingPrimary);
 

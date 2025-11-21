@@ -65,7 +65,7 @@ namespace FCR.Bll.Services
                 {
                     CarId = carId,
                     Url = imageUrl,
-                    AltText = altText ?? $"{car.Brand} {car.Model}",
+                    AltText = altText ?? $"{car.Brand} {car.ModelName}",
                     IsPrimary = isPrimary,
                     DisplayOrder = displayOrder,
                     UploadedAt = DateTime.UtcNow

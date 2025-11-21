@@ -46,7 +46,7 @@
             <div class="relative h-64 bg-gray-200">
                 @if (!string.IsNullOrEmpty(Model.PrimaryImageUrl))
                 {
-                    <img src="@Model.PrimaryImageUrl" alt="@Model.Brand @Model.Model" class="w-full h-full object-cover">
+                    <img src="@Model.PrimaryImageUrl" alt="@Model.Brand @Model.ModelName" class="w-full h-full object-cover">
                 }
                 else
                 {
@@ -58,7 +58,7 @@
 
             <!-- Car Details -->
             <div class="p-8">
-                <h2 class="text-3xl font-bold text-gray-900 mb-4">@Model.Brand @Model.Model</h2>
+                <h2 class="text-3xl font-bold text-gray-900 mb-4">@Model.Brand @Model.ModelName</h2>
                 
                 <div class="grid grid-cols-2 gap-4 mb-6">
                     <div class="flex items-center space-x-2">

@@ -1,4 +1,6 @@
-﻿using FCR.Web.Services.Base;
+﻿using Azure;
+using FCR.Bll.Common;
+using FCR.Web.Services.Base;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -9,6 +11,7 @@ namespace FCR.Web.Controllers
     {
         private readonly IClient _apiClient;
         private readonly ILogger<AdminController> _logger;
+    
 
         public AdminController(IClient apiClient, ILogger<AdminController> logger)
         {
@@ -16,30 +19,71 @@ namespace FCR.Web.Controllers
             _logger = logger;
         }
 
+
         // GET: Admin/Dashboard
         public async Task<IActionResult> Dashboard()
         {
             try
             {
-                // Get active bookings (Status = "Pending" or "Confirmed")
-                var activeBookings = await _apiClient.StatusGETAsync("Confirmed");
+                // ✅ Response is AdminStatisticsDto directly
+                var statistics = await _apiClient.StatisticsAsync();
 
-                if (activeBookings?.Data != null)
+                if (statistics != null)
                 {
-                    return View(activeBookings.Data);
-                }
+                    _logger.LogInformation(
+                        "Statistics loaded: TotalUsers={TotalUsers}, TotalCars={TotalCars}, TotalBookings={TotalBookings}, TotalRevenue={TotalRevenue}",
+                        statistics.TotalUsers,
+                        statistics.TotalCars,
+                        statistics.TotalBookings,
+                        statistics.TotalRevenue);
 
-                return View(new List<BookingResponseDto>());
+                    return View(statistics);
+                }
+                else
+                {
+                    _logger.LogWarning("Statistics returned null");
+                    TempData["ErrorMessage"] = "Unable to load dashboard statistics.";
+
+                    return View(new AdminStatisticsDto
+                    {
+                        TotalUsers = 0,
+                        TotalBookings = 0,
+                        TotalCars = 0,
+                        TotalRevenue = 0
+                    });
+                }
             }
             catch (ApiException ex)
             {
-                _logger.LogError(ex, "Error loading admin dashboard");
-                ViewBag.ErrorMessage = "Unable to load dashboard data.";
-                return View(new List<BookingResponseDto>());
+                _logger.LogError(ex, "API error loading dashboard: StatusCode={StatusCode}", ex.StatusCode);
+
+                TempData["ErrorMessage"] = ex.StatusCode == 401
+                    ? "Unauthorized. Please login again."
+                    : "Unable to load dashboard.";
+
+                return View(new AdminStatisticsDto
+                {
+                    TotalUsers = 0,
+                    TotalBookings = 0,
+                    TotalCars = 0,
+                    TotalRevenue = 0
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Unexpected error loading dashboard");
+                TempData["ErrorMessage"] = "An error occurred.";
+
+                return View(new AdminStatisticsDto
+                {
+                    TotalUsers = 0,
+                    TotalBookings = 0,
+                    TotalCars = 0,
+                    TotalRevenue = 0
+                });
             }
         }
 
-        // GET: Admin/Users
         // GET: Admin/Users
         public async Task<IActionResult> Users()
         {
@@ -204,8 +248,8 @@ namespace FCR.Web.Controllers
                 // Only update password if provided
                 if (!string.IsNullOrWhiteSpace(password))
                 {
-                    // You'll need a separate API endpoint for password update
-                    // For now, this is a placeholder
+                    // placeholder -------------> API endpoint for password update
+                   
                 }
 
                 // Update user
@@ -229,7 +273,6 @@ namespace FCR.Web.Controllers
                 return RedirectToAction(nameof(Edit), new { id });
             }
         }
-
 
     }
 }

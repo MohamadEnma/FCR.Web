@@ -76,7 +76,7 @@ namespace FCR.Web.Controllers
                 ViewBag.Car = carResponse.Data;
                 ViewBag.CarImages = carResponse.Data.Images?.ToList() ?? new List<ImageResponseDto>();
                 ViewBag.CarBrand = carResponse.Data.Brand;
-                ViewBag.CarModel = carResponse.Data.Model;
+                ViewBag.CarModel = carResponse.Data.ModelName;
 
                 var model = new BookingCreateDto
                 {
@@ -107,7 +107,7 @@ namespace FCR.Web.Controllers
                 ViewBag.Car = carResponse?.Data;
                 ViewBag.CarImages = carResponse?.Data?.Images?.ToList() ?? new List<ImageResponseDto>();
                 ViewBag.CarBrand = carResponse?.Data?.Brand;
-                ViewBag.CarModel = carResponse?.Data?.Model;
+                ViewBag.CarModel = carResponse?.Data?.ModelName;
 
                 return View(model);
             }
@@ -130,7 +130,7 @@ namespace FCR.Web.Controllers
                     ViewBag.Car = carResponse?.Data;
                     ViewBag.CarImages = carResponse?.Data?.Images?.ToList() ?? new List<ImageResponseDto>();
                     ViewBag.CarBrand = carResponse?.Data?.Brand;
-                    ViewBag.CarModel = carResponse?.Data?.Model;
+                    ViewBag.CarModel = carResponse?.Data?.ModelName;
 
                     return View(model);
                 }
@@ -145,7 +145,7 @@ namespace FCR.Web.Controllers
                 ViewBag.Car = carResponse?.Data;
                 ViewBag.CarImages = carResponse?.Data?.Images?.ToList() ?? new List<ImageResponseDto>();
                 ViewBag.CarBrand = carResponse?.Data?.Brand;
-                ViewBag.CarModel = carResponse?.Data?.Model;
+                ViewBag.CarModel = carResponse?.Data?.ModelName;
 
                 return View(model);
             }

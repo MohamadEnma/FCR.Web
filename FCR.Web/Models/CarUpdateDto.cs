@@ -1,12 +1,14 @@
 ﻿using Microsoft.AspNetCore.Http;
-using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
-namespace FCR.Bll.DTOs
+namespace FCR.Web.Models
 {
-    public class CarCreateDto
+    public class CarUpdateDto
     {
+        [Required(ErrorMessage = "Car ID is required")]
+        public int CarId { get; set; }
+
         // Basic Info
         [Required(ErrorMessage = "Brand is required")]
         [MaxLength(50)]
@@ -27,16 +29,16 @@ namespace FCR.Bll.DTOs
         // Pricing
         [Required(ErrorMessage = "Daily rate is required")]
         [Range(0.01, 10000, ErrorMessage = "Daily rate must be between 0.01 and 10000")]
-        [Precision(10, 2)]
         public decimal DailyRate { get; set; }
 
         [Range(0.01, 50000, ErrorMessage = "Weekly rate must be positive")]
-        [Precision(10, 2)]
         public decimal? WeeklyRate { get; set; }
 
         [Range(0.01, 200000, ErrorMessage = "Monthly rate must be positive")]
-        [Precision(10, 2)]
         public decimal? MonthlyRate { get; set; }
+
+        // Availability
+        public bool IsAvailable { get; set; }
 
         // Specifications
         [Required(ErrorMessage = "Transmission type is required")]
@@ -64,8 +66,8 @@ namespace FCR.Bll.DTOs
         [MaxLength(1000)]
         public string? Description { get; set; }
 
-       
-        public List<string>? ImageUrls { get; set; }  // Direct URLs
-        public List<IFormFile>? ImageFiles { get; set; }  // File uploads
+        // Images
+        public List<string>? ImageUrls { get; set; }
+        public List<IFormFile>? ImageFiles { get; set; }
     }
 }

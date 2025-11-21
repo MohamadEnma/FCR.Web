@@ -22,7 +22,7 @@ namespace FCR.Dal.Configuration
                    .IsRequired()
                    .HasMaxLength(50);
 
-            builder.Property(c => c.Model)
+            builder.Property(c => c.ModelName)
                    .IsRequired()
                    .HasMaxLength(50);
 

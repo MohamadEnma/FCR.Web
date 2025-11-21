@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FCR.Dal.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20251119020410_AddFeaturesJsonToCar")]
-    partial class AddFeaturesJsonToCar
+    [Migration("20251120070605_InitiaCreate")]
+    partial class InitiaCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -280,7 +280,7 @@ namespace FCR.Dal.Migrations
                     b.Property<double>("Mileage")
                         .HasColumnType("float");
 
-                    b.Property<string>("Model")
+                    b.Property<string>("ModelName")
                         .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");

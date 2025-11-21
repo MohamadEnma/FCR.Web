@@ -26,7 +26,6 @@ namespace FCR.Web.Controllers
             return View();
         }
 
-        // POST: Auth/Login
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Login(LoginDto model, string? returnUrl = null)
@@ -42,58 +41,74 @@ namespace FCR.Web.Controllers
             {
                 var response = await _apiClient.LoginAsync(model);
 
-                // Check if login was successful
                 if (response?.Success == true && response.Data != null)
                 {
                     var loginData = response.Data;
 
-                    // Parse JWT token and create claims
+                    // Parse JWT token
                     var handler = new JwtSecurityTokenHandler();
                     var jwtToken = handler.ReadJwtToken(loginData.Token);
 
+                    // Create claims from JWT
                     var claims = jwtToken.Claims.ToList();
-                    claims.Add(new Claim("AccessToken", loginData.Token));
 
-                    var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+                    var claimsIdentity = new ClaimsIdentity(
+                        claims,
+                        CookieAuthenticationDefaults.AuthenticationScheme);
+
                     var authProperties = new AuthenticationProperties
                     {
                         IsPersistent = true,
                         ExpiresUtc = jwtToken.ValidTo
                     };
 
+                    // Store JWT token for API calls
+                    authProperties.StoreTokens(new List<AuthenticationToken>
+                    {
+                new AuthenticationToken
+                {
+                    Name = "access_token",
+                    Value = loginData.Token
+                }
+            });
+
                     await HttpContext.SignInAsync(
                         CookieAuthenticationDefaults.AuthenticationScheme,
                         new ClaimsPrincipal(claimsIdentity),
                         authProperties);
 
-                    // Store JWT token in cookie for API calls
-                    Response.Cookies.Append("jwt", loginData.Token, new CookieOptions
-                    {
-                        HttpOnly = true,
-                        Secure = true,
-                        SameSite = SameSiteMode.Strict,
-                        Expires = jwtToken.ValidTo
-                    });
+                    //  DEBUG: Verify token was saved
+                    var savedToken = await HttpContext.GetTokenAsync("access_token");
+                    _logger.LogInformation("Token saved: {TokenExists}", !string.IsNullOrEmpty(savedToken));
+                    _logger.LogInformation("Token length: {TokenLength}", savedToken?.Length ?? 0);
+                    _logger.LogInformation("User {Email} logged in successfully", model.Email);
 
-                    TempData["SuccessMessage"] = "Login successful!";
+                    TempData["SuccessMessage"] = $"Welcome back!";
+
+                    var role = claims.FirstOrDefault(c => c.Type == ClaimTypes.Role)?.Value;
 
                     if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
                     {
                         return Redirect(returnUrl);
                     }
 
+                    if (role == "Admin")
+                    {
+                        return RedirectToAction("Dashboard", "Admin");
+                    }
+
                     return RedirectToAction("Index", "Home");
                 }
                 else
                 {
-                    ModelState.AddModelError("", response?.Message ?? "Login failed.");
+                    ModelState.AddModelError("", response?.Message ?? "Invalid email or password.");
                     return View(model);
                 }
             }
-            catch (ApiException ex)
+            catch (Exception ex)
             {
-                _logger.LogWarning(ex, "Login failed for user {Email}", model.Email);
-                ModelState.AddModelError("", "Invalid email or password.");
+                _logger.LogError(ex, "Unexpected error during login");
+                ModelState.AddModelError("", "An unexpected error occurred. Please try again.");
                 return View(model);
             }
         }

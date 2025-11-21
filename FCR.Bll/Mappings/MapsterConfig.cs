@@ -28,7 +28,7 @@ namespace FCR.Bll.Mappings
                 .Map(dest => dest.BookingId, src => src.BookingId)
                 .Map(dest => dest.BookingDate, src => src.CreatedAt)
                 .Map(dest => dest.CarBrand, src => src.Car != null ? src.Car.Brand : string.Empty)
-                .Map(dest => dest.CarModel, src => src.Car != null ? src.Car.Model : string.Empty)
+                .Map(dest => dest.CarModel, src => src.Car != null ? src.Car.ModelName : string.Empty)
                 .Map(dest => dest.CarYear, src => src.Car != null ? src.Car.Year : 0)
                 .Map(dest => dest.CarImageUrl,
                      src => src.Car != null && src.Car.Images != null && src.Car.Images.Any()

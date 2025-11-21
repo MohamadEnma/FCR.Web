@@ -1,14 +1,16 @@
-﻿@{
+﻿@model FCR.Web.Services.Base.AdminStatisticsDto
+
+@{
     ViewData["Title"] = "Admin Dashboard";
 }
 
 <!-- Admin Dashboard -->
-<section class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 py-12">
+<section class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100  py-12">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
         <!-- Header -->
         <div class="mb-12">
-            <div class="flex items-center justify-between mb-4">
+            <div class="flex items-center justify-between mt-40 mb-4">
                 <div>
                     <h1 class="text-4xl md:text-5xl font-black text-gray-900 mb-2">
                         Admin Dashboard
@@ -35,7 +37,7 @@
                         <i class="fas fa-arrow-up text-white/80"></i>
                     </div>
                     <p class="text-white/80 text-sm font-medium mb-1">Total Users</p>
-                    <p class="text-4xl font-black" id="total-users">--</p>
+                    <p class="text-4xl font-black" id="total-users">@Model.TotalUsers</p>
                 </div>
 
                 <div class="bg-gradient-to-br from-green-500 to-green-700 rounded-2xl p-6 text-white shadow-lg transform hover:scale-105 transition-all duration-300">
@@ -46,7 +48,7 @@
                         <i class="fas fa-arrow-up text-white/80"></i>
                     </div>
                     <p class="text-white/80 text-sm font-medium mb-1">Total Bookings</p>
-                    <p class="text-4xl font-black" id="total-bookings">--</p>
+                    <p class="text-4xl font-black" id="total-bookings">@Model.TotalBookings</p>
                 </div>
 
                 <div class="bg-gradient-to-br from-purple-500 to-purple-700 rounded-2xl p-6 text-white shadow-lg transform hover:scale-105 transition-all duration-300">
@@ -57,7 +59,7 @@
                         <i class="fas fa-arrow-up text-white/80"></i>
                     </div>
                     <p class="text-white/80 text-sm font-medium mb-1">Total Cars</p>
-                    <p class="text-4xl font-black" id="total-cars">--</p>
+                    <p class="text-4xl font-black" id="total-cars">@Model.TotalCars</p>
                 </div>
 
                 <div class="bg-gradient-to-br from-orange-500 to-orange-700 rounded-2xl p-6 text-white shadow-lg transform hover:scale-105 transition-all duration-300">
@@ -68,7 +70,7 @@
                         <i class="fas fa-arrow-up text-white/80"></i>
                     </div>
                     <p class="text-white/80 text-sm font-medium mb-1">Revenue (MTD)</p>
-                    <p class="text-4xl font-black">$--K</p>
+                    <p class="text-4xl font-black">$@Model.TotalRevenue KR</p>
                 </div>
             </div>
         </div>
@@ -176,7 +178,7 @@
                             Manage pricing
                         </li>
                     </ul>
-                    <a asp-controller="Cars" asp-action="Index"
+                    <a asp-controller="AdminCars" asp-action="Index"
                        class="block w-full px-6 py-3 bg-gradient-to-r from-purple-500 to-purple-700 hover:from-purple-600 hover:to-purple-800 text-white rounded-xl font-bold text-center transform hover:scale-105 transition-all duration-300 shadow-lg">
                         <i class="fas fa-arrow-right mr-2"></i>
                         Manage Fleet
@@ -232,22 +234,21 @@
 
 @section Scripts {
     <script>
-        // Update current time every second
+       
         function updateTime() {
             const now = new Date();
             const utcTime = now.toISOString().replace('T', ' ').substring(0, 19);
             document.getElementById('current-time').textContent = utcTime;
+
+            
+            const serverTime = now.toISOString().substring(11, 19);
+            const serverTimeEl = document.getElementById('server-time');
+            if (serverTimeEl) {
+                serverTimeEl.textContent = serverTime;
+            }
         }
 
         setInterval(updateTime, 1000);
-
-        // Load statistics (you can connect this to your API)
-        document.addEventListener('DOMContentLoaded', function() {
-            // Example: Load stats from API
-            // For now, using placeholder values
-            document.getElementById('total-users').textContent = '127';
-            document.getElementById('total-bookings').textContent = '856';
-            document.getElementById('total-cars').textContent = '50';
-        });
+        updateTime(); 
     </script>
 }

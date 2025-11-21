@@ -106,7 +106,7 @@ namespace FCR.Dal.Data
     new Car
     {
         Brand = "Toyota",
-        Model = "Camry",
+        ModelName = "Camry",
         Category = "Sedan",
         Year = 2024,
         DailyRate = 45.00m,
@@ -116,11 +116,12 @@ namespace FCR.Dal.Data
         Seats = 5, 
         CreatedAt = new DateTime(2025, 1, 1, 0, 0, 0, DateTimeKind.Utc),
         UpdatedAt = new DateTime(2025, 1, 1, 0, 0, 0, DateTimeKind.Utc)
+        
     },
     new Car
     {
         Brand = "Honda",
-        Model = "Civic",
+        ModelName = "Civic",
         Category = "Sedan",
         Year = 2023,
         DailyRate = 40.00m,
@@ -134,7 +135,7 @@ namespace FCR.Dal.Data
     new Car
     {
         Brand = "BMW",
-        Model = "X5",
+        ModelName = "X5",
         Category = "SUV",
         Year = 2024,
         DailyRate = 85.00m,
@@ -148,7 +149,7 @@ namespace FCR.Dal.Data
     new Car
     {
         Brand = "Mercedes",
-        Model = "C-Class",
+        ModelName = "C-Class",
         Category = "Luxury",
         Year = 2024,
         DailyRate = 95.00m,
@@ -162,7 +163,7 @@ namespace FCR.Dal.Data
     new Car
     {
         Brand = "Ford",
-        Model = "Mustang",
+        ModelName = "Mustang",
         Category = "Sports",
         Year = 2023,
         DailyRate = 120.00m,
@@ -176,7 +177,7 @@ namespace FCR.Dal.Data
     new Car
     {
         Brand = "Tesla",
-        Model = "Model 3",
+        ModelName = "Model 3",
         Category = "Electric",
         Year = 2024,
         DailyRate = 110.00m,

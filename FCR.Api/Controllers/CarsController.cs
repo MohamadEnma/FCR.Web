@@ -194,7 +194,7 @@ namespace FCR.Api.Controllers
             if (!result.Success)
                 return BadRequest(result);
 
-            _logger.LogInformation("Car created: {Brand} {Model}", dto.Brand, dto.Model);
+            _logger.LogInformation("Car created: {Brand} {Model}", dto.Brand, dto.ModelName);
 
             return CreatedAtAction(
                 nameof(GetCar),

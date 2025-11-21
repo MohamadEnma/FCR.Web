@@ -73,7 +73,7 @@ namespace FCR.Dal.Repositories.Implementation
                 .Include(c => c.Images.OrderBy(i => i.DisplayOrder))
                 .Where(c => !c.IsDeleted &&
                     (c.Brand.ToLower().Contains(lowerKeyword) ||
-                     c.Model.ToLower().Contains(lowerKeyword) ||
+                     c.ModelName.ToLower().Contains(lowerKeyword) ||
                      c.Category.ToLower().Contains(lowerKeyword) ||
                      (c.Description != null && c.Description.ToLower().Contains(lowerKeyword))))
                 .ToListAsync(cancellationToken);

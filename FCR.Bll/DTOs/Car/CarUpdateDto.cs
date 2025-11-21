@@ -14,7 +14,7 @@ namespace FCR.Bll.DTOs
 
         [Required(ErrorMessage = "Model is required")]
         [MaxLength(50)]
-        public string Model { get; set; } = string.Empty;
+        public string ModelName { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "Category is required")]
         [MaxLength(30)]

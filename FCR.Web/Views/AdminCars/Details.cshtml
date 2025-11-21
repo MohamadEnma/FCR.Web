@@ -1,6 +1,6 @@
 @model FCR.Web.Services.Base.CarResponseDto
 @{
-    ViewData["Title"] = $"{Model.Brand} {Model.Model} - Details";
+    ViewData["Title"] = $"{Model.Brand} {Model.ModelName} - Details";
     var images = Model.Images?.OrderBy(i => i.DisplayOrder).ToList() ?? new List<FCR.Web.Services.Base.ImageResponseDto>();
     var primaryImage = images.FirstOrDefault(i => i.IsPrimary) ?? images.FirstOrDefault();
 }
@@ -16,7 +16,7 @@
                         <i class="fas fa-arrow-left text-xl"></i>
                     </a>
                     <div>
-                        <h1 class="text-4xl font-bold text-gray-900">@Model.Brand @Model.Model</h1>
+                        <h1 class="text-4xl font-bold text-gray-900">@Model.Brand @Model.ModelName</h1>
                         <p class="text-gray-600 mt-1">@Model.Category • @Model.Year</p>
                     </div>
                 </div>
@@ -63,7 +63,7 @@
                     <div class="relative bg-gray-200">
                         @if (primaryImage != null && !string.IsNullOrEmpty(primaryImage.Url))
                         {
-                            <img id="main-image" src="@primaryImage.Url" alt="@Model.Brand @Model.Model" class="w-full h-96 object-cover cursor-pointer" onclick="openLightbox('@primaryImage.Url')">
+                            <img id="main-image" src="@primaryImage.Url" alt="@Model.Brand @Model.ModelName" class="w-full h-96 object-cover cursor-pointer" onclick="openLightbox('@primaryImage.Url')">
                         }
                         else
                         {
@@ -148,7 +148,7 @@
                         </div>
                         <div class="flex items-center justify-between py-2 border-b border-gray-200">
                             <span class="text-gray-600"><i class="fas fa-car w-5 mr-2"></i>Model</span>
-                            <span class="font-semibold">@Model.Model</span>
+                            <span class="font-semibold">@Model.ModelName</span>
                         </div>
                         <div class="flex items-center justify-between py-2 border-b border-gray-200">
                             <span class="text-gray-600"><i class="fas fa-th-large w-5 mr-2"></i>Category</span>

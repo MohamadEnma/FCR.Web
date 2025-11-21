@@ -20,7 +20,7 @@ namespace FCR.Dal.Classes
         public string Brand { get; set; } = string.Empty; 
 
         [Required, StringLength(100)]
-        public string Model { get; set; } = string.Empty; 
+        public string ModelName { get; set; } = string.Empty; 
 
         [Required, StringLength(50)]
         public string Category { get; set; } = string.Empty; 

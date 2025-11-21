@@ -277,7 +277,7 @@ namespace FCR.Dal.Migrations
                     b.Property<double>("Mileage")
                         .HasColumnType("float");
 
-                    b.Property<string>("Model")
+                    b.Property<string>("ModelName")
                         .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");

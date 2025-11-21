@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
-namespace FCR.Bll.DTOs
+namespace FCR.Web.Models
 {
     public class CarCreateDto
     {
@@ -64,7 +64,7 @@ namespace FCR.Bll.DTOs
         [MaxLength(1000)]
         public string? Description { get; set; }
 
-       
+        // Images 
         public List<string>? ImageUrls { get; set; }  // Direct URLs
         public List<IFormFile>? ImageFiles { get; set; }  // File uploads
     }

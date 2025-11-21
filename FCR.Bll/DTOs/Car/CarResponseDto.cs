@@ -11,7 +11,7 @@ namespace FCR.Bll.DTOs
         // Basic Info
         public int CarId { get; set; }
         public string Brand { get; set; } = string.Empty;
-        public string Model { get; set; } = string.Empty;
+        public string ModelName { get; set; } = string.Empty;
         public string Category { get; set; } = string.Empty;
         public int Year { get; set; }
 

@@ -12,7 +12,7 @@ namespace FCR.Bll.Validators
                 .NotEmpty().WithMessage("Brand is required")
                 .MaximumLength(50).WithMessage("Brand must not exceed 50 characters");
 
-            RuleFor(x => x.Model)
+            RuleFor(x => x.ModelName)
                 .NotEmpty().WithMessage("Model is required")
                 .MaximumLength(50).WithMessage("Model must not exceed 50 characters");
 
