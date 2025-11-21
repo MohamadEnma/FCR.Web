@@ -29,20 +29,18 @@ namespace FCR.Web.Controllers
             bool? isAvailable,
             double? minPrice,
             double? maxPrice,
-            int? minSeats,
-            int pageNumber = 1,
-            int pageSize = 12)
+            int? minSeats)
         {
             try
             {
-                IEnumerable<Services.Base.CarResponseDto> cars;
+                IEnumerable<CarResponseDto> cars;
 
                 // Apply filters if any
                 if (!string.IsNullOrEmpty(category) || !string.IsNullOrEmpty(transmission) ||
                     !string.IsNullOrEmpty(fuelType) || minSeats.HasValue || maxPrice.HasValue)
                 {
                     var response = await _apiClient.FilterAsync(category, transmission, fuelType, minSeats, maxPrice);
-                    cars = response?.Data ?? new List<Services.Base.CarResponseDto>();
+                    cars = response?.Data ?? new List<CarResponseDto>();
                 }
                 else
                 {
@@ -110,19 +108,6 @@ namespace FCR.Web.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([FromForm] CarCreateDto model, List<IFormFile>? uploadedImages, List<string>? imageUrls)
         {
-            //  DEBUG: Log what's being received
-            _logger.LogInformation("Received Brand: {Brand}", model.Brand);
-            _logger.LogInformation("Received Model: {Model}", model.ModelName);
-            _logger.LogInformation("Received Year: {Year}", model.Year);
-            _logger.LogInformation("ModelState Valid: {IsValid}", ModelState.IsValid);
-
-            foreach (var error in ModelState.Values.SelectMany(v => v.Errors))
-            {
-                _logger.LogError("ModelState Error: {Error}", error.ErrorMessage);
-            }
-
-
-
             if (!ModelState.IsValid)
             {
                 return View(model);
@@ -168,48 +153,64 @@ namespace FCR.Web.Controllers
                         }
 
                         //  Create FileParameter for API
-                        var memoryStream = new MemoryStream();
-                        await file.CopyToAsync(memoryStream);
-                        memoryStream.Position = 0;
-                        fileParameters.Add(new FileParameter(memoryStream, file.FileName, file.ContentType));
+                        MemoryStream? memoryStream = null;
+                        try
+                        {
+                            memoryStream = new MemoryStream();
+                            await file.CopyToAsync(memoryStream);
+                            memoryStream.Position = 0;
+                            
+                            fileParameters.Add(new FileParameter(memoryStream, file.FileName, file.ContentType));
+                            memoryStream = null; // Stream ownership transferred
+                        }
+                        catch
+                        {
+                            memoryStream?.Dispose();
+                            throw;
+                        }
                     }
                 }
 
-                // Call API with individual parameters
-                var response = await _apiClient.CarsPOSTAsync(
-                    brand: model.Brand,
-                    modelName: model.ModelName,
-                    category: model.Category,
-                    year: model.Year,
-                    dailyRate: (double)model.DailyRate,
-                    weeklyRate: model.WeeklyRate.HasValue ? (double?)model.WeeklyRate.Value : null,
-                    monthlyRate: model.MonthlyRate.HasValue ? (double?)model.MonthlyRate.Value : null,
-                    transmission: model.Transmission,
-                    fuelType: model.FuelType,
-                    seats: model.Seats,
-                    color: model.Color,
-                    mileage: model.Mileage,
-                    licensePlate: model.LicensePlate,
-                    description: model.Description,
-                    imageUrls: allImageUrls,
-                    imageFiles: fileParameters
-                );
+                try
+                {
+                    // Call API with individual parameters
+                    var response = await _apiClient.CarsPOSTAsync(
+                        brand: model.Brand,
+                        modelName: model.ModelName,
+                        category: model.Category,
+                        year: model.Year,
+                        dailyRate: (double)model.DailyRate,
+                        weeklyRate: model.WeeklyRate.HasValue ? (double?)model.WeeklyRate.Value : null,
+                        monthlyRate: model.MonthlyRate.HasValue ? (double?)model.MonthlyRate.Value : null,
+                        transmission: model.Transmission,
+                        fuelType: model.FuelType,
+                        seats: model.Seats,
+                        color: model.Color,
+                        mileage: model.Mileage,
+                        licensePlate: model.LicensePlate,
+                        description: model.Description,
+                        imageUrls: allImageUrls,
+                        imageFiles: fileParameters
+                    );
 
-                // ? Dispose streams
-                foreach (var param in fileParameters)
-                {
-                    param.Data?.Dispose();
+                    if (response?.Success == true && response.Data != null)
+                    {
+                        TempData["SuccessMessage"] = $"Car '{model.Brand} {model.ModelName}' created successfully!";
+                        return RedirectToAction(nameof(Index));
+                    }
+                    else
+                    {
+                        TempData["ErrorMessage"] = response?.Message ?? "Failed to create car.";
+                        return View(model);
+                    }
                 }
-
-                if (response?.Success == true && response.Data != null)
+                finally
                 {
-                    TempData["SuccessMessage"] = $"Car '{model.Brand} {model.ModelName}' created successfully!";
-                    return RedirectToAction(nameof(Index));
-                }
-                else
-                {
-                    TempData["ErrorMessage"] = response?.Message ?? "Failed to create car.";
-                    return View(model);
+                    // Ensure all memory streams are disposed
+                    foreach (var param in fileParameters)
+                    {
+                        param.Data?.Dispose();
+                    }
                 }
             }
             catch (ApiException ex)
@@ -239,6 +240,7 @@ namespace FCR.Web.Controllers
 
                 var updateDto = new CarUpdateDto
                 {
+                    CarId = car.CarId,
                     Brand = car.Brand,
                     ModelName = car.ModelName,
                     Category = car.Category,
