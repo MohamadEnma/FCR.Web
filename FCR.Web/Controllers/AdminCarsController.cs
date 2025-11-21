@@ -267,24 +267,28 @@ namespace FCR.Web.Controllers
                     var maxFileSize = 5 * 1024 * 1024; // 5MB
                     var fileParameters = new List<FileParameter>();
 
+                    // Validate files first before creating streams
+                    foreach (var file in uploadedImages)
+                    {
+                        var extension = Path.GetExtension(file.FileName).ToLowerInvariant();
+
+                        if (!allowedExtensions.Contains(extension))
+                        {
+                            TempData["ErrorMessage"] = $"Invalid file type: {file.FileName}. Only JPG, PNG, GIF, and WEBP are allowed.";
+                            return RedirectToAction(nameof(Edit), new { id });
+                        }
+
+                        if (file.Length > maxFileSize)
+                        {
+                            TempData["ErrorMessage"] = $"File too large: {file.FileName}. Maximum size is 5MB.";
+                            return RedirectToAction(nameof(Edit), new { id });
+                        }
+                    }
+
                     try
                     {
                         foreach (var file in uploadedImages)
                         {
-                            var extension = Path.GetExtension(file.FileName).ToLowerInvariant();
-
-                            if (!allowedExtensions.Contains(extension))
-                            {
-                                TempData["ErrorMessage"] = $"Invalid file type: {file.FileName}. Only JPG, PNG, GIF, and WEBP are allowed.";
-                                return RedirectToAction(nameof(Edit), new { id });
-                            }
-
-                            if (file.Length > maxFileSize)
-                            {
-                                TempData["ErrorMessage"] = $"File too large: {file.FileName}. Maximum size is 5MB.";
-                                return RedirectToAction(nameof(Edit), new { id });
-                            }
-
                             var memoryStream = new MemoryStream();
                             await file.CopyToAsync(memoryStream);
                             memoryStream.Position = 0;
